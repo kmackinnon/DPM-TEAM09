@@ -1,6 +1,14 @@
+/**MobileRobot contains all the methods needed for the robot to move to a location, and to turn to an angle. 
+ * This includes traveling to a point while navigating around obstacles.  
+ * 
+ * @author Simon Lee, Sidney Ng
+ *
+ */
+
+
 
 public class MobileRobot {
-	private static Odometer odo;
+	public static Odometer odo;
 	double [] pos = new double [3];
 	private double forwardSpeed, rotationSpeed;
 	

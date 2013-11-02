@@ -1,4 +1,5 @@
 package robot;
+
 /**MobileRobot contains all the methods needed for the robot to move to a location, and to turn to an angle. 
  * This includes traveling to a point while navigating around obstacles.  
  * 
@@ -6,14 +7,25 @@ package robot;
  *
  */
 
-
-
 public class MobileRobot {
 	public static Odometer odo;
 	double [] pos = new double [3];
 	private double forwardSpeed, rotationSpeed;
 	
-	
+	/**
+	 * Default Constructor
+	 * <p>
+	 * Starts odometer of the MobileRobot
+	 */
+	MobileRobot() {
+		odo = new Odometer(true);
+	}
+		
+	/**
+	 * Robot travels a certain distance
+	 * 
+	 * @param distance distance to travel
+	 */
 	public void travelMag(double distance){
 		double[] initPos = new double [3], currPos = new double [3];
 		setRotationSpeed(0.0);
@@ -28,6 +40,15 @@ public class MobileRobot {
 		}
 		setForwardSpeed(0.0);
 	}
+	
+	/**
+	 * Move robot to position at (x,y)
+	 * <p>
+	 * Will orient robot to face coordinate before moving in a straight line
+	 * 
+	 * @param x x coordinate to move to
+	 * @param y y coordinate to move to
+	 */
 	public void travelCoordinate(double x, double y){
 		odo.getPosition(pos);
 		while (Math.sqrt(Math.pow((x-pos[0]), 2) + Math.pow((y-pos[1]), 2)) > 3){	
@@ -59,6 +80,14 @@ public class MobileRobot {
 		setSpeeds(0.0, 0.0);
 		setForwardSpeed(0.0);
 	}
+	
+	/**
+	 * Turns robot by specified value.
+	 * <p>
+	 * Negative angle values turn robot counterclockwise. Positive angle values turn robot clockwise.
+	 * 
+	 * @param angle angle to turn
+	 */
 	public void turnTo(double angle) {
 		
 		double [] currPos = new double [3];
@@ -87,39 +116,38 @@ public class MobileRobot {
 			angDiff = Odometer.minimumAngleFromTo(currPos[2], angle);}
 	}
 	
-	public double getDisplacement() {
-		return (HardwareInfo.leftMotor.getTachoCount() * HardwareInfo.leftRadius +
-				HardwareInfo.rightMotor.getTachoCount() * HardwareInfo.rightRadius) *
-				Math.PI / 360.0;
-	}
-	
-	public double getHeading() {
-		return (HardwareInfo.leftMotor.getTachoCount() * HardwareInfo.leftRadius -
-				HardwareInfo.rightMotor.getTachoCount() * HardwareInfo.rightRadius) / HardwareInfo.width;
-	}
-	
-	public void getDisplacementAndHeading(double [] data) {
-		int leftTacho, rightTacho;
-		leftTacho = HardwareInfo.leftMotor.getTachoCount();
-		rightTacho = HardwareInfo.rightMotor.getTachoCount();
-		
-		data[0] = (leftTacho * HardwareInfo.leftRadius + rightTacho * HardwareInfo.rightRadius) *	Math.PI / 360.0;
-		data[1] = (leftTacho * HardwareInfo.leftRadius - rightTacho * HardwareInfo.rightRadius) / HardwareInfo.width;
-	}
-	
 	// mutators
+	/**
+	 * Sets linear speed. Calls setSpeeds(double forwardSpeed, double rotationalSpeed) with rotationalSpeed equal to 0
+	 * @param speed
+	 */
 	public void setForwardSpeed(double speed) {
 		forwardSpeed = speed;
 		rotationSpeed = 0;
 		setSpeeds(forwardSpeed, rotationSpeed);
 	}
 	
+	/**
+	 * Sets rotational speed. Calls setSpeeds(double forwardSpeed, double rotationalSpeed) with forwardSpeed equal to 0
+	 * 
+	 * @param speed rotational speed to set motors
+	 */
 	public void setRotationSpeed(double speed) {
 		forwardSpeed = 0;
 		rotationSpeed = speed;
 		setSpeeds(forwardSpeed, rotationSpeed);
 	}
 	
+	/**
+	 * Sets forward and rotational speed.
+	 * <p>
+	 * Positive rotational speed designated in clockwise direction. Allows for traveling in an arc
+	 * <p>
+	 * For speeds of zero, the speed is actually set to 1. Setting motor speed to 0 does not allow for further increases to speed.
+	 * 
+	 * @param forwardSpeed the forward speed to set the motors
+	 * @param rotationalSpeed the rotational speed to set the motors
+	 */
 	public void setSpeeds(double forwardSpeed, double rotationalSpeed) {//clockwise
 		double leftSpeed, rightSpeed;
 
@@ -149,8 +177,10 @@ public class MobileRobot {
 		// set motor speeds
 		if (leftSpeed > 900.0)
 			HardwareInfo.leftMotor.setSpeed(900);
-		if(leftSpeed == 0.0)//!!!!!! If the speed is set to 0 then the Motors come to a complete stop and can't be restarted except from twoWheeledRobot, this means Navigation cant work
-			HardwareInfo.leftMotor.setSpeed(1);//Setting speed to 1 makes it bascially stop but allows the motors to be restarted
+		if(leftSpeed == 0.0)
+			// If the speed is set to 0 then the Motors come to a complete stop and can't be restarted
+			// Setting speed to 1 virtually stops motor movement, but allows for further changes in motor speed
+			HardwareInfo.leftMotor.setSpeed(1);
 		else
 			HardwareInfo.leftMotor.setSpeed((int)leftSpeed);
 		
@@ -163,11 +193,18 @@ public class MobileRobot {
 			HardwareInfo.rightMotor.setSpeed((int)rightSpeed);
 		
 	}
+	
+	/**
+	 * Stops both motors. Calls NXTRegulatedMotor.stop()
+	 */
 	public void stopMotors() {
 		HardwareInfo.rightMotor.stop();
 		HardwareInfo.leftMotor.stop();
 	}
-	
+
+	/**
+	 * Start both motors. Calls NXTRegulatedMotor.forward()
+	 */
 	public void startMotors() {
 		HardwareInfo.rightMotor.forward();
 		HardwareInfo.leftMotor.forward();

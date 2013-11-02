@@ -1,3 +1,11 @@
+/**Odometer keeps track of the position of the robot and the direction it is facing.
+ * 
+ * @author Simon Lee, Sidney Ng
+ * 
+ */
+
+
+
 /*
  * Odometer Class
  * Author: Simon Lee, Sidney Ng

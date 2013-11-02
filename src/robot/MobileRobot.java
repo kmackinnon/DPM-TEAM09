@@ -1,3 +1,4 @@
+package robot;
 /**MobileRobot contains all the methods needed for the robot to move to a location, and to turn to an angle. 
  * This includes traveling to a point while navigating around obstacles.  
  * 

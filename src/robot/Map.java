@@ -1,3 +1,4 @@
+package robot;
 /**
  * Map contains a representation of the game area. This includes the locations
  * of obstacles, the red and green zones, and the 4 corners

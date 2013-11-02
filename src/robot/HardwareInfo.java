@@ -1,3 +1,4 @@
+package robot;
 /**HardwareInfo contains constant values that are needed for operating the robot.
  * 
  * @author Simon Lee, Sidney Ng

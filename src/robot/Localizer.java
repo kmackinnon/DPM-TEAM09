@@ -1,3 +1,4 @@
+package robot;
 /**
  * Localizer calculates the position and orientation of the robot at the start
  * of the game. This has to be done because the odometer initially assumes a

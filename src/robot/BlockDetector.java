@@ -1,3 +1,4 @@
+package robot;
 /**
  * BlockDetector uses the ultrasonic sensor and light sensor to detect blocks.
  * The light sensor identifies the block as wooden or styrofoam

@@ -1,3 +1,4 @@
+package robot;
 /**Odometer keeps track of the position of the robot and its orientation
  * 
  * @author Simon Lee, Sidney Ng

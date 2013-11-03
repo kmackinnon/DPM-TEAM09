@@ -17,7 +17,7 @@ public class MobileRobot {
 	 * <p>
 	 * Starts odometer of the MobileRobot
 	 */
-	MobileRobot() {
+	public MobileRobot() {
 		odo = new Odometer(true);
 	}
 		

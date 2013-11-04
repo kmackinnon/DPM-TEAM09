@@ -33,8 +33,14 @@ public class HardwareInfo {
 	public static final NXTRegulatedMotor liftingMotor = Motor.C;
 
 	/** The front ultrasonic sensor for detecting cinder blocks */
-	public static final UltrasonicSensor ultrasonicSensor = new UltrasonicSensor(
+	public static final UltrasonicSensor frontUltrasonicSensor = new UltrasonicSensor(
 			SensorPort.S1);
+	
+	public static final UltrasonicSensor leftUltrasonicSensor = new UltrasonicSensor(
+			SensorPort.S2);
+	
+	public static final UltrasonicSensor rightUltrasonicSensor = new UltrasonicSensor(
+			SensorPort.S3);
 
 	/**
 	 * The front color sensor for detecting blocks (especially when approaching

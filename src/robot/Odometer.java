@@ -9,7 +9,7 @@ package robot;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
 
-public class Odometer implements TimerListener {
+public class Odometer extends SensorUser implements TimerListener{
 
 	/** Default period for the Timer object */
 	private static final int DEFAULT_PERIOD = 25;

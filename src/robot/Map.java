@@ -145,14 +145,16 @@ public class Map {
 	/**
 	 * Returns a list of waypoints of the shortest path to a destination.
 	 * 
-	 * @param current
-	 *            the current coordinates of the robot
+	 * @param x
+	 *            current x position of the robot
+	 * @param y
+	 *            current y position of the robot
 	 * @param destination
 	 *            the coordinates of the destination
 	 * @return an arraylist of coordinates that represent the shortest path from
 	 *         the current position to the destination
 	 */
-	public ArrayList<Coordinates> findBestPath(Coordinates current,
+	public ArrayList<Coordinates> findBestPath(double x, double y,
 			Coordinates destination) {
 
 		return new ArrayList<Coordinates>();

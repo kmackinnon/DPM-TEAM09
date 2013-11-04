@@ -16,7 +16,6 @@ public class BlockDetector extends SensorUser{
 	private UltrasonicSensor rightUS;
 	private ColorSensor colorSensor;
 	
-	
 	public BlockDetector() {
 		
 		frontUS = HardwareInfo.frontUltrasonicSensor;

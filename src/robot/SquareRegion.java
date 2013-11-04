@@ -1,7 +1,7 @@
 package robot;
 
 /**
- * SquareRegion is a class meant to represent rectangular areas on the board.
+ * SquareRegion is meant to represent rectangular areas on the board.
  * This is simply a way to hide some code that is needed to determine if the
  * robot is entering a "forbidden" zone. It may also make it easier to write the
  * code for finding optimal paths
@@ -10,23 +10,42 @@ package robot;
 
 public class SquareRegion {
 
-	private Coordinates topRightCorner;
-	private Coordinates bottomLeftCorner;
-	private final double closeDistance = 6;
+	double xLeft;
+	double xRight;
+	double yTop;
+	double yBottom;
+
+	private Line topLine;
+	private Line bottomLine;
+	private Line leftLine;
+	private Line rightLine;
+	
+	private final double CLOSE_DISTANCE = 6;
 
 	/**
 	 * 
-	 * @param c1
+	 * @param topRightCorner
 	 *            The coordinates of the top right corner of the rectangle.
-	 * @param c2
+	 * @param bottomLeftCorner
 	 *            The coordinates of the bottom left corner of the rectangle.
 	 */
-	public SquareRegion(Coordinates c1, Coordinates c2) {
-		this.topRightCorner = c1;
-		this.bottomLeftCorner = c2;
+	public SquareRegion(Coordinates topRightCorner, Coordinates bottomLeftCorner) {
+		
+		this.xLeft = bottomLeftCorner.getX();
+		this.xRight = topRightCorner.getX();
+		this.yTop = topRightCorner.getY();
+		this.yBottom = bottomLeftCorner.getY();
+		
+		Coordinates topLeftCorner = new Coordinates(bottomLeftCorner.getX(), topRightCorner.getY());
+		Coordinates bottomRightCorner = new Coordinates(topRightCorner.getX(), bottomLeftCorner.getY());
+		
+		topLine = new Line(topLeftCorner, topRightCorner);
+		bottomLine = new Line(bottomLeftCorner, bottomRightCorner);
+		leftLine = new Line(topLeftCorner, bottomLeftCorner);
+		rightLine = new Line(topRightCorner, bottomRightCorner);
+		
 	}
 
-	// TODO fill in
 	/**
 	 * Returns a boolean indicating if the robot is close to a rectangle.
 	 * 
@@ -38,11 +57,15 @@ public class SquareRegion {
 	 *         "Close" is defined in the variable closeDistance.
 	 */
 	public boolean isClose(double x, double y) {
-
+		
+		if(getDistance(x,y) < CLOSE_DISTANCE){
+			return true;
+		}
+		
 		return false;
+		
 	}
 
-	// TODO fill in
 	/**
 	 * Returns a double indicating the distance to the closest point of the
 	 * rectangle.
@@ -55,7 +78,24 @@ public class SquareRegion {
 	 */
 	public double getDistance(double x, double y) {
 
-		return 0;
+		Coordinates current = new Coordinates(x,y);
+		
+		if(x < xLeft){
+			return leftLine.shortestDistance(current);
+		}
+		
+		else if(x > xRight){
+			return rightLine.shortestDistance(current);
+		}
+		
+		else if(y > yTop){
+			return topLine.shortestDistance(current);
+		}
+		
+		else{
+			return bottomLine.shortestDistance(current);
+		}
+		
 	}
 
 }

@@ -12,7 +12,6 @@ public class Main {
 		// else Map.setTargetZone(Map.greenZone)
 		
 		// Competitor.play()
-
 	}
 
 }

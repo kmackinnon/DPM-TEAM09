@@ -14,7 +14,7 @@ public class BlockMover extends MobileRobot {
 	public void moveBlockToZone(){
 		
 		grabBlock();
-		
+/*		
 		if(Map.targetZone == Map.greenZone){
 			stackBlock();
 		}
@@ -22,7 +22,7 @@ public class BlockMover extends MobileRobot {
 		else{
 			releaseBlock();
 		}
-		
+		*/
 	}
 	
 	

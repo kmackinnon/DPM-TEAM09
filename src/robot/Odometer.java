@@ -282,7 +282,10 @@ public class Odometer extends SensorUser implements TimerListener{
 		while(counter !=0){
 			int currColor = cs.getColorID();
 			if(currColor==colorID) counter--;
-			else counter =3;
+			else{
+				counter =3;
+				colorID = currColor;
+			}
 		}
 		return colorID;
 	}

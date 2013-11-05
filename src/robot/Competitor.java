@@ -1,8 +1,10 @@
 package robot;
 
 /**
- * This class chooses which routines to execute in a certain order. It receives
- * the initial Bluetooth signal which determines competition characteristics.
+ * This class contains the main function, and gives responsibility of the robot
+ * to Localizer, Explorer, or BlockMover, depending on the situation. It
+ * receives the initial Bluetooth signal which determines competition
+ * characteristics.
  * 
  * @author Keith MacKinnon
  * 
@@ -10,15 +12,11 @@ package robot;
 
 public class Competitor {
 
-	public Localizer localizer = new Localizer();
-	public Explorer explorer = new Explorer();
-	public BlockMover blockMover = new BlockMover();
+	public static void main(String[] args) {
 
-	public Competitor() {
-
-	}
-
-	public void play() {
+		Localizer localizer = new Localizer();
+		Explorer explorer = new Explorer();
+		BlockMover blockMover = new BlockMover();
 
 		localizer.localize();
 

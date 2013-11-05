@@ -11,46 +11,24 @@ import lejos.nxt.UltrasonicSensor;
  */
 public class BlockDetector extends SensorUser{
 
-	private UltrasonicSensor frontUS;
+	private UltrasonicSensor ultrasonicSensor;
 	private ColorSensor colorSensor;
 	
 	public BlockDetector() {
 		
-		frontUS = HardwareInfo.frontUltrasonicSensor;
+		ultrasonicSensor = HardwareInfo.ultrasonicSensor;
 		colorSensor = HardwareInfo.frontCS;
 
 	}
 	
 	// TODO fill in
 	/**
-	 * Returns a boolean indicating whether or not a block is detected by the FRONT US sensor.
+	 * Returns a boolean indicating whether or not a block is detected by the ultrasonic or color sensor.
 	 * 
 	 * @return true if a block is detected, false otherwise.
 	 */
 	public boolean frontDetectBlock() {
 		
-		return false;
-	}
-
-	// TODO fill in
-	/**
-	 * Returns a boolean indicating whether or not a block is detected by the LEFT US sensor.
-	 * 
-	 * @return true if a block is detected, false otherwise.
-	 */
-	public boolean leftDetectBlock() {
-
-		return false;
-	}
-
-	// TODO fill in
-	/**
-	 * Returns a boolean indicating whether or not a block is detected by the RIGHT US sensor.
-	 * 
-	 * @return true if a block is detected, false otherwise.
-	 */
-	public boolean rightDetectBlock() {
-
 		return false;
 	}
 

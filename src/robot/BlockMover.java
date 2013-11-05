@@ -11,6 +11,8 @@ public class BlockMover extends MobileRobot {
 		
 	}
 	
+	
+	/**Contains all the steps necessary for moving a block to a zone: grabbing, traveling to destination and releasing or stacking the block*/
 	public void moveBlockToZone(){
 		
 		grabBlock();
@@ -25,7 +27,7 @@ public class BlockMover extends MobileRobot {
 		*/
 	}
 	
-	
+
 	private void grabBlock(){
 		
 	}

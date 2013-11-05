@@ -1,8 +1,9 @@
 package robot;
 
 /**
- * Here we define an x,y pair as an object. It is used to check if we're at a
- * specific point.
+ * Here we define an x,y pair as an object. It is more convenient to deal with
+ * xy pairs as an object, since position is always defined in terms of both x
+ * and y.
  * 
  * @author Keith MacKinnon
  * 

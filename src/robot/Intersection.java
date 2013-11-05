@@ -1,8 +1,8 @@
 package robot;
 
 /**
- * Defines the board in terms of squares and creates a simulated cartesian
- * coordinate system based on the intersecting gridlines.
+ * Contains the x,y coordinates of the intersection, and the status of the
+ * intersection (forbidden, target, unreachable, etc.)
  * 
  * @author Keith MacKinnon
  * 

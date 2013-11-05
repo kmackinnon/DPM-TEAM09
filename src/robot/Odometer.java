@@ -6,6 +6,10 @@ package robot;
  * 
  */
 
+import lejos.nxt.ColorSensor;
+import lejos.nxt.SensorPort;
+import lejos.nxt.Sound;
+import lejos.robotics.Color;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
 
@@ -32,7 +36,10 @@ public class Odometer extends SensorUser implements TimerListener{
 	
 	/** Previous displacement/heading values */
 	private double oldDisp, oldHeading;
-
+	/** light sensors for the correction*/
+	ColorSensor leftSensor = new ColorSensor(SensorPort.S1);
+	ColorSensor rightSensor = new ColorSensor(SensorPort.S4);
+	
 	/**
 	 * Odometer constructor
 	 * 
@@ -222,11 +229,61 @@ public class Odometer extends SensorUser implements TimerListener{
 	}
 	
 	/**
-	 * Calculates the total change in heading and displacement
+	 * Calculates the total change in heading and coordinate
 	 * @param data the double array storing displacement as 0th element and heading as the 1st element
 	 */
 	public void getDisplacementAndHeading(double [] data) {
 		data[0] = getDisplacement();
 		data[1] = getHeading();
+	}
+	/**
+	 * this is a method that helps the odometer in order to get right position value of robot.
+	 */
+	public void correction(){
+		double[] initPos = new double[3],destination = new double[3];
+		
+		while((getFilteredData(leftSensor)==Color.BLACK) || (getFilteredData(rightSensor)==Color.BLACK));
+			if(getFilteredData(leftSensor) == Color.BLACK){
+				double prevRightTacho = HardwareInfo.rightMotor.getTachoCount();
+				while(getFilteredData(rightSensor) == Color.BLACK);
+				getPosition(destination);
+				double lastRightTacho = HardwareInfo.rightMotor.getTachoCount();
+				double length = 2*Math.PI*HardwareInfo.rightRadius*((lastRightTacho - prevRightTacho) /360);
+				double angleOff = Math.atan(length/HardwareInfo.sensorWidth);
+				synchronized (lock) {
+					theta = theta - angleOff; 
+					x = initPos[0]-(initPos[0] - destination[0])*Math.sin(angleOff);
+					y = initPos[1]-(initPos[1] - destination[1])*Math.cos(angleOff);
+				}
+			}
+			else {
+				double prevLeftTacho = HardwareInfo.leftMotor.getTachoCount();
+				while(getFilteredData(leftSensor) == Color.BLACK);
+				getPosition(destination);
+				double lastLeftTacho = HardwareInfo.leftMotor.getTachoCount();
+				double length = 2*Math.PI*HardwareInfo.leftRadius*((lastLeftTacho - prevLeftTacho) /360);
+				double angleOff = Math.atan(length/HardwareInfo.sensorWidth);
+				synchronized (lock) {
+					theta = theta + angleOff;
+					x = initPos[0]+(initPos[0] - destination[0])*Math.sin(angleOff);
+					y = initPos[1]+(initPos[1] - destination[1])*Math.cos(angleOff);
+				}
+			}
+	}
+	/**
+	 * this is to filter the wrong value that has been accumulated by the colorsensor we have.
+	 * @param cs = colorSensor
+	 * @return the colorID of the detection
+	 */
+	public int getFilteredData(ColorSensor cs){
+		int colorID;
+		colorID = cs.getColorID();
+		int counter = 3;
+		while(counter !=0){
+			int currColor = cs.getColorID();
+			if(currColor==colorID) counter--;
+			else counter =3;
+		}
+		return colorID;
 	}
 }

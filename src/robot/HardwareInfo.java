@@ -66,5 +66,7 @@ public class HardwareInfo {
 	 * number is how many degrees the motor rotates per second
 	 */
 	public static final int LIFTING_SPEED = 20;
+	
+	public static final double sensorWidth = 11.05;
 
 }

@@ -1,5 +1,12 @@
 package robot;
 
+/**
+ * Here we define an x,y pair as an object. It is used to check if we're at a
+ * specific point.
+ * 
+ * @author Keith MacKinnon
+ * 
+ */
 public class Coordinates {
 
 	private double x;
@@ -13,11 +20,14 @@ public class Coordinates {
 
 	}
 
-	
-	/**Returns a boolean indicating whether or not the robot is at these coordinates.
+	/**
+	 * Returns a boolean indicating whether or not the robot is at these
+	 * coordinates.
 	 * 
-	 * @param x the current x position of the robot
-	 * @param y the current y position of the robot
+	 * @param x
+	 *            the current x position of the robot
+	 * @param y
+	 *            the current y position of the robot
 	 * @return true if the robot is considered at this point, false otherwise
 	 */
 	public boolean isAtPoint(double x, double y) {

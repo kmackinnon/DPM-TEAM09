@@ -5,14 +5,6 @@ package robot;
  * 
  */
 
-
-/*
- * Odometer Class
- * Author: Simon Lee, Sidney Ng
- */
-
-
-
 import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
@@ -35,12 +27,6 @@ public class HardwareInfo {
 	/** The front ultrasonic sensor for detecting cinder blocks */
 	public static final UltrasonicSensor frontUltrasonicSensor = new UltrasonicSensor(
 			SensorPort.S1);
-	
-	public static final UltrasonicSensor leftUltrasonicSensor = new UltrasonicSensor(
-			SensorPort.S2);
-	
-	public static final UltrasonicSensor rightUltrasonicSensor = new UltrasonicSensor(
-			SensorPort.S3);
 
 	/**
 	 * The front color sensor for detecting blocks (especially when approaching

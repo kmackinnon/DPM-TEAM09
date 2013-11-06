@@ -9,15 +9,9 @@ import lejos.nxt.UltrasonicSensor;
  * styrofoam
  * 
  */
-public class BlockDetector extends SensorUser{
-
-	private UltrasonicSensor ultrasonicSensor;
-	private ColorSensor colorSensor;
+public class BlockDetector extends SensorMotorUser{
 	
 	public BlockDetector() {
-		
-		ultrasonicSensor = HardwareInfo.ultrasonicSensor;
-		colorSensor = HardwareInfo.frontCS;
 
 	}
 	

@@ -13,7 +13,7 @@ import lejos.robotics.Color;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
 
-public class Odometer extends SensorUser implements TimerListener{
+public class Odometer extends SensorMotorUser implements TimerListener{
 
 	/** Default period for the Timer object */
 	private static final int DEFAULT_PERIOD = 25;
@@ -214,8 +214,8 @@ public class Odometer extends SensorUser implements TimerListener{
 	 * @return the change in displacement
 	 */
 	public double getDisplacement() {
-		return (HardwareInfo.leftMotor.getTachoCount() * HardwareInfo.leftRadius +
-				HardwareInfo.rightMotor.getTachoCount() * HardwareInfo.rightRadius) *
+		return (leftMotor.getTachoCount() * leftRadius +
+				rightMotor.getTachoCount() * rightRadius) *
 				Math.PI / 360.0;
 	}
 	
@@ -224,8 +224,8 @@ public class Odometer extends SensorUser implements TimerListener{
 	 * @return the heading
 	 */
 	public double getHeading() {
-		return (HardwareInfo.leftMotor.getTachoCount() * HardwareInfo.leftRadius -
-				HardwareInfo.rightMotor.getTachoCount() * HardwareInfo.rightRadius) / HardwareInfo.width;
+		return (leftMotor.getTachoCount() * leftRadius -
+				rightMotor.getTachoCount() * rightRadius) / width;
 	}
 	
 	/**
@@ -244,12 +244,12 @@ public class Odometer extends SensorUser implements TimerListener{
 		
 		while((getFilteredData(leftSensor)==Color.BLACK) || (getFilteredData(rightSensor)==Color.BLACK));
 			if(getFilteredData(leftSensor) == Color.BLACK){
-				double prevRightTacho = HardwareInfo.rightMotor.getTachoCount();
+				double prevRightTacho = rightMotor.getTachoCount();
 				while(getFilteredData(rightSensor) == Color.BLACK);
 				getPosition(destination);
-				double lastRightTacho = HardwareInfo.rightMotor.getTachoCount();
-				double length = 2*Math.PI*HardwareInfo.rightRadius*((lastRightTacho - prevRightTacho) /360);
-				double angleOff = Math.atan(length/HardwareInfo.sensorWidth);
+				double lastRightTacho = rightMotor.getTachoCount();
+				double length = 2*Math.PI*rightRadius*((lastRightTacho - prevRightTacho) /360);
+				double angleOff = Math.atan(length/sensorWidth);
 				synchronized (lock) {
 					theta = theta - angleOff; 
 					x = initPos[0]-(initPos[0] - destination[0])*Math.sin(angleOff);
@@ -257,12 +257,12 @@ public class Odometer extends SensorUser implements TimerListener{
 				}
 			}
 			else {
-				double prevLeftTacho = HardwareInfo.leftMotor.getTachoCount();
+				double prevLeftTacho = leftMotor.getTachoCount();
 				while(getFilteredData(leftSensor) == Color.BLACK);
 				getPosition(destination);
-				double lastLeftTacho = HardwareInfo.leftMotor.getTachoCount();
-				double length = 2*Math.PI*HardwareInfo.leftRadius*((lastLeftTacho - prevLeftTacho) /360);
-				double angleOff = Math.atan(length/HardwareInfo.sensorWidth);
+				double lastLeftTacho = leftMotor.getTachoCount();
+				double length = 2*Math.PI*leftRadius*((lastLeftTacho - prevLeftTacho) /360);
+				double angleOff = Math.atan(length/sensorWidth);
 				synchronized (lock) {
 					theta = theta + angleOff;
 					x = initPos[0]+(initPos[0] - destination[0])*Math.sin(angleOff);

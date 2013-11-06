@@ -7,7 +7,7 @@ package robot;
  *
  */
 
-public class MobileRobot {
+public class MobileRobot extends SensorMotorUser{
 	public static Odometer odo;
 	double [] pos = new double [3];
 	private double forwardSpeed, rotationSpeed;
@@ -32,9 +32,9 @@ public class MobileRobot {
 		odo.getPosition(initPos);
 		odo.getPosition(currPos);
 		if (distance < 0.0)
-			setForwardSpeed(-HardwareInfo.FORWARD_SPEED);
+			setForwardSpeed(-FORWARD_SPEED);
 		else
-			setForwardSpeed(HardwareInfo.FORWARD_SPEED);
+			setForwardSpeed(FORWARD_SPEED);
 		while (Math.pow((currPos[0]-initPos[0]), 2) + Math.pow((currPos[1]-initPos[1]), 2) < distance * distance) {//pythagoros to determine how far left to go
 			odo.getPosition(currPos);
 		}
@@ -154,43 +154,43 @@ public class MobileRobot {
 		this.forwardSpeed = forwardSpeed;
 		this.rotationSpeed = rotationalSpeed; 
 
-		leftSpeed = (forwardSpeed + rotationalSpeed * HardwareInfo.width * Math.PI / 360.0) *
-				180.0 / (HardwareInfo.leftRadius * Math.PI);
-		rightSpeed = (forwardSpeed - rotationalSpeed * HardwareInfo.width * Math.PI / 360.0) *
-				180.0 / (HardwareInfo.rightRadius * Math.PI);
+		leftSpeed = (forwardSpeed + rotationalSpeed * width * Math.PI / 360.0) *
+				180.0 / (leftRadius * Math.PI);
+		rightSpeed = (forwardSpeed - rotationalSpeed * width * Math.PI / 360.0) *
+				180.0 / (rightRadius * Math.PI);
 
 		// set motor directions
 		if (leftSpeed > 0.0)
-			HardwareInfo.leftMotor.forward();
+			leftMotor.forward();
 		else {
-			HardwareInfo.leftMotor.backward();
+			leftMotor.backward();
 			leftSpeed = -leftSpeed;
 		}
 		
 		if (rightSpeed > 0.0)
-			HardwareInfo.rightMotor.forward();
+			rightMotor.forward();
 		else {
-			HardwareInfo.rightMotor.backward();
+			rightMotor.backward();
 			rightSpeed = -rightSpeed;
 		}
 		
 		// set motor speeds
 		if (leftSpeed > 900.0)
-			HardwareInfo.leftMotor.setSpeed(900);
+			leftMotor.setSpeed(900);
 		if(leftSpeed == 0.0)
 			// If the speed is set to 0 then the Motors come to a complete stop and can't be restarted
 			// Setting speed to 1 virtually stops motor movement, but allows for further changes in motor speed
-			HardwareInfo.leftMotor.setSpeed(1);
+			leftMotor.setSpeed(1);
 		else
-			HardwareInfo.leftMotor.setSpeed((int)leftSpeed);
+			leftMotor.setSpeed((int)leftSpeed);
 		
 		if (rightSpeed > 900.0)
-			HardwareInfo.rightMotor.setSpeed(900);
+			rightMotor.setSpeed(900);
 		else
 		if(rightSpeed == 0.0)
-			HardwareInfo.rightMotor.setSpeed(1);
+			rightMotor.setSpeed(1);
 		else
-			HardwareInfo.rightMotor.setSpeed((int)rightSpeed);
+			rightMotor.setSpeed((int)rightSpeed);
 		
 	}
 	
@@ -198,15 +198,15 @@ public class MobileRobot {
 	 * Stops both motors. Calls NXTRegulatedMotor.stop()
 	 */
 	public void stopMotors() {
-		HardwareInfo.rightMotor.stop();
-		HardwareInfo.leftMotor.stop();
+		rightMotor.stop();
+		leftMotor.stop();
 	}
 
 	/**
 	 * Start both motors. Calls NXTRegulatedMotor.forward()
 	 */
 	public void startMotors() {
-		HardwareInfo.rightMotor.forward();
-		HardwareInfo.leftMotor.forward();
+		rightMotor.forward();
+		leftMotor.forward();
 	}
 }

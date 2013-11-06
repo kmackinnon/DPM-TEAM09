@@ -1,9 +1,4 @@
 package robot;
-/**HardwareInfo contains constant values that are needed for operating the robot.
- * 
- * @author Simon Lee, Sidney Ng
- * 
- */
 
 import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
@@ -11,9 +6,13 @@ import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
 
+/**
+ * SensorMotorUser contains methods that are needed when using the data received by
+ * the light and ultrasonic sensors. It contains all hardware info as well.
+ */
 
-//Measure the exact values for these data
-public class HardwareInfo {
+
+public class SensorMotorUser {
 
 	/**Used to move the robot*/
 	public static final NXTRegulatedMotor leftMotor = Motor.A;
@@ -68,5 +67,34 @@ public class HardwareInfo {
 	public static final int LIFTING_SPEED = 20;
 	
 	public static final double sensorWidth = 11.05;
+	
+	
+	
+	
+	
+	/**
+	 * When doing a moving median or mean, the array needs to be shifted at
+	 * every time step. This is just a for loop, but for loops are ugly.
+	 * 
+	 * @param input
+	 *            array to be shifted.
+	 */
+	public void shiftArrayByOne(double[] input) {
 
+	}
+
+	// TODO
+	public double getMean(double[] input) {
+
+		return 0;
+	}
+
+	// TODO
+	public double getMedian(double[] input) {
+
+		return 0;
+	}
+	
+	
+	
 }

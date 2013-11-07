@@ -18,7 +18,7 @@ public class OdometerTest {
 	public static void main(String[] args) {
 		MobileRobot robot = new MobileRobot();
 
-		int option = 0; // don't bother with button inputs: just change this variable
+		int option = 0; // don't bother with button inputs
 		
 		while (option == 0)
 			option = Button.waitForAnyPress();

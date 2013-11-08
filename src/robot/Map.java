@@ -19,42 +19,25 @@ public class Map {
 	private static ArrayList<Edge> edgeList = new ArrayList<Edge>();
 
 	/**
-	 * Initializes the hashtable of intersections. The corner intersections are
-	 * marked as "forbidden" because the robot is not allowed to enter the
-	 * corner tiles
+	 * Initializes the arraylist of intersections.
 	 */
 	public static void initializeMap() {
 
 		for (int y = 0; y < NUM_OF_INTERSECTIONS; y++) {
 			for (int x = 0; x < NUM_OF_INTERSECTIONS; x++) {
-				intersectionList.add(new Intersection(x,y));
+				intersectionList.add(new Intersection(x, y));
 			}
 		}
-		
+
 		for (int y = 0; y < NUM_OF_INTERSECTIONS; y++) {
 			for (int x = 0; x < NUM_OF_INTERSECTIONS; x++) {
-	
-			Intersection temp = get(index(x,y));	
-			
-			addToEdgeList(new Edge(temp, get(index(x+1,y))));
-			addToEdgeList(new Edge(temp, get(index(x+1,y+1))));
-			addToEdgeList(new Edge(temp, get(index(x,y+1))));
-			addToEdgeList(new Edge(temp, get(index(x-1,y+1))));
-			addToEdgeList(new Edge(temp, get(index(x-1,y))));
-			addToEdgeList(new Edge(temp, get(index(x-1,y-1))));
-			addToEdgeList(new Edge(temp, get(index(x,y-1))));
-			addToEdgeList(new Edge(temp, get(index(x+1,y-1))));
-		
+				addEdgesToInitialMap(x, y);
 			}
-			
 		}
-		
-		
-	}
-	
-	
 
-/*	*//**
+	}
+
+	/**
 	 * Assuming the robot is a builder, this sets all intersections in and on
 	 * the boundary of the redZone as "forbidden". (The green zone would be
 	 * forbidden for a garbage collector)
@@ -67,153 +50,278 @@ public class Map {
 	 *            the xy coordinates of the bottom left corner of the forbidden
 	 *            zone
 	 * 
-	 *//*
-	public static void setForbiddenZone(Coordinates topRightCorner,
-			Coordinates bottomLeftCorner) {
-
-		int[] topRightKey = findKeyFromCoordinates(topRightCorner);
-		int[] bottomLeftKey = findKeyFromCoordinates(bottomLeftCorner);
-
-		for (int x = bottomLeftKey[0]; x <= topRightKey[0]; x++) {
-			for (int y = bottomLeftKey[1]; y <= topRightKey[1]; y++) {
-				intersectionList.get(key(x, y)).setAsForbidden();
-			}
-		}
-
+	 */
+	public static void setForbiddenZone(int[] topRightCorner,
+			int[] bottomLeftCorner) {
+		
+		setZone(topRightCorner,bottomLeftCorner,false);
 	}
 
-	
-	*//**
+	/**
 	 * Assuming the robot is a builder, this sets all intersections in and on
-	 * the boundary of the greenZone as "target". (The red zone would be
-	 * the target for a garbage collector)
+	 * the boundary of the greenZone as "target". (The red zone would be the
+	 * target for a garbage collector)
 	 * 
 	 * @param topRightCorner
-	 *            the xy coordinates of the top right corner of the target
-	 *            zone.
+	 *            the xy coordinates of the top right corner of the target zone.
 	 * 
 	 * @param bottomLeftCorner
 	 *            the xy coordinates of the bottom left corner of the target
 	 *            zone
 	 * 
-	 *//*
-	public static void setTargetZone(Coordinates topRightCorner,
-			Coordinates bottomLeftCorner) {
+	 */
+	public static void setTargetZone(int[] topRightCorner,
+			int[] bottomLeftCorner) {
 
-		int[] topRightKey = findKeyFromCoordinates(topRightCorner);
-		int[] bottomLeftKey = findKeyFromCoordinates(bottomLeftCorner);
+		setZone(topRightCorner,bottomLeftCorner,true);
+	}
+	
+	
+	private static void setZone(int[] topRightCorner,
+			int[] bottomLeftCorner, boolean keepNode){
+		
+		int topRightXGrid = topRightCorner[0];
+		int bottomLeftXGrid = bottomLeftCorner[0];
 
-		for (int x = bottomLeftKey[0]; x <= topRightKey[0]; x++) {
-			for (int y = bottomLeftKey[1]; y <= topRightKey[1]; y++) {
-				intersectionList.get(key(x, y)).setAsTarget();
+		int topRightYGrid = topRightCorner[1];
+		int bottomLeftYGrid = bottomLeftCorner[1];
+
+		for (int x = bottomLeftXGrid; x <= topRightXGrid; x++) {
+			for (int y = bottomLeftYGrid; y <= topRightYGrid; y++) {
+				if(keepNode){
+					get(index(x,y)).setAsTarget();
+				}
+				
+				else{
+					removeIntersection(index(x, y));
+				}
 			}
 		}
-
+		
 	}
-
-	
-	private static int[] findKeyFromCoordinates(Coordinates input) {
-
-		int xKey = (int) Math.round(input.getX() / TILE_SIZE);
-		int yKey = (int) Math.round(input.getY() / TILE_SIZE);
-
-		return key(xKey, yKey);
-	}*/
-	
 	
 
 	private static int index(int x, int y) {
 
-		return (y*11 + x);
-		
+		return (y * NUM_OF_INTERSECTIONS + x);
+
 	}
-	
-	private static Intersection get(int index){
-		
+
+	private static Intersection get(int index) {
+
 		return intersectionList.get(index);
-		
+
 	}
-	
-	
-	private static void addToEdgeList(Edge edge){
-		
-		if(!edgeList.contains(edge)){
+
+	private static void addToEdgeList(Edge edge) {
+
+		if (!edgeList.contains(edge)) {
 			edgeList.add(edge);
 		}
-		
+
 	}
-	
-	private static void removeIntersection(int index){
-		
+
+
+	private static void removeIntersection(int index) {
+
 		Intersection intersection = get(index);
-		
+
 		Iterator<Edge> it = edgeList.iterator();
-		
-		for(;it.hasNext();){
-			if(it.next().touches(intersection)){
+
+		for (; it.hasNext();) {
+			if (it.next().touches(intersection)) {
 				it.remove();
 			}
 		}
-		
+
 		intersectionList.set(index, null);
-		
+
+	}
+
+	
+	
+	
+	private static void addEdgesToInitialMap(int x, int y) {
+
+		Intersection temp = get(index(x, y));
+
+		if (x == 0 && y == 0) {
+			addTopRightCap(temp, x, y);
+		}
+
+		else if (x == 0 && y == 10) {
+			addBottomRightCap(temp, x, y);
+		}
+
+		else if (x == 0) {
+			addRightSide(temp, x, y);
+			addTopAndBottom(temp, x, y);
+		}
+
+		else if (x == 10 && y == 0) {
+			addTopLeftCap(temp, x, y);
+		}
+
+		else if (y == 0) {
+			addTopSide(temp, x, y);
+			addRightAndLeft(temp, x, y);
+		}
+
+		else if (x == 10 && y == 10) {
+			addBottomLeftCap(temp, x, y);
+		}
+
+		else if (x == 10) {
+			addLeftSide(temp, x, y);
+			addTopAndBottom(temp, x, y);
+		}
+
+		else if (y == 10) {
+			addBottomSide(temp, x, y);
+			addRightAndLeft(temp, x, y);
+		}
 	}
 	
 	
 	
-	private static class Edge{
+	private static Intersection right(int x, int y) {
+		return intersectionList.get(index(x + 1, y));
+	}
+
+	private static Intersection topRight(int x, int y) {
+		return intersectionList.get(index(x + 1, y + 1));
+	}
+
+	private static Intersection bottomRight(int x, int y) {
+		return intersectionList.get(index(x + 1, y - 1));
+	}
+
+	private static Intersection left(int x, int y) {
+		return intersectionList.get(index(x - 1, y));
+	}
+
+	private static Intersection topLeft(int x, int y) {
+		return intersectionList.get(index(x - 1, y + 1));
+	}
+
+	private static Intersection bottomLeft(int x, int y) {
+		return intersectionList.get(index(x - 1, y - 1));
+	}
+
+	private static Intersection top(int x, int y) {
+		return intersectionList.get(index(x, y + 1));
+	}
+
+	private static Intersection bottom(int x, int y) {
+		return intersectionList.get(index(x, y - 1));
+	}
+
+	private static void addRightSide(Intersection temp, int x, int y) {
+		addToEdgeList(new Edge(temp, bottomRight(x, y)));
+		addToEdgeList(new Edge(temp, right(x, y)));
+		addToEdgeList(new Edge(temp, topRight(x, y)));
+	}
+
+	private static void addLeftSide(Intersection temp, int x, int y) {
+		addToEdgeList(new Edge(temp, topLeft(x, y)));
+		addToEdgeList(new Edge(temp, left(x, y)));
+		addToEdgeList(new Edge(temp, bottomLeft(x, y)));
+	}
+
+	private static void addTopAndBottom(Intersection temp, int x, int y) {
+		addToEdgeList(new Edge(temp, top(x, y)));
+		addToEdgeList(new Edge(temp, bottom(x, y)));
+	}
+
+	private static void addRightAndLeft(Intersection temp, int x, int y) {
+		addToEdgeList(new Edge(temp, right(x, y)));
+		addToEdgeList(new Edge(temp, left(x, y)));
+	}
+
+	private static void addTopSide(Intersection temp, int x, int y) {
+		addToEdgeList(new Edge(temp, topRight(x, y)));
+		addToEdgeList(new Edge(temp, top(x, y)));
+		addToEdgeList(new Edge(temp, topLeft(x, y)));
+	}
+
+	private static void addBottomSide(Intersection temp, int x, int y) {
+		addToEdgeList(new Edge(temp, bottomLeft(x, y)));
+		addToEdgeList(new Edge(temp, bottom(x, y)));
+		addToEdgeList(new Edge(temp, bottomRight(x, y)));
+	}
+
+	private static void addTopRightCap(Intersection temp, int x, int y) {
+		addToEdgeList(new Edge(temp, right(x, y)));
+		addToEdgeList(new Edge(temp, topRight(x, y)));
+		addToEdgeList(new Edge(temp, top(x, y)));
+	}
+
+	private static void addTopLeftCap(Intersection temp, int x, int y) {
+		addToEdgeList(new Edge(temp, top(x, y)));
+		addToEdgeList(new Edge(temp, topLeft(x, y)));
+		addToEdgeList(new Edge(temp, left(x, y)));
+	}
+
+	private static void addBottomRightCap(Intersection temp, int x, int y) {
+		addToEdgeList(new Edge(temp, bottom(x, y)));
+		addToEdgeList(new Edge(temp, bottomRight(x, y)));
+		addToEdgeList(new Edge(temp, right(x, y)));
+	}
+
+	private static void addBottomLeftCap(Intersection temp, int x, int y) {
+		addToEdgeList(new Edge(temp, left(x, y)));
+		addToEdgeList(new Edge(temp, bottomLeft(x, y)));
+		addToEdgeList(new Edge(temp, bottom(x, y)));
+	}
+
+	private static class Edge {
 		Intersection a;
 		Intersection b;
-		
+
 		double weight;
-		
-		public Edge(Intersection a, Intersection b){
-			
+
+		public Edge(Intersection a, Intersection b) {
+
 			this.a = a;
 			this.b = b;
-			
-			if(a.getX()==b.getX()||a.getY()==b.getY()){
+
+			if (a.getX() == b.getX() || a.getY() == b.getY()) {
 				weight = 1;
 			}
-			
-			else{
+
+			else {
 				weight = 1.414;
 			}
-			
+
 		}
-		
-		
-		public boolean equals(Object obj){
-			
+
+		public boolean equals(Object obj) {
+
 			Edge otherEdge = (Edge) obj;
-			
-			if(otherEdge.a == this.a && otherEdge.b == this.b){
+
+			if (otherEdge.a == this.a && otherEdge.b == this.b) {
 				return true;
 			}
-			
-			if(otherEdge.b == this.a && otherEdge.a == this.b){
+
+			if (otherEdge.b == this.a && otherEdge.a == this.b) {
 				return true;
 			}
-			
-			else{
+
+			else {
 				return false;
 			}
 		}
-		
-		
-		public boolean touches(Intersection c){
-			if(a==c || b==c){
+
+		public boolean touches(Intersection c) {
+			if (a == c || b == c) {
 				return true;
 			}
-			
-			else{
+
+			else {
 				return false;
 			}
 		}
-			
+
 	}
-	
-	
-	
 
 }

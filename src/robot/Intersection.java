@@ -1,5 +1,6 @@
 package robot;
 
+
 /**
  * Contains the x,y coordinates of the intersection, and the status of the
  * intersection (forbidden, target, unreachable, etc.)
@@ -11,16 +12,23 @@ package robot;
 public class Intersection {
 
 	private Coordinates coordinates;
+	private int x, y;
 	private boolean isForbidden;
 	private boolean isTarget;
+	
 
 	public Intersection(int x, int y) {
 
+		this.x = x;
+		this.y = y;
+		
 		coordinates = new Coordinates(x * Map.TILE_SIZE, y * Map.TILE_SIZE);
 		isForbidden = false;
 		isTarget = false;
 
 	}
+	
+	
 
 	public void setAsForbidden() {
 		isForbidden = true;
@@ -37,5 +45,16 @@ public class Intersection {
 	public boolean isTarget() {
 		return isTarget;
 	}
+	
+	public int getX(){
+		return x;
+	}
+	
+	public int getY(){
+		return y;
+	}
+	
+
+
 
 }

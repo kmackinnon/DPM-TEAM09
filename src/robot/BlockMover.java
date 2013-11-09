@@ -34,11 +34,22 @@ public class BlockMover extends MobileRobot {
 	private void grabBlock() {
 
 		clawMotor.setSpeed(LIFTING_SPEED);
-
-		// we should check the current position of the claw somehow, before
-		// rotating the motor.
-
-		clawMotor.rotate(250);
+		
+		//lower claw until ultrasonic sensor sees it.
+	
+		//this sets the claw to the ground.
+		
+		//this is the idea:
+		//while(ultrasonicSensor.getDistance > CLOSE_DISTANCE){
+		//clawMotor.backward();
+		//}
+		
+		
+		clawMotor.resetTachoCount();
+		
+		//from lowest point to highest point
+		//number to be determined
+		clawMotor.rotateTo(340);
 
 	}
 
@@ -49,12 +60,17 @@ public class BlockMover extends MobileRobot {
 		// we should check the current position of the claw somehow, before
 		// rotating the motor.
 
-		clawMotor.rotate(-250);
+		//this is the idea:
+		//while(ultrasonicSensor.getDistance > CLOSE_DISTANCE){
+		//clawMotor.backward();
+		//}
 		
 	}
 
 	private void stackBlock() {
 
+		
+		
 	}
 
 }

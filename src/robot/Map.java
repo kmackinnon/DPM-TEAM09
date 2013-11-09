@@ -3,7 +3,6 @@ package robot;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-
 /**
  * Map contains a representation of the game area. This includes the locations
  * of obstacles, the red and green zones, and the 4 corners
@@ -54,8 +53,8 @@ public class Map {
 	 */
 	public static void setForbiddenZone(int[] topRightCorner,
 			int[] bottomLeftCorner) {
-		
-		setZone(topRightCorner,bottomLeftCorner,false);
+
+		setZone(topRightCorner, bottomLeftCorner, false);
 	}
 
 	/**
@@ -74,13 +73,12 @@ public class Map {
 	public static void setTargetZone(int[] topRightCorner,
 			int[] bottomLeftCorner) {
 
-		setZone(topRightCorner,bottomLeftCorner,true);
+		setZone(topRightCorner, bottomLeftCorner, true);
 	}
-	
-	
-	private static void setZone(int[] topRightCorner,
-			int[] bottomLeftCorner, boolean keepNode){
-		
+
+	private static void setZone(int[] topRightCorner, int[] bottomLeftCorner,
+			boolean keepNode) {
+
 		int topRightXGrid = topRightCorner[0];
 		int bottomLeftXGrid = bottomLeftCorner[0];
 
@@ -89,18 +87,17 @@ public class Map {
 
 		for (int x = bottomLeftXGrid; x <= topRightXGrid; x++) {
 			for (int y = bottomLeftYGrid; y <= topRightYGrid; y++) {
-				if(keepNode){
-					get(index(x,y)).setAsTarget();
+				if (keepNode) {
+					get(index(x, y)).setAsTarget();
 				}
-				
-				else{
+
+				else {
 					removeIntersection(index(x, y));
 				}
 			}
 		}
-		
+
 	}
-	
 
 	public static int index(int x, int y) {
 
@@ -122,7 +119,6 @@ public class Map {
 
 	}
 
-
 	private static void removeIntersection(int index) {
 
 		Intersection intersection = get(index);
@@ -139,9 +135,6 @@ public class Map {
 
 	}
 
-	
-	
-	
 	private static void addEdgesToInitialMap(int x, int y) {
 
 		Intersection temp = get(index(x, y));
@@ -181,17 +174,15 @@ public class Map {
 			addBottomSide(temp, x, y);
 			addRightAndLeft(temp, x, y);
 		}
-		
-		else{
-			addRightSide(temp,x,y);
-			addLeftSide(temp,x,y);
-			addTopAndBottom(temp,x,y);
-			
+
+		else {
+			addRightSide(temp, x, y);
+			addLeftSide(temp, x, y);
+			addTopAndBottom(temp, x, y);
+
 		}
 	}
-	
-	
-	
+
 	private static Intersection right(int x, int y) {
 		return intersectionList.get(index(x + 1, y));
 	}
@@ -281,17 +272,26 @@ public class Map {
 		addToEdgeList(new Edge(temp, bottomLeft(x, y)));
 		addToEdgeList(new Edge(temp, bottom(x, y)));
 	}
-	
-	public static ArrayList<Edge> getEdgeList(){
+
+	public static ArrayList<Edge> getEdgeList() {
 		return edgeList;
 	}
-	
-	
-	public static ArrayList<Intersection> getIntersectionList(){
+
+	public static ArrayList<Intersection> getIntersectionList() {
 		return intersectionList;
 	}
-	
-	
+
+	public static void resetAllPreviousAndDistance() {
+
+		for (Intersection intersection : intersectionList) {
+
+			if (intersection != null) {
+				intersection.setPreviousToNull();
+				intersection.setMinDistance(Double.POSITIVE_INFINITY);
+			}
+		}
+
+	}
 
 	public static class Edge {
 		public Intersection a;
@@ -317,21 +317,22 @@ public class Map {
 		public boolean equals(Object obj) {
 
 			boolean result = false;
-			
-			if(obj instanceof Edge){
+
+			if (obj instanceof Edge) {
 				Edge otherEdge = (Edge) obj;
 
 				if (otherEdge.a.equals(this.a) && otherEdge.b.equals(this.b)) {
 					result = true;
 				}
 
-				else if (otherEdge.b.equals(this.a) && otherEdge.a.equals(this.b)) {
+				else if (otherEdge.b.equals(this.a)
+						&& otherEdge.a.equals(this.b)) {
 					result = true;
 				}
 			}
-			
+
 			return result;
-			
+
 		}
 
 		public boolean touches(Intersection c) {
@@ -343,24 +344,24 @@ public class Map {
 				return false;
 			}
 		}
-		
-		public Intersection getAdjacentIntersection(Intersection c){
-			
-			if(a.equals(c)){
+
+		public Intersection getAdjacentIntersection(Intersection c) {
+
+			if (a.equals(c)) {
 				return b;
 			}
-			
-			else if(b.equals(c)){
+
+			else if (b.equals(c)) {
 				return a;
 			}
-			
-			else{
+
+			else {
 				return null;
 			}
-			
+
 		}
-		
-		public double getWeight(){
+
+		public double getWeight() {
 			return weight;
 		}
 

@@ -5,32 +5,29 @@ import java.util.ArrayList;
 import robot.Map.Edge;
 
 public class Dijkstra {
-	
-	
-	public static ArrayList<Intersection> algorithm(Intersection source, Intersection destination){
-		
+
+	public static ArrayList<Intersection> algorithm(Intersection source,
+			Intersection destination) {
+
 		computePaths(source);
 		return getShortestPathTo(destination);
-		
+
 	}
-	
 
 	private static void computePaths(Intersection source) {
 
 		source.setMinDistance(0);
 
 		PriorityQueue intersectionQueue = new PriorityQueue();
-		
-		
+
 		intersectionQueue.add(source);
-		
 
 		while (!intersectionQueue.isEmpty()) {
-			
-			if(intersectionQueue.queue.size()==1){
+
+			if (intersectionQueue.queue.size() == 1) {
 				break;
 			}
-			
+
 			Intersection current = intersectionQueue.poll();
 
 			for (Edge edge : Map.getEdgeList()) {
@@ -40,60 +37,56 @@ public class Dijkstra {
 							.getAdjacentIntersection(current);
 					double weight = edge.getWeight();
 
-					double distanceThroughCurrent = current.getMinDistance() + weight;
-					
-					if(distanceThroughCurrent < adjacent.getMinDistance()){
+					double distanceThroughCurrent = current.getMinDistance()
+							+ weight;
+
+					if (distanceThroughCurrent < adjacent.getMinDistance()) {
 						adjacent.setMinDistance(distanceThroughCurrent);
 						adjacent.setPrevious(current);
-						
-						if(intersectionQueue.contains(adjacent)){
-							intersectionQueue.swimUp(intersectionQueue.indexOf(adjacent));
+
+						if (intersectionQueue.contains(adjacent)) {
+							intersectionQueue.swimUp(intersectionQueue
+									.indexOf(adjacent));
 						}
-						
-						else{
+
+						else {
 							intersectionQueue.add(adjacent);
 						}
-						
-						
+
 					}
-					
+
 				}
 
 			}
 		}
 
 	}
-	
-	
-	
-	
-	
-	private static ArrayList<Intersection> getShortestPathTo(Intersection destination){
-		
+
+	private static ArrayList<Intersection> getShortestPathTo(
+			Intersection destination) {
+
 		ArrayList<Intersection> reversePath = new ArrayList<Intersection>();
 		Intersection temp;
-		
-		for(temp = destination; temp != null; temp = temp.getPrevious()){
-			
+
+		for (temp = destination; temp != null; temp = temp.getPrevious()) {
+
 			reversePath.add(temp);
-			
+
 		}
-		
-		
+
+		Map.resetAllPreviousAndDistance();
+
 		ArrayList<Intersection> correctPath = new ArrayList<Intersection>();
-		
-		
-		for(int i = reversePath.size()-1; i>=0; i--){
+
+		for (int i = reversePath.size() - 1; i >= 0; i--) {
 			temp = reversePath.get(i);
-			
-			correctPath.add(temp);	
+
+			correctPath.add(temp);
 		}
-		
+
 		return correctPath;
-			
+
 	}
-	
-	
 
 	private static class PriorityQueue {
 
@@ -124,8 +117,6 @@ public class Dijkstra {
 			swimUp(queue.size() - 1);
 
 		}
-		
-		
 
 		private void swimUp(int k) {
 
@@ -183,12 +174,12 @@ public class Dijkstra {
 		private boolean isEmpty() {
 			return queue.isEmpty();
 		}
-		
-		private int indexOf(Intersection intersection){
+
+		private int indexOf(Intersection intersection) {
 			return queue.indexOf(intersection);
 		}
-		
-		private boolean contains(Intersection intersection){
+
+		private boolean contains(Intersection intersection) {
 			return queue.contains(intersection);
 		}
 

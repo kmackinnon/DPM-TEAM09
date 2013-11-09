@@ -11,10 +11,10 @@ package robot;
 
 public class Intersection {
 
-	private Coordinates coordinates;
 	private int x, y;
-	private boolean isForbidden;
 	private boolean isTarget;
+	private Intersection previous;
+	private double minDistance = Double.POSITIVE_INFINITY;
 	
 
 	public Intersection(int x, int y) {
@@ -22,24 +22,31 @@ public class Intersection {
 		this.x = x;
 		this.y = y;
 		
-		coordinates = new Coordinates(x * Map.TILE_SIZE, y * Map.TILE_SIZE);
-		isForbidden = false;
 		isTarget = false;
 
 	}
 	
 	
 
-	public void setAsForbidden() {
-		isForbidden = true;
+	public void setPrevious(Intersection intersection){
+		previous = intersection;
+	}
+	
+	public Intersection getPrevious(){
+		return previous;
+	}
+	
+	
+	public void setMinDistance(double min){
+		minDistance = min;
+	}
+	
+	public double getMinDistance(){
+		return minDistance;
 	}
 
 	public void setAsTarget() {
 		isTarget = true;
-	}
-
-	public boolean isForbidden() {
-		return isForbidden;
 	}
 
 	public boolean isTarget() {
@@ -52,6 +59,22 @@ public class Intersection {
 	
 	public int getY(){
 		return y;
+	}
+	
+	public boolean equals(Object obj){
+		
+		boolean result = false;
+		
+		if(obj instanceof Intersection){
+			Intersection otherIntersection = (Intersection) obj;
+			
+			if(otherIntersection.getX()==x && otherIntersection.getY()==y){
+				result = true;
+			}
+		}
+		
+		return result;
+		
 	}
 	
 

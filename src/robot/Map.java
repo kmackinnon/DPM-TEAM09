@@ -3,6 +3,7 @@ package robot;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+
 /**
  * Map contains a representation of the game area. This includes the locations
  * of obstacles, the red and green zones, and the 4 corners
@@ -101,7 +102,7 @@ public class Map {
 	}
 	
 
-	private static int index(int x, int y) {
+	public static int index(int x, int y) {
 
 		return (y * NUM_OF_INTERSECTIONS + x);
 
@@ -179,6 +180,13 @@ public class Map {
 		else if (y == 10) {
 			addBottomSide(temp, x, y);
 			addRightAndLeft(temp, x, y);
+		}
+		
+		else{
+			addRightSide(temp,x,y);
+			addLeftSide(temp,x,y);
+			addTopAndBottom(temp,x,y);
+			
 		}
 	}
 	
@@ -273,12 +281,23 @@ public class Map {
 		addToEdgeList(new Edge(temp, bottomLeft(x, y)));
 		addToEdgeList(new Edge(temp, bottom(x, y)));
 	}
+	
+	public static ArrayList<Edge> getEdgeList(){
+		return edgeList;
+	}
+	
+	
+	public static ArrayList<Intersection> getIntersectionList(){
+		return intersectionList;
+	}
+	
+	
 
-	private static class Edge {
-		Intersection a;
-		Intersection b;
+	public static class Edge {
+		public Intersection a;
+		public Intersection b;
 
-		double weight;
+		private double weight;
 
 		public Edge(Intersection a, Intersection b) {
 
@@ -297,13 +316,26 @@ public class Map {
 
 		public boolean equals(Object obj) {
 
-			Edge otherEdge = (Edge) obj;
+			boolean result = false;
+			
+			if(obj instanceof Edge){
+				Edge otherEdge = (Edge) obj;
 
-			if (otherEdge.a == this.a && otherEdge.b == this.b) {
-				return true;
+				if (otherEdge.a.equals(this.a) && otherEdge.b.equals(this.b)) {
+					result = true;
+				}
+
+				else if (otherEdge.b.equals(this.a) && otherEdge.a.equals(this.b)) {
+					result = true;
+				}
 			}
+			
+			return result;
+			
+		}
 
-			if (otherEdge.b == this.a && otherEdge.a == this.b) {
+		public boolean touches(Intersection c) {
+			if (a.equals(c) || b.equals(c)) {
 				return true;
 			}
 
@@ -311,15 +343,25 @@ public class Map {
 				return false;
 			}
 		}
-
-		public boolean touches(Intersection c) {
-			if (a == c || b == c) {
-				return true;
+		
+		public Intersection getAdjacentIntersection(Intersection c){
+			
+			if(a.equals(c)){
+				return b;
 			}
-
-			else {
-				return false;
+			
+			else if(b.equals(c)){
+				return a;
 			}
+			
+			else{
+				return null;
+			}
+			
+		}
+		
+		public double getWeight(){
+			return weight;
 		}
 
 	}

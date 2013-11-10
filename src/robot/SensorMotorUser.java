@@ -41,25 +41,25 @@ public class SensorMotorUser {
 	public static final ColorSensor rightCS = new ColorSensor(SensorPort.S4);
 
 	/** The radius of the left wheel. */
-	public static final double leftRadius = 2.2875;
+	public static final double leftRadius = 2.175;
 
 	/** The radius of the right wheel. */
-	public static final double rightRadius = 2.2875;
+	public static final double rightRadius = 2.175;
 
 	/** The distance between the two wheels */
-	public static final double width = 16.395; // need to measure first
+	public static final double width = 11.395; // need to measure first
 
 	/**
 	 * The speed of the wheel motors when the robot is moving in a straight
 	 * line. The number is how many degrees the motors rotate per second
 	 */
-	public static final int FORWARD_SPEED = 150;
+	public static final int FORWARD_SPEED = 90;
 
 	/**
 	 * The speed of the wheel motors when the robot is rotating on point. The
 	 * number is how many degrees the motors rotate per second
 	 */
-	public static final int ROTATION_SPEED = 50;
+	public static final int ROTATION_SPEED = 45;
 
 	/**
 	 * The speed of the lifting motor when the robot is lifting blocks. The

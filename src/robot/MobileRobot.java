@@ -1,5 +1,6 @@
 package robot;
 
+
 /**MobileRobot contains all the methods needed for the robot to move to a location, and to turn to an angle. 
  * This includes traveling to a point while navigating around obstacles.  
  * 
@@ -78,7 +79,6 @@ public class MobileRobot extends SensorMotorUser{
 				travelMag(Math.sqrt(Math.pow((x-pos[0]), 2) + Math.pow((y-pos[1]), 2)));//after orientation travel there
 		}
 		setSpeeds(0.0, 0.0);
-		setForwardSpeed(0.0);
 	}
 	
 	/**
@@ -91,7 +91,7 @@ public class MobileRobot extends SensorMotorUser{
 	public void turnTo(double angle) {
 		
 		double [] currPos = new double [3];
-		double currSpeed = 30;
+		double currSpeed = ROTATION_SPEED;
 		double angDiff;
 		
 		setForwardSpeed(0.0);
@@ -113,7 +113,9 @@ public class MobileRobot extends SensorMotorUser{
 				setRotationSpeed(currSpeed *= -0.5);
 			
 			odo.getPosition(currPos);
-			angDiff = Odometer.minimumAngleFromTo(currPos[2], angle);}
+			angDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
+		}
+		setSpeeds(0.0, 0.0);
 	}
 	
 	// mutators

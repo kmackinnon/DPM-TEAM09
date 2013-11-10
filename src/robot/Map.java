@@ -51,8 +51,15 @@ public class Map {
 	 *            zone
 	 * 
 	 */
-	public static void setForbiddenZone(int[] topRightCorner,
-			int[] bottomLeftCorner) {
+	public static void setForbiddenZone(int[] zone) {
+		
+		int[] bottomLeftCorner = new int[2];
+		int[] topRightCorner = new int[2];
+		
+		bottomLeftCorner[0] = zone[0];
+		bottomLeftCorner[1] = zone[1];
+		topRightCorner[0] = zone[2];
+		topRightCorner[1] = zone[3];
 
 		setZone(topRightCorner, bottomLeftCorner, false);
 	}
@@ -70,9 +77,16 @@ public class Map {
 	 *            zone
 	 * 
 	 */
-	public static void setTargetZone(int[] topRightCorner,
-			int[] bottomLeftCorner) {
+	public static void setTargetZone(int[] zone) {
 
+		int[] bottomLeftCorner = new int[2];
+		int[] topRightCorner = new int[2];
+		
+		bottomLeftCorner[0] = zone[0];
+		bottomLeftCorner[1] = zone[1];
+		topRightCorner[0] = zone[2];
+		topRightCorner[1] = zone[3];
+		
 		setZone(topRightCorner, bottomLeftCorner, true);
 	}
 

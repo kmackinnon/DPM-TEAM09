@@ -18,11 +18,18 @@ import bluetooth.Transmission;
  */
 
 public class Competitor {
-
+	
+	private static StartCorner corner;
+	private static PlayerRole role;
+	private static int[] greenZone;
+	private static int[] redZone;
+	
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws InterruptedException {
 
 		BluetoothConnection conn = new BluetoothConnection();
+		
+
 
 		// as of this point, the bluetooth connection is closed again, and you
 		// can pair to another NXT (or PC) if you wish
@@ -33,32 +40,42 @@ public class Competitor {
 		if (t == null) {
 			LCD.drawString("Failed to read transmission", 0, 5);
 		} else {
-			StartCorner corner = t.startingCorner;
-			PlayerRole role = t.role;
+			corner = t.startingCorner;
+			role = t.role;
 
 			// green zone is defined by (bottom-left and top-right) corners:
-			int[] greenZone = t.greenZone;
+			greenZone = t.greenZone;
 
 			// red zone is defined by these (bottom-left and top-right) corners:
-			int[] redZone = t.redZone;
+			redZone = t.redZone;
 
 			// print out the transmission information to the LCD
 			conn.printTransmission();
 		}
+		
+		
+		if(role.getId()==1){
+			SensorMotorUser.becomeBuilder(true);
+		}
 
-		// stall until user decides to end program
-		Button.waitForAnyPress();
-
+		else if(role.getId()==2){
+			SensorMotorUser.becomeBuilder(false);
+		}
+		
 		Map.initializeMap();
 
-		// Map.setForbiddenZone;
-		// Map.setTargetZone;
-
-		// if we are builder
-		// SensorMotorUser.isBuilder(true);
-
-		// if we are garbage collector
-		// SensorMotorUser.isBuilder(false);
+		if(SensorMotorUser.isBuilder()){
+			Map.setTargetZone(greenZone);
+			Map.setForbiddenZone(redZone);
+		}
+		
+		else if(!SensorMotorUser.isBuilder()){
+			Map.setTargetZone(redZone);
+			Map.setForbiddenZone(greenZone);
+		}
+		
+		SensorMotorUser.setStartCorner(corner.getCooridinates());
+			
 
 		Localizer localizer = new Localizer();
 		Explorer explorer = new Explorer();

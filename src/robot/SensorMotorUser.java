@@ -69,17 +69,46 @@ public class SensorMotorUser {
 
 	public static final double sensorWidth = 11.05;
 	
-	public static boolean isBuilder;
+	private static boolean isBuilder;
 
+	private static boolean isBuilderHasBeenSet = false;
+	
+	private static int[] startCorner;
+	
+	private static boolean startCornerHasBeenSet = false;
 	
 	
 	
 	
 	
-	public static void isBuilder(boolean willBuild){
+	
+	public static void becomeBuilder(boolean willBuild){
+		if(!isBuilderHasBeenSet){
+			isBuilder = willBuild;
+			isBuilderHasBeenSet = true;
+		}
 		
-		isBuilder = willBuild;
-		
+	}
+	
+	public static boolean isBuilder(){
+		return isBuilder;
+	}
+	
+	
+	public static void setStartCorner(int[] coordinates){
+		if(!startCornerHasBeenSet){
+			startCorner[0] = coordinates[0];
+			startCorner[1] = coordinates[1];
+			startCornerHasBeenSet = true;
+		}
+	}
+	
+	public static int getXStart(){
+		return startCorner[0];
+	}
+	
+	public static int getYStart(){
+		return startCorner[1];
 	}
 	
 	

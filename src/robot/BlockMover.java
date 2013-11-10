@@ -22,7 +22,7 @@ public class BlockMover extends MobileRobot {
 
 		// travel to appropriate zone
 
-		if (isBuilder) {
+		if (isBuilder()) {
 			stackBlock();
 		}
 

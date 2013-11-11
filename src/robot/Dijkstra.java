@@ -68,7 +68,7 @@ public class Dijkstra {
 		ArrayList<Intersection> reversePath = new ArrayList<Intersection>();
 		Intersection temp;
 
-		for (temp = destination; temp != null; temp = temp.getPrevious()) {
+		for (temp = destination; temp.getPrevious() != null; temp = temp.getPrevious()) {
 
 			reversePath.add(temp);
 

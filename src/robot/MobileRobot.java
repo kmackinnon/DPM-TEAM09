@@ -1,5 +1,7 @@
 package robot;
 
+import java.util.ArrayList;
+
 
 /**MobileRobot contains all the methods needed for the robot to move to a location, and to turn to an angle. 
  * This includes traveling to a point while navigating around obstacles.  
@@ -21,7 +23,26 @@ public class MobileRobot extends SensorMotorUser{
 	public MobileRobot() {
 		odo = new Odometer(true);
 	}
+	
+	
+	public void travelTo(Intersection destination){
 		
+		Intersection source = Intersection.convertToIntersection(odo.getX(), odo.getY());
+		
+		ArrayList<Intersection> listOfWayPoints = Dijkstra.algorithm(source,destination);
+		
+		for(Intersection intersection : listOfWayPoints){
+			
+			travelCoordinate(intersection.getXInCm(), intersection.getYInCm());
+			
+		}
+		
+		
+	}
+	
+	
+	
+	
 	/**
 	 * Robot travels a certain distance
 	 * 

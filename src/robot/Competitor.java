@@ -27,7 +27,7 @@ public class Competitor {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws InterruptedException {
 
-		BluetoothConnection conn = new BluetoothConnection();
+		/*BluetoothConnection conn = new BluetoothConnection();
 		
 
 
@@ -60,11 +60,11 @@ public class Competitor {
 
 		else if(role.getId()==2){
 			SensorMotorUser.becomeBuilder(false);
-		}
+		}*/
 		
 		Map.initializeMap();
 
-		if(SensorMotorUser.isBuilder()){
+		/*if(SensorMotorUser.isBuilder()){
 			Map.setTargetZone(greenZone);
 			Map.setForbiddenZone(redZone);
 		}
@@ -74,16 +74,16 @@ public class Competitor {
 			Map.setForbiddenZone(greenZone);
 		}
 		
-		SensorMotorUser.setStartCorner(corner.getCooridinates());
+		SensorMotorUser.setStartCorner(corner.getCooridinates());*/
 			
 
 		Localizer localizer = new Localizer();
-		Explorer explorer = new Explorer();
-		BlockMover blockMover = new BlockMover();
+		/*Explorer explorer = new Explorer();
+		BlockMover blockMover = new BlockMover();*/
 
 		localizer.localize();
 
-		explorer.lookForStyrofoamBlocks();
+		/*explorer.lookForStyrofoamBlocks();*/
 
 	}
 

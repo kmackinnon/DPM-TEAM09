@@ -52,10 +52,10 @@ public class Map {
 	 * 
 	 */
 	public static void setForbiddenZone(int[] zone) {
-		
+
 		int[] bottomLeftCorner = new int[2];
 		int[] topRightCorner = new int[2];
-		
+
 		bottomLeftCorner[0] = zone[0];
 		bottomLeftCorner[1] = zone[1];
 		topRightCorner[0] = zone[2];
@@ -81,12 +81,12 @@ public class Map {
 
 		int[] bottomLeftCorner = new int[2];
 		int[] topRightCorner = new int[2];
-		
+
 		bottomLeftCorner[0] = zone[0];
 		bottomLeftCorner[1] = zone[1];
 		topRightCorner[0] = zone[2];
 		topRightCorner[1] = zone[3];
-		
+
 		setZone(topRightCorner, bottomLeftCorner, true);
 	}
 
@@ -113,41 +113,35 @@ public class Map {
 
 	}
 
+	public static void removeEdge(Intersection a, Intersection b) {
 
-	public static void removeEdge(Intersection a, Intersection b){
-		
-		edgeList.remove(new Edge(a,b));
-		
+		edgeList.remove(new Edge(a, b));
+
 	}
-	
-	
+
 	public static ArrayList<Edge> getEdgeList() {
 		return edgeList;
 	}
-	
 
-	public static ArrayList<Intersection> getTargetZone(){
-		
+	public static ArrayList<Intersection> getTargetZone() {
+
 		ArrayList<Intersection> targetZone = new ArrayList<Intersection>();
-		
-		for(Intersection intersection : intersectionList){
-			
-			if(intersection.isTarget()){
+
+		for (Intersection intersection : intersectionList) {
+
+			if (intersection.isTarget()) {
 				targetZone.add(intersection);
 			}
-			
+
 		}
-		
+
 		return targetZone;
-		
-	}
-	
-	
-	
-	public static Intersection getIntersection(int x, int y){
-		return intersectionList.get(index(x,y));
+
 	}
 
+	public static Intersection getIntersection(int x, int y) {
+		return intersectionList.get(index(x, y));
+	}
 
 	public static void resetAllPreviousAndDistance() {
 
@@ -160,8 +154,7 @@ public class Map {
 		}
 
 	}
-	
-	
+
 	private static int index(int x, int y) {
 
 		return (y * NUM_OF_INTERSECTIONS + x);
@@ -174,11 +167,11 @@ public class Map {
 
 	}
 
+	// Does not remove duplicate edges. We tried removing duplicates during
+	// initialization, but it took ~15 seconds.
 	private static void addToEdgeList(Edge edge) {
 
-		if (!edgeList.contains(edge)) {
-			edgeList.add(edge);
-		}
+		edgeList.add(edge);
 
 	}
 
@@ -335,8 +328,6 @@ public class Map {
 		addToEdgeList(new Edge(temp, bottomLeft(x, y)));
 		addToEdgeList(new Edge(temp, bottom(x, y)));
 	}
-
-
 
 	public static class Edge {
 		public Intersection a;

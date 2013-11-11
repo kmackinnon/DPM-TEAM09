@@ -113,7 +113,30 @@ public class Map {
 
 	}
 
-	public static int index(int x, int y) {
+
+	public static ArrayList<Edge> getEdgeList() {
+		return edgeList;
+	}
+	
+	public static Intersection getIntersection(int x, int y){
+		return intersectionList.get(index(x,y));
+	}
+
+
+	public static void resetAllPreviousAndDistance() {
+
+		for (Intersection intersection : intersectionList) {
+
+			if (intersection != null) {
+				intersection.setPreviousToNull();
+				intersection.setMinDistance(Double.POSITIVE_INFINITY);
+			}
+		}
+
+	}
+	
+	
+	private static int index(int x, int y) {
 
 		return (y * NUM_OF_INTERSECTIONS + x);
 
@@ -287,25 +310,7 @@ public class Map {
 		addToEdgeList(new Edge(temp, bottom(x, y)));
 	}
 
-	public static ArrayList<Edge> getEdgeList() {
-		return edgeList;
-	}
 
-	public static ArrayList<Intersection> getIntersectionList() {
-		return intersectionList;
-	}
-
-	public static void resetAllPreviousAndDistance() {
-
-		for (Intersection intersection : intersectionList) {
-
-			if (intersection != null) {
-				intersection.setPreviousToNull();
-				intersection.setMinDistance(Double.POSITIVE_INFINITY);
-			}
-		}
-
-	}
 
 	public static class Edge {
 		public Intersection a;

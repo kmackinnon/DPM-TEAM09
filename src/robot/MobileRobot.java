@@ -36,7 +36,13 @@ public class MobileRobot extends SensorMotorUser{
 			travelCoordinate(intersection.getXInCm(), intersection.getYInCm());
 			
 		}
+			
+	}
+	
+	
+	public void travelToNeighbor(Intersection destination){
 		
+		travelCoordinate(destination.getXInCm(), destination.getYInCm());
 		
 	}
 	

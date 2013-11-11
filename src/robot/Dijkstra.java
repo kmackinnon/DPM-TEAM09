@@ -4,8 +4,25 @@ import java.util.ArrayList;
 
 import robot.Map.Edge;
 
+/**
+ * Dijkstra contains Dijkstra's algorithm. The code is heavily based on this
+ * webpage: http://en.literateprograms.org/Dijkstra's_algorithm_(Java).
+ * 
+ * Java has its own Priority Queue. However, it is not included in LeJOS, so I
+ * wrote a PriorityQueue class. I found this powerpoint useful while making the
+ * class: http://www.cs.princeton.edu/~rs/AlgsDS07/06PriorityQueues.pdf
+ */
+
 public class Dijkstra {
 
+	/**
+	 * 
+	 * @param source
+	 *            the intersection we want to find the shortest path FROM
+	 * @param destination
+	 *            the intersection we want to find the shortest path TO
+	 * @return an arraylist of waypoints that comprise the shortest path
+	 */
 	public static ArrayList<Intersection> algorithm(Intersection source,
 			Intersection destination) {
 
@@ -68,7 +85,8 @@ public class Dijkstra {
 		ArrayList<Intersection> reversePath = new ArrayList<Intersection>();
 		Intersection temp;
 
-		for (temp = destination; temp.getPrevious() != null; temp = temp.getPrevious()) {
+		for (temp = destination; temp.getPrevious() != null; temp = temp
+				.getPrevious()) {
 
 			reversePath.add(temp);
 

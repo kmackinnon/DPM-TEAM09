@@ -39,11 +39,31 @@ public class Explorer extends MobileRobot {
 				
 				for(int initialColumn = columnNumber; forLoopCondition(columnNumber, initialColumn); forLoopAfterthought('C',initialColumn)){
 				
+					Intersection neighbor = useCorrectXYToGetIntersection(initialRow);
+					
+					travelToNeighbor(neighbor);
 					
 				}
 				
 		}
 		
+		
+	}
+	
+	
+	private Intersection useCorrectXYToGetIntersection(int initialRow){
+		
+		if(initialRow == getYStart()){
+			
+			return Map.getIntersection(columnNumber, rowNumber);
+			
+		}
+		
+		else{
+			
+			return Map.getIntersection(rowNumber, columnNumber);
+			
+		}
 		
 	}
 	

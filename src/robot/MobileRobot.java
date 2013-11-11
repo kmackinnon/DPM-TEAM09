@@ -12,6 +12,8 @@ import java.util.ArrayList;
 
 public class MobileRobot extends SensorMotorUser{
 	public static Odometer odo;
+	public static BlockDetector blockDetector;
+	
 	double [] pos = new double [3];
 	private double forwardSpeed, rotationSpeed;
 	
@@ -43,6 +45,20 @@ public class MobileRobot extends SensorMotorUser{
 	public void travelToNeighbor(Intersection destination){
 		
 		travelCoordinate(destination.getXInCm(), destination.getYInCm());
+		
+	}
+	
+	public void travelToTargetZone(){
+		
+		Intersection source = Intersection.convertToIntersection(odo.getX(), odo.getY());
+		
+		ArrayList<Intersection> listOfWayPoints = Dijkstra.algorithmForTargetZone(source);
+		
+		for(Intersection intersection : listOfWayPoints){
+			
+			travelCoordinate(intersection.getXInCm(), intersection.getYInCm());
+			
+		}
 		
 	}
 	

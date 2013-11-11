@@ -20,7 +20,7 @@ public class BlockMover extends MobileRobot {
 
 		grabBlock();
 
-		// travel to appropriate zone
+		travelToTargetZone();
 
 		if (isBuilder()) {
 			stackBlock();

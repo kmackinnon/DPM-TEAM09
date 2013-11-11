@@ -30,6 +30,28 @@ public class Dijkstra {
 		return getShortestPathTo(destination);
 
 	}
+	
+	
+	public static ArrayList<Intersection> algorithmForTargetZone(Intersection source) {
+
+		computePaths(source);
+		
+		Intersection destination = Map.getTargetZone().get(0);
+		
+		double minimumDistance = destination.getMinDistance();
+		
+		for(Intersection intersection : Map.getTargetZone()){
+			
+			if(intersection.getMinDistance() < minimumDistance){
+				destination = intersection;
+				minimumDistance = intersection.getMinDistance();
+			}
+			
+		}
+		
+		return getShortestPathTo(destination);
+
+	}
 
 	private static void computePaths(Intersection source) {
 

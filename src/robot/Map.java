@@ -114,9 +114,35 @@ public class Map {
 	}
 
 
+	public static void removeEdge(Intersection a, Intersection b){
+		
+		edgeList.remove(new Edge(a,b));
+		
+	}
+	
+	
 	public static ArrayList<Edge> getEdgeList() {
 		return edgeList;
 	}
+	
+
+	public static ArrayList<Intersection> getTargetZone(){
+		
+		ArrayList<Intersection> targetZone = new ArrayList<Intersection>();
+		
+		for(Intersection intersection : intersectionList){
+			
+			if(intersection.isTarget()){
+				targetZone.add(intersection);
+			}
+			
+		}
+		
+		return targetZone;
+		
+	}
+	
+	
 	
 	public static Intersection getIntersection(int x, int y){
 		return intersectionList.get(index(x,y));

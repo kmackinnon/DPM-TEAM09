@@ -35,6 +35,16 @@ public class Localizer extends MobileRobot {
 		}
 	};
 	
+	private Thread csThread = new Thread() {
+		public void run() {
+			while (true) {
+				// get the color values from both color sensors
+				// check if detected at the same time
+				// if true correct for 0, 90, 180, 270
+			}
+		}
+	};
+	
 	/**
 	 * Default constructor
 	 */
@@ -54,8 +64,10 @@ public class Localizer extends MobileRobot {
 	 * @throws InterruptedException 
 	 */
 	public void localize() throws InterruptedException {
+		clawMotor.setSpeed(60);
+		clawMotor.rotateTo(300);
 		ultrasonicLocalization();
-		lightLocalization();
+//		lightLocalization();
 	}
 
 	/**
@@ -110,7 +122,10 @@ public class Localizer extends MobileRobot {
 	}
 
 	private void lightLocalization() {
-		
+		// start on an intersection
+		// rotate until we detect a line
+		// based on our current heading, correct for the angle
+		// rotate until we detect another line, correct for this angle
 	}
 	
 }

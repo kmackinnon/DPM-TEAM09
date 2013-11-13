@@ -9,50 +9,40 @@ import lejos.nxt.comm.RConsole;
 public class ClawTest {
 
 	public static void main(String[] args) {
-		
+
+		// RConsole.open();
+
+		int option = 0;
+		while (option == 0) {
+			option = Button.waitForAnyPress();
+		}
+
 		NXTRegulatedMotor clawMotor = Motor.C;
-		
-		//RConsole.open();
-		
-		Button.waitForAnyPress();
-		
+
 		clawMotor.setSpeed(50);
-		
-		int angle = clawMotor.getTachoCount();
-		
-		LCD.drawInt(angle, 0, 0);
-		
-		clawMotor.rotate(-200);
-		
-		clawMotor.resetTachoCount();
-		
-		//RConsole.println(Integer.toString(angle));
-		
+
+		clawMotor.rotate(-100); // opens claw
+		clawMotor.resetTachoCount(); // reset tachometer when fully open
+
 		try {
-			Thread.sleep(1000); // sleep for second
+			Thread.sleep(1000); // sleep for one second
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
-		clawMotor.rotateTo(300);
-		
+
+		clawMotor.rotateTo(350); // lift the block
+
 		try {
-			Thread.sleep(1000); // sleep for second
+			Thread.sleep(1000); // sleep for one second
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		clawMotor.rotateTo(0);
-	
-		
-		
-		
-		
-		
-		Button.waitForAnyPress();
+
+		// RConsole.println(Integer.toString(angle));
+
+		clawMotor.rotateTo(0); // set the block back down
+
 		System.exit(0);
 	}
-	
-	
+
 }

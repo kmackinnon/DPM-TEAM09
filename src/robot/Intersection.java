@@ -1,5 +1,7 @@
 package robot;
 
+import java.util.ArrayList;
+
 /**
  * Contains the x,y coordinates of the intersection, and the status of the
  * intersection (forbidden, target, unreachable, etc.)
@@ -14,6 +16,7 @@ public class Intersection {
 	private boolean isTarget;
 	private Intersection previous;
 	private double minDistance = Double.POSITIVE_INFINITY;
+	private ArrayList<Intersection> adjacencyList = new ArrayList<Intersection>();
 
 	public Intersection(int x, int y) {
 
@@ -26,8 +29,17 @@ public class Intersection {
 
 	}
 
-	public void setPreviousToNull() {
-		previous = null;
+	
+	public void addToAdjacencyList(Intersection intersection){
+		adjacencyList.add(intersection);
+	}
+	
+	public void removeFromAdjacencyList(Intersection intersection){
+		adjacencyList.remove(intersection);
+	}
+	
+	public ArrayList<Intersection> getAdjacencyList(){
+		return adjacencyList;
 	}
 
 	public void setPrevious(Intersection intersection) {
@@ -77,23 +89,6 @@ public class Intersection {
 	
 	public double getYInCm(){
 		return y*Map.TILE_SIZE;
-	}
-	
-
-	public boolean equals(Object obj) {
-
-		boolean result = false;
-
-		if (obj instanceof Intersection) {
-			Intersection otherIntersection = (Intersection) obj;
-
-			if (otherIntersection.getX() == x && otherIntersection.getY() == y) {
-				result = true;
-			}
-		}
-
-		return result;
-
 	}
 
 }

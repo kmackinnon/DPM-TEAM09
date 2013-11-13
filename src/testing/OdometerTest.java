@@ -41,10 +41,13 @@ public class OdometerTest {
 	}
 	
 	public static void squareTest(MobileRobot robot) {
-		for (int i = 0; i < 4; i++) {
 		robot.travelMag(60.96);
-			robot.turnTo(MobileRobot.odo.getAng() + 90.0);
-		}
+		robot.turnTo(MobileRobot.odo.getAng() + 90.0);
+		robot.travelMag(60.96);
+		robot.turnTo(MobileRobot.odo.getAng() + 90.0);
+		robot.travelMag(60.96);
+		robot.turnTo(MobileRobot.odo.getAng() + 90.0);
+		robot.travelMag(60.96);
 		robot.turnTo(0.0);
 	}
 	

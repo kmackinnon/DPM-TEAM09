@@ -1,10 +1,10 @@
 package testing;
 
-import robot.MobileRobot;
 import lejos.nxt.Button;
-import lejos.nxt.UltrasonicSensor;
-import lejos.nxt.SensorPort;
+import lejos.nxt.LCD;
 import lejos.nxt.comm.RConsole;
+import robot.MobileRobot;
+import robot.SensorMotorUser;
 
 /**
  * Test accuracy of the ultrasonic sensor.
@@ -24,13 +24,11 @@ public class TestUltrasonic extends Thread {
 		int distToStop = 20; // change this variable
 		int sleepTime = 250; // in milliseconds, may have to change
 		
-		UltrasonicSensor us = new UltrasonicSensor(SensorPort.S1);
-
 		RConsole.open(); // opens a USB connection with no timeout
 
 		int buttonChoice;
 		MobileRobot robot = new MobileRobot();
-		robot.startMotors();
+		//robot.startMotors();
 		do {
 			try {
 				Thread.sleep(sleepTime);
@@ -38,11 +36,14 @@ public class TestUltrasonic extends Thread {
 				e.printStackTrace();
 			}
 
-			int distValue = us.getDistance();
+			int distValue = robot.getUSDistance();
 			RConsole.println(Integer.toString(distValue));
-			if (distValue <= distToStop) {
+			LCD.clear();
+			LCD.drawInt(distValue, 0, 0);
+			
+			/*if (distValue <= distToStop) {
 				robot.stopMotors(); // stops robot at a distance from the wall
-			}
+			}*/
 			
 			buttonChoice = Button.readButtons();
 

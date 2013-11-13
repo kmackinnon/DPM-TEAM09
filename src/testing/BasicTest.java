@@ -2,6 +2,7 @@ package testing;
 
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
+import lejos.nxt.comm.RConsole;
 import robot.MobileRobot;
 
 /**
@@ -18,14 +19,15 @@ public class BasicTest {
 		MobileRobot robot = new MobileRobot();
 
 		int option = 0; // don't bother with button inputs
-		
+	
 		while (option == 0)
 			option = Button.waitForAnyPress();
 		
 		switch(option) {
 		case Button.ID_LEFT:
 			// Move forward
-			robot.travelMag(60.96);
+			robot.travelMag(60.69);
+			
 			break;
 		case Button.ID_RIGHT:
 			// Turn

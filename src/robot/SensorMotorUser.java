@@ -26,7 +26,7 @@ public class SensorMotorUser {
 
 	/** The front ultrasonic sensor for detecting cinder blocks */
 	public static final UltrasonicSensor ultrasonicSensor = new UltrasonicSensor(
-			SensorPort.S1);
+			SensorPort.S4);
 
 	/**
 	 * The front color sensor for detecting blocks (especially when approaching
@@ -35,10 +35,10 @@ public class SensorMotorUser {
 	public static final ColorSensor frontCS = new ColorSensor(SensorPort.S2);
 
 	/** The back left color sensor used in odometry correction */
-	public static final ColorSensor leftCS = new ColorSensor(SensorPort.S3);
+	public static final ColorSensor leftCS = new ColorSensor(SensorPort.S1);
 
 	/** The back right color sensor used in odometry correction */
-	public static final ColorSensor rightCS = new ColorSensor(SensorPort.S4);
+	public static final ColorSensor rightCS = new ColorSensor(SensorPort.S3);
 
 	/** The radius of the left wheel. */
 	public static final double leftRadius = 2.11;
@@ -202,6 +202,11 @@ public class SensorMotorUser {
 		} else {
 			return (sortedArray[middle - 1] + sortedArray[middle]) / 2;
 		}
+	}
+	
+	
+	public int getUSDistance(){
+		return ultrasonicSensor.getDistance();
 	}
 	
 

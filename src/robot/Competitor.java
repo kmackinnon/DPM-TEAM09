@@ -2,6 +2,7 @@ package robot;
 
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
+import lejos.nxt.comm.RConsole;
 import bluetooth.BluetoothConnection;
 import bluetooth.PlayerRole;
 import bluetooth.StartCorner;
@@ -62,8 +63,10 @@ public class Competitor {
 			SensorMotorUser.becomeBuilder(false);
 		}*/
 		
-		Map.initializeMap();
+		//Map.initializeMap();
 
+		
+		
 		/*if(SensorMotorUser.isBuilder()){
 			Map.setTargetZone(greenZone);
 			Map.setForbiddenZone(redZone);
@@ -77,11 +80,11 @@ public class Competitor {
 		SensorMotorUser.setStartCorner(corner.getCooridinates());*/
 			
 
-		Localizer localizer = new Localizer();
+		//Localizer localizer = new Localizer();
 		/*Explorer explorer = new Explorer();
 		BlockMover blockMover = new BlockMover();*/
 
-		localizer.localize();
+		//localizer.localize();
 
 		/*explorer.lookForStyrofoamBlocks();*/
 

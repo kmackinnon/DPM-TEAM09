@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 
 public class MobileRobot extends SensorMotorUser{
-	public static Odometer odo;
+	public static Odometer odo = new Odometer(true);
 	public static BlockDetector blockDetector;
 	
 	double [] pos = new double [3];
@@ -23,7 +23,6 @@ public class MobileRobot extends SensorMotorUser{
 	 * Starts odometer of the MobileRobot
 	 */
 	public MobileRobot() {
-		odo = new Odometer(true);
 	}
 	
 	

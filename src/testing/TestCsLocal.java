@@ -10,18 +10,11 @@ import robot.SensorMotorUser;
 
 /**
  * 
- * @author Keith MacKinnon
+ * @author Sidney Ng
  * 
- * Steps for using RConsole
- * 1. Turn on the robot
- * 2. Run program
- * 3. RConsole Connect
- * 4. Press ESC on robot (down button)
- * 5. RConsole Disconnect
- * 6. Return to step 2
  * 
  */
-public class TestLight /*extends Thread*/ {
+public class TestCsLocal /*extends Thread*/ {
 
 	public static void main(String[] args) {
 		
@@ -32,6 +25,7 @@ public class TestLight /*extends Thread*/ {
 
 		RConsole.open(); // opens a USB connection with no timeout
 		robot.startMotors();
+		
 		
 		int buttonChoice;
 		do {

@@ -37,8 +37,6 @@ public class Odometer extends SensorMotorUser implements TimerListener{
 	/** Previous displacement/heading values */
 	private double oldDisp, oldHeading;
 	/** light sensors for the correction*/
-	ColorSensor leftSensor = new ColorSensor(SensorPort.S1);
-	ColorSensor rightSensor = new ColorSensor(SensorPort.S4);
 	
 	/**
 	 * Odometer constructor
@@ -242,10 +240,10 @@ public class Odometer extends SensorMotorUser implements TimerListener{
 	public void correction(){
 		double[] initPos = new double[3],destination = new double[3];
 		
-		while((getFilteredData(leftSensor)==Color.BLACK) || (getFilteredData(rightSensor)==Color.BLACK));
-			if(getFilteredData(leftSensor) == Color.BLACK){
+		while((getFilteredData(leftCS)==Color.BLACK) || (getFilteredData(rightCS)==Color.BLACK));
+			if(getFilteredData(leftCS) == Color.BLACK){
 				double prevRightTacho = rightMotor.getTachoCount();
-				while(getFilteredData(rightSensor) == Color.BLACK);
+				while(getFilteredData(rightCS) == Color.BLACK);
 				getPosition(destination);
 				double lastRightTacho = rightMotor.getTachoCount();
 				double length = 2*Math.PI*rightRadius*((lastRightTacho - prevRightTacho) /360);
@@ -258,7 +256,7 @@ public class Odometer extends SensorMotorUser implements TimerListener{
 			}
 			else {
 				double prevLeftTacho = leftMotor.getTachoCount();
-				while(getFilteredData(leftSensor) == Color.BLACK);
+				while(getFilteredData(leftCS) == Color.BLACK);
 				getPosition(destination);
 				double lastLeftTacho = leftMotor.getTachoCount();
 				double length = 2*Math.PI*leftRadius*((lastLeftTacho - prevLeftTacho) /360);

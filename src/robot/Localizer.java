@@ -13,37 +13,8 @@ public class Localizer extends MobileRobot {
 	/** A noise margin to filter out noise when localizing */
 	private final int NOISE_MARGIN = 2;
 	
-	/** Period for the  */
-	private final int PERIOD = 100;
-	
 	/** Distance measured by the ultrasonic sensor */
 	private int distance;
-	
-	/** Thread utilizing the ultrasonic sensor to poll distance values every PERIOD seconds */
-	private Thread usThread = new Thread() {
-		public void run() {
-			while (true) {
-				distance = ultrasonicSensor.getDistance();
-			
-				try {
-					Thread.sleep(PERIOD);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					break;
-				}
-			}
-		}
-	};
-	
-	private Thread csThread = new Thread() {
-		public void run() {
-			while (true) {
-				// get the color values from both color sensors
-				// check if detected at the same time
-				// if true correct for 0, 90, 180, 270
-			}
-		}
-	};
 	
 	/**
 	 * Default constructor
@@ -63,21 +34,20 @@ public class Localizer extends MobileRobot {
 	 * by the ultrasonic localization.
 	 * @throws InterruptedException 
 	 */
-	public void localize() throws InterruptedException {
+	public void localize() {
 		clawMotor.setSpeed(60);
 		clawMotor.rotateTo(300);
 		ultrasonicLocalization();
-//		lightLocalization();
+		lightLocalization();
 	}
 
 	/**
 	 * Performs falling edge ultrasonic localization.
 	 * @throws InterruptedException 
 	 */
-	private void ultrasonicLocalization() throws InterruptedException {
+	private void ultrasonicLocalization() {
 		double [] pos = new double [3];
 		double angleA, angleB, tempA, tempB;
-		usThread.start();
 		
 		this.setRotationSpeed(ROTATION_SPEED);
 		
@@ -117,8 +87,6 @@ public class Localizer extends MobileRobot {
 		odo.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {true, true, true});
 		this.stopMotors();
 		
-		usThread.interrupt();
-		usThread.join();
 	}
 
 	private void lightLocalization() {

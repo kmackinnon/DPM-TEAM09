@@ -21,13 +21,14 @@ import robot.SensorMotorUser;
  * 6. Return to step 2
  * 
  */
-public class TestLight /*extends Thread*/ {
+public class TestLineDetection extends Thread {
 
 	public static void main(String[] args) {
 		
 		MobileRobot robot = new MobileRobot();
-		ColorSensor cs = new ColorSensor(SensorPort.S2);
-//		cs.setFloodlight(true);
+		ColorSensor lcs = new ColorSensor(SensorPort.S3);
+		ColorSensor rcs = new ColorSensor(SensorPort.S3);
+
 		Color color;
 
 		RConsole.open(); // opens a USB connection with no timeout
@@ -35,21 +36,20 @@ public class TestLight /*extends Thread*/ {
 		
 		int buttonChoice;
 		do {
-//			try {
-//				Thread.sleep(250); // sleep for quarter second
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
+			try {
+				Thread.sleep(100); // sleep for quarter second
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
-			//int colorValue = cs.getRawLightValue();
-			
-			color = cs.getColor();
+			color = lcs.getColor();
 			int colorValue = color.getGreen();
+			color = rcs.getColor();
+			int colorValue2 = color.getGreen();
+			RConsole.println(colorValue + " " + colorValue2); // first is left, second is right
 			
-			int leftTacho = SensorMotorUser.leftMotor.getTachoCount();
-			int rightTacho = SensorMotorUser.rightMotor.getTachoCount();
-			RConsole.println(Integer.toString(colorValue) + " " + Integer.toString(leftTacho) + " " + Integer.toString(rightTacho));
-
+			//TODO: add line detection method
+			
 			buttonChoice = Button.readButtons();
 
 		} while (buttonChoice != Button.ID_ESCAPE);

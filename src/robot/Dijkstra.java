@@ -2,8 +2,6 @@ package robot;
 
 import java.util.ArrayList;
 
-import robot.Map.Edge;
-
 /**
  * Dijkstra contains Dijkstra's algorithm. The code is heavily based on this
  * webpage: http://en.literateprograms.org/Dijkstra's_algorithm_(Java).
@@ -14,6 +12,8 @@ import robot.Map.Edge;
  */
 
 public class Dijkstra {
+	
+	static int counter =0;
 
 	/**
 	 * 
@@ -53,8 +53,10 @@ public class Dijkstra {
 
 	}
 
-	private static void computePaths(Intersection source) {
+	private static void computePaths(Intersection input) {
 
+		Intersection source = Map.getIntersection(input);
+		
 		source.setMinDistance(0);
 
 		PriorityQueue intersectionQueue = new PriorityQueue();
@@ -69,12 +71,13 @@ public class Dijkstra {
 
 			Intersection current = intersectionQueue.poll();
 
-			for (Edge edge : Map.getEdgeList()) {
+			for (Intersection adjacent : current.getAdjacencyList()) {
 
-				if (edge.touches(current)) {
-					Intersection adjacent = edge
-							.getAdjacentIntersection(current);
-					double weight = edge.getWeight();
+				adjacent = Map.getIntersection(adjacent);
+				
+				if (adjacent!=null) {
+
+					double weight = getEdgeWeight(current,adjacent);
 
 					double distanceThroughCurrent = current.getMinDistance()
 							+ weight;
@@ -83,6 +86,8 @@ public class Dijkstra {
 						adjacent.setMinDistance(distanceThroughCurrent);
 						adjacent.setPrevious(current);
 
+
+						
 						if (intersectionQueue.contains(adjacent)) {
 							intersectionQueue.swimUp(intersectionQueue
 									.indexOf(adjacent));
@@ -105,9 +110,9 @@ public class Dijkstra {
 			Intersection destination) {
 
 		ArrayList<Intersection> reversePath = new ArrayList<Intersection>();
-		Intersection temp;
+		Intersection temp = Map.getIntersection(destination);
 
-		for (temp = destination; temp.getPrevious() != null; temp = temp
+		for (; temp.getPrevious() != null; temp = temp
 				.getPrevious()) {
 
 			reversePath.add(temp);
@@ -127,6 +132,22 @@ public class Dijkstra {
 		return correctPath;
 
 	}
+	
+	
+	private static double getEdgeWeight(Intersection a, Intersection b){
+		
+		if (a.getX() == b.getX() || a.getY() == b.getY()) {
+			return 1;
+		}
+
+		else {
+			return 1.414;
+		}
+		
+	}
+	
+	
+	
 
 	private static class PriorityQueue {
 

@@ -1,7 +1,6 @@
 package robot;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Map contains a representation of the game area. This includes the locations
@@ -16,8 +15,6 @@ public class Map {
 	public final static int NUM_OF_INTERSECTIONS = 11;
 
 	private static ArrayList<Intersection> intersectionList = new ArrayList<Intersection>();
-	private static ArrayList<Edge> edgeList = new ArrayList<Edge>();
-
 	/**
 	 * Initializes the arraylist of intersections.
 	 */
@@ -115,13 +112,23 @@ public class Map {
 
 	public static void removeEdge(Intersection a, Intersection b) {
 
-		edgeList.remove(new Edge(a, b));
+		int x1 = a.getX();
+		int y1 = a.getY();
+		
+		int x2 = b.getX();
+		int y2 = b.getY();
+		
+		int index1 = index(x1,y1);
+		int index2 = index(x2,y2);
+		
+		Intersection one = intersectionList.get(index1);
+		Intersection two = intersectionList.get(index2);
+		
+		one.removeFromAdjacencyList(two);
+		two.removeFromAdjacencyList(one);
 
 	}
 
-	public static ArrayList<Edge> getEdgeList() {
-		return edgeList;
-	}
 
 	public static ArrayList<Intersection> getTargetZone() {
 
@@ -129,7 +136,7 @@ public class Map {
 
 		for (Intersection intersection : intersectionList) {
 
-			if (intersection.isTarget()) {
+			if (intersection!=null&&intersection.isTarget()) {
 				targetZone.add(intersection);
 			}
 
@@ -140,22 +147,31 @@ public class Map {
 	}
 
 	public static Intersection getIntersection(int x, int y) {
-		return intersectionList.get(index(x, y));
+		return get(index(x, y));
 	}
+	
+	
+	public static Intersection getIntersection(Intersection intersection){
+		
+		int index = index(intersection.getX(), intersection.getY());
+		
+		return get(index);
+	}
+	
 
 	public static void resetAllPreviousAndDistance() {
 
 		for (Intersection intersection : intersectionList) {
 
 			if (intersection != null) {
-				intersection.setPreviousToNull();
+				intersection.setPrevious(null);
 				intersection.setMinDistance(Double.POSITIVE_INFINITY);
 			}
 		}
 
 	}
 
-	private static int index(int x, int y) {
+	public static int index(int x, int y) {
 
 		return (y * NUM_OF_INTERSECTIONS + x);
 
@@ -169,23 +185,13 @@ public class Map {
 
 	// Does not remove duplicate edges. We tried removing duplicates during
 	// initialization, but it took ~15 seconds.
-	private static void addToEdgeList(Edge edge) {
+	private static void addEdge(Intersection source, Intersection adjacent) {
 
-		edgeList.add(edge);
+		source.addToAdjacencyList(adjacent);
 
 	}
 
 	private static void removeIntersection(int index) {
-
-		Intersection intersection = get(index);
-
-		Iterator<Edge> it = edgeList.iterator();
-
-		for (; it.hasNext();) {
-			if (it.next().touches(intersection)) {
-				it.remove();
-			}
-		}
 
 		intersectionList.set(index, null);
 
@@ -199,7 +205,7 @@ public class Map {
 			addTopRightCap(temp, x, y);
 		}
 
-		else if (x == 0 && y == 10) {
+		else if (x == 0 && y == NUM_OF_INTERSECTIONS-1) {
 			addBottomRightCap(temp, x, y);
 		}
 
@@ -208,7 +214,7 @@ public class Map {
 			addTopAndBottom(temp, x, y);
 		}
 
-		else if (x == 10 && y == 0) {
+		else if (x == NUM_OF_INTERSECTIONS-1 && y == 0) {
 			addTopLeftCap(temp, x, y);
 		}
 
@@ -217,16 +223,16 @@ public class Map {
 			addRightAndLeft(temp, x, y);
 		}
 
-		else if (x == 10 && y == 10) {
+		else if (x == NUM_OF_INTERSECTIONS-1 && y == NUM_OF_INTERSECTIONS-1) {
 			addBottomLeftCap(temp, x, y);
 		}
 
-		else if (x == 10) {
+		else if (x == NUM_OF_INTERSECTIONS-1) {
 			addLeftSide(temp, x, y);
 			addTopAndBottom(temp, x, y);
 		}
 
-		else if (y == 10) {
+		else if (y == NUM_OF_INTERSECTIONS-1) {
 			addBottomSide(temp, x, y);
 			addRightAndLeft(temp, x, y);
 		}
@@ -272,135 +278,63 @@ public class Map {
 	}
 
 	private static void addRightSide(Intersection temp, int x, int y) {
-		addToEdgeList(new Edge(temp, bottomRight(x, y)));
-		addToEdgeList(new Edge(temp, right(x, y)));
-		addToEdgeList(new Edge(temp, topRight(x, y)));
+		addEdge(temp, bottomRight(x, y));
+		addEdge(temp, right(x, y));
+		addEdge(temp, topRight(x, y));
 	}
 
 	private static void addLeftSide(Intersection temp, int x, int y) {
-		addToEdgeList(new Edge(temp, topLeft(x, y)));
-		addToEdgeList(new Edge(temp, left(x, y)));
-		addToEdgeList(new Edge(temp, bottomLeft(x, y)));
+		addEdge(temp, topLeft(x, y));
+		addEdge(temp, left(x, y));
+		addEdge(temp, bottomLeft(x, y));
 	}
 
 	private static void addTopAndBottom(Intersection temp, int x, int y) {
-		addToEdgeList(new Edge(temp, top(x, y)));
-		addToEdgeList(new Edge(temp, bottom(x, y)));
+		addEdge(temp, top(x, y));
+		addEdge(temp, bottom(x, y));
 	}
 
 	private static void addRightAndLeft(Intersection temp, int x, int y) {
-		addToEdgeList(new Edge(temp, right(x, y)));
-		addToEdgeList(new Edge(temp, left(x, y)));
+		addEdge(temp, right(x, y));
+		addEdge(temp, left(x, y));
 	}
 
 	private static void addTopSide(Intersection temp, int x, int y) {
-		addToEdgeList(new Edge(temp, topRight(x, y)));
-		addToEdgeList(new Edge(temp, top(x, y)));
-		addToEdgeList(new Edge(temp, topLeft(x, y)));
+		addEdge(temp, topRight(x, y));
+		addEdge(temp, top(x, y));
+		addEdge(temp, topLeft(x, y));
 	}
 
 	private static void addBottomSide(Intersection temp, int x, int y) {
-		addToEdgeList(new Edge(temp, bottomLeft(x, y)));
-		addToEdgeList(new Edge(temp, bottom(x, y)));
-		addToEdgeList(new Edge(temp, bottomRight(x, y)));
+		addEdge(temp, bottomLeft(x, y));
+		addEdge(temp, bottom(x, y));
+		addEdge(temp, bottomRight(x, y));
 	}
 
 	private static void addTopRightCap(Intersection temp, int x, int y) {
-		addToEdgeList(new Edge(temp, right(x, y)));
-		addToEdgeList(new Edge(temp, topRight(x, y)));
-		addToEdgeList(new Edge(temp, top(x, y)));
+		addEdge(temp, right(x, y));
+		addEdge(temp, topRight(x, y));
+		addEdge(temp, top(x, y));
 	}
 
 	private static void addTopLeftCap(Intersection temp, int x, int y) {
-		addToEdgeList(new Edge(temp, top(x, y)));
-		addToEdgeList(new Edge(temp, topLeft(x, y)));
-		addToEdgeList(new Edge(temp, left(x, y)));
+		addEdge(temp, top(x, y));
+		addEdge(temp, topLeft(x, y));
+		addEdge(temp, left(x, y));
 	}
 
 	private static void addBottomRightCap(Intersection temp, int x, int y) {
-		addToEdgeList(new Edge(temp, bottom(x, y)));
-		addToEdgeList(new Edge(temp, bottomRight(x, y)));
-		addToEdgeList(new Edge(temp, right(x, y)));
+		addEdge(temp, bottom(x, y));
+		addEdge(temp, bottomRight(x, y));
+		addEdge(temp, right(x, y));
 	}
 
 	private static void addBottomLeftCap(Intersection temp, int x, int y) {
-		addToEdgeList(new Edge(temp, left(x, y)));
-		addToEdgeList(new Edge(temp, bottomLeft(x, y)));
-		addToEdgeList(new Edge(temp, bottom(x, y)));
+		addEdge(temp, left(x, y));
+		addEdge(temp, bottomLeft(x, y));
+		addEdge(temp, bottom(x, y));
 	}
 
-	public static class Edge {
-		public Intersection a;
-		public Intersection b;
-
-		private double weight;
-
-		public Edge(Intersection a, Intersection b) {
-
-			this.a = a;
-			this.b = b;
-
-			if (a.getX() == b.getX() || a.getY() == b.getY()) {
-				weight = 1;
-			}
-
-			else {
-				weight = 1.414;
-			}
-
-		}
-
-		public boolean equals(Object obj) {
-
-			boolean result = false;
-
-			if (obj instanceof Edge) {
-				Edge otherEdge = (Edge) obj;
-
-				if (otherEdge.a.equals(this.a) && otherEdge.b.equals(this.b)) {
-					result = true;
-				}
-
-				else if (otherEdge.b.equals(this.a)
-						&& otherEdge.a.equals(this.b)) {
-					result = true;
-				}
-			}
-
-			return result;
-
-		}
-
-		public boolean touches(Intersection c) {
-			if (a.equals(c) || b.equals(c)) {
-				return true;
-			}
-
-			else {
-				return false;
-			}
-		}
-
-		public Intersection getAdjacentIntersection(Intersection c) {
-
-			if (a.equals(c)) {
-				return b;
-			}
-
-			else if (b.equals(c)) {
-				return a;
-			}
-
-			else {
-				return null;
-			}
-
-		}
-
-		public double getWeight() {
-			return weight;
-		}
-
-	}
+	
 
 }

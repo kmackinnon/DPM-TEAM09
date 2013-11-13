@@ -7,14 +7,16 @@ import robot.MobileRobot;
 import robot.SensorMotorUser;
 
 /**
- * Test accuracy of the ultrasonic sensor.
- * 1. Start motors forward and poll ultrasonic sensor until the robot is a certain distance from wall.
- * 	  Measure actual distance, distance perceived by ultrasonic, and error - change distance, try again
+ * Test accuracy of the ultrasonic sensor. 1. Start motors forward and poll
+ * ultrasonic sensor until the robot is a certain distance from wall. Measure
+ * actual distance, distance perceived by ultrasonic, and error - change
+ * distance, try again
  * 
- * 2. Potentially change the sleepTime. hopefully more frequent polling will help with accuracy
+ * 2. Potentially change the sleepTime. hopefully more frequent polling will
+ * help with accuracy
  * 
  * @author Sidney Ng
- *
+ * 
  */
 
 public class TestUltrasonic extends Thread {
@@ -23,12 +25,17 @@ public class TestUltrasonic extends Thread {
 
 		int distToStop = 20; // change this variable
 		int sleepTime = 250; // in milliseconds, may have to change
-		
-		RConsole.open(); // opens a USB connection with no timeout
 
+		RConsole.openBluetooth(10000); // opens a Bluetooth connection with no
+										// timeout
+
+		SensorMotorUser.clawMotor.setSpeed(60);
+		SensorMotorUser.clawMotor.rotateTo(320);
+		
 		int buttonChoice;
 		MobileRobot robot = new MobileRobot();
-		//robot.startMotors();
+		robot.startMotors();
+		
 		do {
 			try {
 				Thread.sleep(sleepTime);
@@ -40,16 +47,16 @@ public class TestUltrasonic extends Thread {
 			RConsole.println(Integer.toString(distValue));
 			LCD.clear();
 			LCD.drawInt(distValue, 0, 0);
-			
-			/*if (distValue <= distToStop) {
-				robot.stopMotors(); // stops robot at a distance from the wall
-			}*/
-			
+
+			if (distValue <= distToStop) {
+				robot.setSpeeds(0,0);
+			}
+
 			buttonChoice = Button.readButtons();
 
 		} while (buttonChoice != Button.ID_ESCAPE);
 
 		RConsole.close(); // closes the USB connection
 	}
-	
+
 }

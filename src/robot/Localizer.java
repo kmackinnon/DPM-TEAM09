@@ -1,4 +1,8 @@
 package robot;
+
+import lejos.nxt.Sound;
+import lejos.nxt.comm.RConsole;
+
 /**
  * Localizer calculates the position and orientation of the robot at the start
  * of the game. This has to be done because the odometer initially assumes a
@@ -8,7 +12,7 @@ package robot;
 public class Localizer extends MobileRobot {
 	
 	/** The distance from the wall at which to record the falling edge angle */
-	private final int DIST_TO_WALL = 40;
+	private final int DIST_TO_WALL = 30;
 	
 	/** A noise margin to filter out noise when localizing */
 	private final int NOISE_MARGIN = 2;
@@ -16,11 +20,14 @@ public class Localizer extends MobileRobot {
 	/** Distance measured by the ultrasonic sensor */
 	private int distance;
 	
+	/** Boolean to indicate when the robot has detected the falling edge of a wall */
+	private boolean isLatched;
+	
 	/**
 	 * Default constructor
 	 */
 	public Localizer() {
-		
+		isLatched = false;
 	}
 
 	/**
@@ -35,8 +42,9 @@ public class Localizer extends MobileRobot {
 	 * @throws InterruptedException 
 	 */
 	public void localize() {
+		// raise the claw to unimpede sensor vision
 		clawMotor.setSpeed(60);
-		clawMotor.rotateTo(300);
+		clawMotor.rotateTo(310);
 		ultrasonicLocalization();
 		lightLocalization();
 	}
@@ -46,47 +54,45 @@ public class Localizer extends MobileRobot {
 	 * @throws InterruptedException 
 	 */
 	private void ultrasonicLocalization() {
-		double [] pos = new double [3];
-		double angleA, angleB, tempA, tempB;
+		// a double array to store the latched angle values
+		// first latched angle corresponds to 0th element, second angle to 1st element
+		double[] angles = new double[2];
 		
-		this.setRotationSpeed(ROTATION_SPEED);
+		//TODO: delete RConsole stuff
+		RConsole.open();
 		
-		while(distance < 55); // keep rotating until there is no wall
+		setRotationSpeed(ROTATION_SPEED);
 		
-		while(distance > DIST_TO_WALL + NOISE_MARGIN); // average the angles found at edges of the noise margin
-		odo.getPosition(pos);
-		tempA = pos[2];
+		// turn until the robot has latched the falling edge
+		// checkForLatched() will modify the values of angleA, tempA, 
+		while (!isLatched) {
+			isLatched = checkForLatched(angles);
+		}
+
+//		turnTo(odo.getAng() - 10);
+		isLatched = false;
+		double angleA = (angles[0] + angles[1])/2; // calculate the first angle
+		RConsole.println("" + isLatched);
+		setRotationSpeed(-1 * ROTATION_SPEED);
+		while (!isLatched) {
+		}
+//		// latch the second falling edge
+//		while (!isLatched) {
+//			isLatched = checkForLatched(angles);
+//		}
+//		
+//		double angleB = (angles[0] + angles[1]) / 2; // calculate the second angle
+//		
+//		if (angleA < angleB)
+//			turnTo((angleA + angleB + 270) / 2);
+//		else
+//			turnTo((angleA + angleB - 90) / 2);
+//		
+//		// update the odometer position
+//		odo.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {true, true, true});
 		
-		while (distance > DIST_TO_WALL - NOISE_MARGIN);
-		odo.getPosition(pos);
-		angleA = pos[2];
-		
-		angleA = (tempA + angleA)/2;
-		
-		// switch direction and wait until it sees no wall
-		this.setRotationSpeed(ROTATION_SPEED * -1);
-		while (distance < 50);
-		
-		// keep rotating until the robot sees a wall, then latch the angle
-		while (distance > DIST_TO_WALL + NOISE_MARGIN);
-		odo.getPosition(pos);
-		tempB = pos[2];
-		
-		while (distance > DIST_TO_WALL - NOISE_MARGIN);
-		odo.getPosition(pos);
-		angleB = pos[2];
-		
-		angleB = (tempB + angleB)/2;
-		
-		if (angleA < angleB)
-			turnTo((angleA + angleB + 270) / 2);
-		else
-			turnTo((angleA + angleB - 90) / 2);
-		
-		// update the odometer position
-		odo.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {true, true, true});
-		this.stopMotors();
-		
+		// TODO: delete
+		RConsole.close();
 	}
 
 	private void lightLocalization() {
@@ -96,4 +102,38 @@ public class Localizer extends MobileRobot {
 		// rotate until we detect another line, correct for this angle
 	}
 	
-}
+	/**
+	 * Helper method for Ultrasonic localization to store the latched angles in an array.
+	 * 
+	 * @param angles a double array within which the latched angles are stored
+	 * @return true if lower bound has been detected, false if lower bound has not been reached
+	 */
+	private boolean checkForLatched(double[] angles) {
+		double [] pos = new double [3];
+
+		distance = getFilteredUSData();
+		if (distance <= (DIST_TO_WALL + NOISE_MARGIN) && distance > DIST_TO_WALL) {
+			// robot turned to the upper bound of the NOISE_MARGIN
+			// get the angle here
+			odo.getPosition(pos);
+			angles[0]= pos[2];
+		} else if (distance >= (DIST_TO_WALL - NOISE_MARGIN) && distance < DIST_TO_WALL) {
+			// detected the lower bound of the NOISE_MARGIN
+			// get the angle here and stop the robot
+			setSpeeds(0.0, 0.0);
+			odo.getPosition(pos);
+			angles[1] = pos[2];
+			return true; // exit the loop
+		}
+		return false;
+	}
+	
+	// TODO: filter this data
+	private int getFilteredUSData() {
+		//TODO: get rid of rconsole
+		distance = ultrasonicSensor.getDistance();
+		RConsole.println("Distance: " + distance + " Theta: " + odo.getAng());
+		return distance;
+	}
+	
+} // end of doc

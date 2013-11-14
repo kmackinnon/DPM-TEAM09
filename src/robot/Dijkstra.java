@@ -12,8 +12,8 @@ import java.util.ArrayList;
  */
 
 public class Dijkstra {
-	
-	static int counter =0;
+
+	static int counter = 0;
 
 	/**
 	 * 
@@ -30,25 +30,25 @@ public class Dijkstra {
 		return getShortestPathTo(destination);
 
 	}
-	
-	
-	public static ArrayList<Intersection> algorithmForTargetZone(Intersection source) {
+
+	public static ArrayList<Intersection> algorithmForTargetZone(
+			Intersection source) {
 
 		computePaths(source);
-		
+
 		Intersection destination = Map.getTargetZone().get(0);
-		
+
 		double minimumDistance = destination.getMinDistance();
-		
-		for(Intersection intersection : Map.getTargetZone()){
-			
-			if(intersection.getMinDistance() < minimumDistance){
+
+		for (Intersection intersection : Map.getTargetZone()) {
+
+			if (intersection.getMinDistance() < minimumDistance) {
 				destination = intersection;
 				minimumDistance = intersection.getMinDistance();
 			}
-			
+
 		}
-		
+
 		return getShortestPathTo(destination);
 
 	}
@@ -56,7 +56,7 @@ public class Dijkstra {
 	private static void computePaths(Intersection input) {
 
 		Intersection source = Map.getIntersection(input);
-		
+
 		source.setMinDistance(0);
 
 		PriorityQueue intersectionQueue = new PriorityQueue();
@@ -74,10 +74,10 @@ public class Dijkstra {
 			for (Intersection adjacent : current.getAdjacencyList()) {
 
 				adjacent = Map.getIntersection(adjacent);
-				
-				if (adjacent!=null) {
 
-					double weight = getEdgeWeight(current,adjacent);
+				if (adjacent != null) {
+
+					double weight = getEdgeWeight(current, adjacent);
 
 					double distanceThroughCurrent = current.getMinDistance()
 							+ weight;
@@ -86,8 +86,6 @@ public class Dijkstra {
 						adjacent.setMinDistance(distanceThroughCurrent);
 						adjacent.setPrevious(current);
 
-
-						
 						if (intersectionQueue.contains(adjacent)) {
 							intersectionQueue.swimUp(intersectionQueue
 									.indexOf(adjacent));
@@ -112,8 +110,7 @@ public class Dijkstra {
 		ArrayList<Intersection> reversePath = new ArrayList<Intersection>();
 		Intersection temp = Map.getIntersection(destination);
 
-		for (; temp.getPrevious() != null; temp = temp
-				.getPrevious()) {
+		for (; temp.getPrevious() != null; temp = temp.getPrevious()) {
 
 			reversePath.add(temp);
 
@@ -132,10 +129,9 @@ public class Dijkstra {
 		return correctPath;
 
 	}
-	
-	
-	private static double getEdgeWeight(Intersection a, Intersection b){
-		
+
+	private static double getEdgeWeight(Intersection a, Intersection b) {
+
 		if (a.getX() == b.getX() || a.getY() == b.getY()) {
 			return 1;
 		}
@@ -143,11 +139,8 @@ public class Dijkstra {
 		else {
 			return 1.414;
 		}
-		
+
 	}
-	
-	
-	
 
 	private static class PriorityQueue {
 

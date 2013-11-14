@@ -97,21 +97,23 @@ public class MobileRobot extends SensorMotorUser{
 		while (Math.sqrt(Math.pow((x-pos[0]), 2) + Math.pow((y-pos[1]), 2)) > 3){	
 			odo.getPosition(pos);
 	
-				if(Math.abs(y - pos[1]) < 0.6){//if you only need to move horizontally
-					if(x<pos[0])
-					turnTo(-90);//position is to left
-					else
-						turnTo(90);
+				if(Math.abs(y - pos[1]) < 2){//if you only need to move horizontally
+					if(Math.abs(x -pos[0])>2){
+						if(pos[0]>x) turnTo(-90);//position is to left
+						else turnTo(90);
+						}
 					}
 				//position is to right
 				else{
 					if(y>pos[1])
 					turnTo(Math.toDegrees(Math.atan((x-pos[0])/(y-pos[1]))));	
 					else{
-						if(x<pos[0])
-						turnTo(-1*Math.toDegrees(Math.atan((y-pos[1])/(x-pos[0]))) - 90);//counter clockwise
-						else
-						turnTo(-1*Math.toDegrees(Math.atan((y-pos[1])/(x-pos[0]))) + 90);//clockwise
+						if(Math.abs(x -pos[0])>2){
+							if(pos[0]>x)
+							turnTo(-1*Math.toDegrees(Math.atan((y-pos[1])/(x-pos[0]))) - 90);//counter clockwise
+							else
+							turnTo(-1*Math.toDegrees(Math.atan((y-pos[1])/(x-pos[0]))) + 90);//clockwise
+						}
 					}
 				}
 
@@ -148,7 +150,7 @@ public class MobileRobot extends SensorMotorUser{
 			setRotationSpeed(currSpeed *= -1);//counterclockwise
 		
 		
-		while (Math.abs(angDiff) > 1) {//move to angle
+		while (Math.abs(angDiff) > 0.5) {//move to angle
 			if (currSpeed > 0.0 && angDiff < 0.0)
 				setRotationSpeed(currSpeed *= -0.5);
 			else if (currSpeed < 0.0 && angDiff > 0.0)

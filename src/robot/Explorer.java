@@ -34,8 +34,10 @@ public class Explorer extends MobileRobot {
 		
 		rowCounter = 0;
 		
+		travelCoordinate(1,0);
 		
-		for(int initialRow = rowNumber; forLoopCondition(rowNumber,initialRow); forLoopAfterthought('R',initialRow)){
+		
+		/*for(int initialRow = rowNumber; forLoopCondition(rowNumber,initialRow); forLoopAfterthought('R',initialRow)){
 				
 				for(int initialColumn = columnNumber; forLoopCondition(columnNumber, initialColumn); forLoopAfterthought('C',initialColumn)){
 				
@@ -45,7 +47,7 @@ public class Explorer extends MobileRobot {
 					
 				}
 				
-		}
+		}*/
 		
 		
 	}

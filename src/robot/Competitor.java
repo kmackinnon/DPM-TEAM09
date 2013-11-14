@@ -1,6 +1,8 @@
 package robot;
 
 import lejos.nxt.Button;
+import lejos.nxt.LCD;
+import lejos.nxt.Sound;
 import bluetooth.PlayerRole;
 import bluetooth.StartCorner;
 
@@ -59,7 +61,7 @@ public class Competitor {
 			SensorMotorUser.becomeBuilder(false);
 		}*/
 		
-		//Map.initializeMap();
+		
 
 		
 		
@@ -71,23 +73,41 @@ public class Competitor {
 		else if(!SensorMotorUser.isBuilder()){
 			Map.setTargetZone(redZone);
 			Map.setForbiddenZone(greenZone);
-		}
+		}*/
 		
-		SensorMotorUser.setStartCorner(corner.getCooridinates());*/
+		
 		
 		Button.waitForAnyPress();
 		
+		int[] test1 = {0,5,2,9};
+		
+		int[] test2 = {6,3,8,4};
+		
+		Map.initializeMap();
+		
+		//Map.setForbiddenZone(test1);
+		
+		//Map.setTargetZone(test2);
+		
+/*		Sound.beep();
+		
+		SensorMotorUser.setStartCorner(new int[] {0,0});
+		
+		Sound.beep();*/
+		
 		Localizer localizer = new Localizer();
-		/*Explorer explorer = new Explorer();
-		BlockMover blockMover = new BlockMover();*/
+		//Explorer explorer = new Explorer();
+		//BlockMover blockMover = new BlockMover();
 
 		localizer.localize();
+		
+		//explorer.lookForStyrofoamBlocks();
 		
 		Button.waitForAnyPress();
 		
 		System.exit(0);
 
-		/*explorer.lookForStyrofoamBlocks();*/
+		
 
 	}
 

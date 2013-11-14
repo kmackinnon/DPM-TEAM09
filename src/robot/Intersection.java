@@ -29,16 +29,15 @@ public class Intersection {
 
 	}
 
-	
-	public void addToAdjacencyList(Intersection intersection){
+	public void addToAdjacencyList(Intersection intersection) {
 		adjacencyList.add(intersection);
 	}
-	
-	public void removeFromAdjacencyList(Intersection intersection){
+
+	public void removeFromAdjacencyList(Intersection intersection) {
 		adjacencyList.remove(intersection);
 	}
-	
-	public ArrayList<Intersection> getAdjacencyList(){
+
+	public ArrayList<Intersection> getAdjacencyList() {
 		return adjacencyList;
 	}
 
@@ -73,22 +72,22 @@ public class Intersection {
 	public int getY() {
 		return y;
 	}
-	
-	public static Intersection convertToIntersection(double x, double y){
-		
-		int xGrid = (int) Math.round(x/Map.TILE_SIZE);
-		int yGrid = (int) Math.round(y/Map.TILE_SIZE);
-		
+
+	public static Intersection convertToIntersection(double x, double y) {
+
+		int xGrid = (int) Math.round(x / Map.TILE_SIZE);
+		int yGrid = (int) Math.round(y / Map.TILE_SIZE);
+
 		return new Intersection(xGrid, yGrid);
-		
+
 	}
-	
-	public double getXInCm(){
-		return x*Map.TILE_SIZE;
+
+	public double getXInCm() {
+		return x * Map.TILE_SIZE;
 	}
-	
-	public double getYInCm(){
-		return y*Map.TILE_SIZE;
+
+	public double getYInCm() {
+		return y * Map.TILE_SIZE;
 	}
 
 }

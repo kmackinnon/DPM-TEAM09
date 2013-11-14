@@ -15,6 +15,7 @@ public class Map {
 	public final static int NUM_OF_INTERSECTIONS = 11;
 
 	private static ArrayList<Intersection> intersectionList = new ArrayList<Intersection>();
+
 	/**
 	 * Initializes the arraylist of intersections.
 	 */
@@ -114,21 +115,20 @@ public class Map {
 
 		int x1 = a.getX();
 		int y1 = a.getY();
-		
+
 		int x2 = b.getX();
 		int y2 = b.getY();
-		
-		int index1 = index(x1,y1);
-		int index2 = index(x2,y2);
-		
+
+		int index1 = index(x1, y1);
+		int index2 = index(x2, y2);
+
 		Intersection one = intersectionList.get(index1);
 		Intersection two = intersectionList.get(index2);
-		
+
 		one.removeFromAdjacencyList(two);
 		two.removeFromAdjacencyList(one);
 
 	}
-
 
 	public static ArrayList<Intersection> getTargetZone() {
 
@@ -136,7 +136,7 @@ public class Map {
 
 		for (Intersection intersection : intersectionList) {
 
-			if (intersection!=null&&intersection.isTarget()) {
+			if (intersection != null && intersection.isTarget()) {
 				targetZone.add(intersection);
 			}
 
@@ -149,15 +149,13 @@ public class Map {
 	public static Intersection getIntersection(int x, int y) {
 		return get(index(x, y));
 	}
-	
-	
-	public static Intersection getIntersection(Intersection intersection){
-		
+
+	public static Intersection getIntersection(Intersection intersection) {
+
 		int index = index(intersection.getX(), intersection.getY());
-		
+
 		return get(index);
 	}
-	
 
 	public static void resetAllPreviousAndDistance() {
 
@@ -205,7 +203,7 @@ public class Map {
 			addTopRightCap(temp, x, y);
 		}
 
-		else if (x == 0 && y == NUM_OF_INTERSECTIONS-1) {
+		else if (x == 0 && y == NUM_OF_INTERSECTIONS - 1) {
 			addBottomRightCap(temp, x, y);
 		}
 
@@ -214,7 +212,7 @@ public class Map {
 			addTopAndBottom(temp, x, y);
 		}
 
-		else if (x == NUM_OF_INTERSECTIONS-1 && y == 0) {
+		else if (x == NUM_OF_INTERSECTIONS - 1 && y == 0) {
 			addTopLeftCap(temp, x, y);
 		}
 
@@ -223,16 +221,16 @@ public class Map {
 			addRightAndLeft(temp, x, y);
 		}
 
-		else if (x == NUM_OF_INTERSECTIONS-1 && y == NUM_OF_INTERSECTIONS-1) {
+		else if (x == NUM_OF_INTERSECTIONS - 1 && y == NUM_OF_INTERSECTIONS - 1) {
 			addBottomLeftCap(temp, x, y);
 		}
 
-		else if (x == NUM_OF_INTERSECTIONS-1) {
+		else if (x == NUM_OF_INTERSECTIONS - 1) {
 			addLeftSide(temp, x, y);
 			addTopAndBottom(temp, x, y);
 		}
 
-		else if (y == NUM_OF_INTERSECTIONS-1) {
+		else if (y == NUM_OF_INTERSECTIONS - 1) {
 			addBottomSide(temp, x, y);
 			addRightAndLeft(temp, x, y);
 		}
@@ -334,7 +332,5 @@ public class Map {
 		addEdge(temp, bottomLeft(x, y));
 		addEdge(temp, bottom(x, y));
 	}
-
-	
 
 }

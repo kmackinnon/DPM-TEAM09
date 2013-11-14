@@ -1,7 +1,7 @@
 package robot;
 
-import lejos.nxt.LCD;
-import lejos.nxt.Sound;
+import java.util.Arrays;
+
 
 /**
  * Localizer calculates the position and orientation of the robot at the start
@@ -13,6 +13,11 @@ public class Localizer extends MobileRobot {
 
 	private double angleA; // angle of right wall (assuming facing away)
 	private double angleB; // angle of left wall
+	
+	int distanceArray[] = new int[5];
+	int medianDistance;
+	
+	long correctionStart, correctionEnd;
 
 	public Localizer() {
 
@@ -20,18 +25,14 @@ public class Localizer extends MobileRobot {
 
 	public void localize() {
 
-		clawMotor.setSpeed(100);
-		clawMotor.rotateTo(320);
+		clawMotor.setSpeed(120);
+		clawMotor.rotateTo(340);
 
 		ultrasonicLocalization();
 		xyUltrasonicCorrection();
 		
 		travelCoordinate(0,0);
 		turnTo(0);
-		
-		LCD.drawInt((int) odo.getAng(), 0, 5);
-
-		clawMotor.rotateTo(0);
 	}
 
 	private void ultrasonicLocalization() {
@@ -39,10 +40,17 @@ public class Localizer extends MobileRobot {
 		boolean isFacingWall;
 		int countWall = 0;
 		double deltaTheta;
+		
+		Arrays.fill(distanceArray,255);
 
 		// determine initial position of looking at or away from wall
 		for (int i = 0; i < 5; i++) {
-			if (getUSDistance() <= 50) {
+			
+			shiftArrayByOne(distanceArray,getUSDistance());
+			
+			medianDistance = getMedian(distanceArray);
+			
+			if (medianDistance <= 50) {
 				countWall++;
 			}
 		}
@@ -61,7 +69,12 @@ public class Localizer extends MobileRobot {
 
 			while (count255 < 5) {
 				setRotationSpeed(ROTATION_SPEED);
-				if (getUSDistance() == 255) {
+				
+				shiftArrayByOne(distanceArray,getUSDistance());
+				
+				medianDistance = getMedian(distanceArray);
+				
+				if (medianDistance == 255) {
 					count255++;
 				}
 			}
@@ -88,29 +101,42 @@ public class Localizer extends MobileRobot {
 
 	private void fallingEdge() {
 		boolean isLatched = false; // whether angle is recorded
-		int currentDistance;
 		int count255 = 0;
-
+		
+		
 		// head to right wall
 		while (!isLatched) {
+			correctionStart = System.currentTimeMillis();
+			
 			setRotationSpeed(ROTATION_SPEED);
-			currentDistance = getUSDistance();
+			
+			shiftArrayByOne(distanceArray,getUSDistance());
+			
+			medianDistance = getMedian(distanceArray);
 
 			// right wall detected
-			if (currentDistance < 30) {
+			if (medianDistance < 30) {
 				angleA = odo.getAng(); // latch angle
 				isLatched = true;
 				break;
 			}
+			
+			threadSleep();
+			
 		}
 
 		// to reset isLatched
 		while (isLatched) {
+			correctionStart = System.currentTimeMillis();
+			
 			setRotationSpeed(-ROTATION_SPEED);
-			currentDistance = getUSDistance();
+			
+			shiftArrayByOne(distanceArray,getUSDistance());
+			
+			medianDistance = getMedian(distanceArray);
 
 			// ensure facing away from walls before attempting to detect angles
-			if (currentDistance == 255) {
+			if (medianDistance == 255) {
 				count255++;
 			} else {
 				count255 = 0;
@@ -120,18 +146,27 @@ public class Localizer extends MobileRobot {
 			if (count255 >= 5) {
 				isLatched = false;
 			}
+			
+			threadSleep();
 		}
 
 		// head to left wall
 		while (!isLatched) {
+			correctionStart = System.currentTimeMillis();
+			
 			setRotationSpeed(-ROTATION_SPEED);
-			currentDistance = getUSDistance();
+			
+			shiftArrayByOne(distanceArray,getUSDistance());
+			
+			medianDistance = getMedian(distanceArray);
 
 			// left wall detected
-			if (currentDistance < 30) {
+			if (medianDistance < 30) {
 				angleB = odo.getAng(); // latch angle
 				break;
 			}
+			
+			threadSleep();
 		}
 	}
 	
@@ -146,10 +181,25 @@ public class Localizer extends MobileRobot {
 		
 	}
 	
+	private void threadSleep(){
+		
+		correctionEnd = System.currentTimeMillis();
+        if (correctionEnd - correctionStart < SLEEP_PERIOD) {
+                try {
+                        Thread.sleep(SLEEP_PERIOD
+                                        - (correctionEnd - correctionStart));
+                } catch (InterruptedException e) {
+                        // there is nothing to be done here because it is not
+                        // expected that the localization will be
+                        // interrupted by another thread
+                }
+        }
+		
+	}
 	
 	
 
-	private void lightLocalization() {
+	/*private void lightLocalization() {
 
 		double rightAngle1 = -1; // initialized to impossible values
 		double rightAngle2 = -1;
@@ -236,6 +286,6 @@ public class Localizer extends MobileRobot {
 		travelCoordinate(0, 0);
 		turnTo(0);
 
-	}
+	}*/
 
 }

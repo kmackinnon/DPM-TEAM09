@@ -3,6 +3,7 @@ package robot;
 import java.util.Arrays;
 
 import lejos.nxt.ColorSensor;
+import lejos.nxt.LCD;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
@@ -68,6 +69,8 @@ public class SensorMotorUser {
 	 * number is how many degrees the motor rotates per second
 	 */
 	public static final int LIFTING_SPEED = 50;
+	
+	public static final int SLEEP_PERIOD = 25;
 
 	public static final double sensorWidth = 11.05;
 	
@@ -81,7 +84,7 @@ public class SensorMotorUser {
 
 	private static boolean isBuilderHasBeenSet = false;
 	
-	private static int[] startCorner;
+	private static int[] startCorner = new int[2];
 	
 	private static boolean startCornerHasBeenSet = false;
 	
@@ -104,7 +107,9 @@ public class SensorMotorUser {
 	
 	
 	public static void setStartCorner(int[] coordinates){
+		
 		if(!startCornerHasBeenSet){
+			
 			startCorner[0] = coordinates[0];
 			startCorner[1] = coordinates[1];
 			startCornerHasBeenSet = true;
@@ -241,6 +246,8 @@ public class SensorMotorUser {
 		return false;
 		
 	}
+	
+	
 	
 	
 

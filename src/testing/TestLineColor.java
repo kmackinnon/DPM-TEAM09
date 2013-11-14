@@ -6,11 +6,10 @@ import lejos.nxt.ColorSensor.Color;
 import lejos.nxt.SensorPort;
 import lejos.nxt.comm.RConsole;
 import robot.MobileRobot;
-import robot.SensorMotorUser;
 
 /**
  * 
- * @author Keith MacKinnon
+ * The purpose of the test is to find a common light pattern when crossing black lines.
  * 
  * Steps for using RConsole
  * 1. Turn on the robot
@@ -19,6 +18,8 @@ import robot.SensorMotorUser;
  * 4. Press ESC on robot (down button)
  * 5. RConsole Disconnect
  * 6. Return to step 2
+ * 
+ * @author Keith MacKinnon and Sidney Ng
  * 
  */
 public class TestLineColor extends Thread {

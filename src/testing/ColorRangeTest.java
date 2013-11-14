@@ -11,46 +11,46 @@ import lejos.nxt.UltrasonicSensor;
 
 /**
  * 
- * @author Keith MacKinnon
- * 
- * Steps for using RConsole
- * 1. Get the color values when polling the color sensor for styrofoam, wooden block
+ * Steps to run the test using RConsole 
+ * 1. Get the color values when polling the color sensor for styrofoam, wooden block 
  * 2. Note distance from block.
+ * 
+ * @author Sidney Ng
  * 
  */
 public class ColorRangeTest extends Thread {
 
 	public static void main(String[] args) {
-		
+
 		UltrasonicSensor us = new UltrasonicSensor(SensorPort.S4);
 		ColorSensor cs = new ColorSensor(SensorPort.S2);
 		cs.setFloodlight(true);
 		Color color;
 		NXTRegulatedMotor clawMotor = Motor.C;
-		NXTRegulatedMotor leftMotor = Motor.A;
-		NXTRegulatedMotor rightMotor = Motor.B;
 
 		clawMotor.setSpeed(60);
 		clawMotor.rotateTo(300);
 
-		
 		RConsole.open(); // opens a USB connection with no timeout
-		
+
 		int buttonChoice;
 		do {
-//			try {
-//				Thread.sleep(200); // sleep for fifth of a second
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-			
+			// try {
+			// Thread.sleep(200); // sleep for fifth of a second
+			// } catch (Exception e) {
+			// e.printStackTrace();
+			// }
+
 			int distance = us.getDistance();
 			color = cs.getColor();
 			int redValue = color.getRed();
 			int greenValue = color.getGreen();
 			int blueValue = color.getBlue();
-			
-			RConsole.println(Integer.toString(distance) + " " + Integer.toString(redValue) + " " + Integer.toString(greenValue) + " " + Integer.toString(blueValue));
+
+			RConsole.println(Integer.toString(distance) + " "
+					+ Integer.toString(redValue) + " "
+					+ Integer.toString(greenValue) + " "
+					+ Integer.toString(blueValue));
 
 			buttonChoice = Button.readButtons();
 

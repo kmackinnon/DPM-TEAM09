@@ -2,9 +2,6 @@ package testing;
 
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
-import lejos.nxt.UltrasonicSensor;
-import lejos.nxt.SensorPort;
-import lejos.nxt.comm.RConsole;
 import robot.Localizer;
 import robot.MobileRobot;
 

@@ -1,16 +1,20 @@
 package testing;
 
 import lejos.nxt.Button;
-import lejos.nxt.LCD;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
-import lejos.nxt.comm.RConsole;
 
+/**
+ * Qualitative test to demonstrate the functioning of the lifting mechanism.
+ * Note that the claw should be in a closed position prior to commencing the
+ * program as the motor tries to rotate -100 degrees.
+ * 
+ * @author Keith MacKinnon
+ * 
+ */
 public class ClawTest {
 
 	public static void main(String[] args) {
-
-		// RConsole.open();
 
 		int option = 0;
 		while (option == 0) {
@@ -37,8 +41,6 @@ public class ClawTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		// RConsole.println(Integer.toString(angle));
 
 		clawMotor.rotateTo(0); // set the block back down
 

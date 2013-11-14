@@ -10,45 +10,43 @@ import robot.SensorMotorUser;
 
 /**
  * 
- * @author Keith MacKinnon
+ * Prints varying color values to observe trends and light levels in different
+ * areas.
  * 
- * Steps for using RConsole
- * 1. Turn on the robot
- * 2. Run program
- * 3. RConsole Connect
- * 4. Press ESC on robot (down button)
- * 5. RConsole Disconnect
- * 6. Return to step 2
+ * @author Sidney Ng
+ * 
  * 
  */
-public class TestLight /*extends Thread*/ {
+public class TestLight {
 
 	public static void main(String[] args) {
-		
+
 		MobileRobot robot = new MobileRobot();
 		ColorSensor cs = new ColorSensor(SensorPort.S2);
-//		cs.setFloodlight(true);
+		// cs.setFloodlight(true);
 		Color color;
 
 		RConsole.open(); // opens a USB connection with no timeout
 		robot.startMotors();
-		
+
 		int buttonChoice;
 		do {
-//			try {
-//				Thread.sleep(250); // sleep for quarter second
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
+			// try {
+			// Thread.sleep(250); // sleep for quarter second
+			// } catch (Exception e) {
+			// e.printStackTrace();
+			// }
 
-			//int colorValue = cs.getRawLightValue();
-			
+			// int colorValue = cs.getRawLightValue();
+
 			color = cs.getColor();
 			int colorValue = color.getGreen();
-			
+
 			int leftTacho = SensorMotorUser.leftMotor.getTachoCount();
 			int rightTacho = SensorMotorUser.rightMotor.getTachoCount();
-			RConsole.println(Integer.toString(colorValue) + " " + Integer.toString(leftTacho) + " " + Integer.toString(rightTacho));
+			RConsole.println(Integer.toString(colorValue) + " "
+					+ Integer.toString(leftTacho) + " "
+					+ Integer.toString(rightTacho));
 
 			buttonChoice = Button.readButtons();
 

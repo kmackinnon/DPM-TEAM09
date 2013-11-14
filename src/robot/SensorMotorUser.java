@@ -8,6 +8,7 @@ import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
+import lejos.nxt.comm.RConsole;
 
 /**
  * SensorMotorUser contains methods that are needed when using the data received
@@ -74,11 +75,11 @@ public class SensorMotorUser {
 
 	public static final double sensorWidth = 11.05;
 	
-	public static final int LINE_COLOR = 20;
+	public static final int LINE_DIFF = 20;
 	
 //	private static final int LINE_COLOR_COUNT_THRESHOLD = 7;
 	
-	private static int lineColorCount = 0;
+//	private static int lineColorCount = 0;
 	
 	private static boolean isBuilder;
 
@@ -222,20 +223,48 @@ public class SensorMotorUser {
 		return ultrasonicSensor.getDistance();
 	}
 	
-	private int prevLeft, prevRight;
-	public boolean lineDetected(){
-		int leftValue = leftCS.getColor().getBlue();
-		int rightValue = rightCS.getColor().getBlue();
+	// signed difference
+	// exponential average
+	private int prevValue = 0;//, prevDiff = 0;
+	//boolean positiveDiff = false;
+	boolean negativeDiff = false;
+	//private int[] window = {0,0,0};
+	
+	public boolean lineDetected(ColorSensor cs){
+		int value = cs.getRawLightValue();
+		int diff = (value - prevValue);
+		RConsole.println("Diff: " + diff);
+		if(diff<-LINE_DIFF){
+			negativeDiff = true;
+		}
 		
-		if(leftValue - prevLeft > LINE_COLOR && rightValue - prevRight > LINE_COLOR){
-			prevLeft = leftValue;
-			prevRight = rightValue;
+		if(diff>LINE_DIFF&&negativeDiff){
+			RConsole.println(" detected");
+			
+			negativeDiff = false;
+			
+			return true;
+		}
+		
+		prevValue = value;
+		return false;
+		
+		
+		//shiftArrayByOne(window,diff);
+		
+		//double average = getMean(window);
+		
+		/*if (average > LINE_DIFF) {
+			prevValue = value;
+			//prevDiff = diff;
+			RConsole.println("Diff: " + diff + " detected");
 			return true;
 		} else {
-			prevLeft = leftValue;
-			prevRight = rightValue;
+			prevValue = value;
+			//prevDiff = diff;
+			RConsole.println("Diff: " + diff);
 			return false;
-		}
+		}*/
 	}
 	
 	

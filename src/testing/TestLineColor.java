@@ -2,6 +2,7 @@ package testing;
 
 import lejos.nxt.Button;
 import lejos.nxt.ColorSensor;
+import lejos.nxt.Sound;
 import lejos.nxt.ColorSensor.Color;
 import lejos.nxt.SensorPort;
 import lejos.nxt.comm.RConsole;
@@ -33,22 +34,30 @@ public class TestLineColor /*extends Thread*/ {
 
 		RConsole.open(); // opens a USB connection with no timeout
 		robot.setForwardSpeed(SensorMotorUser.FORWARD_SPEED);
-		
+		SensorMotorUser.leftCS.setFloodlight(true);
+		SensorMotorUser.rightCS.setFloodlight(true);
 		int buttonChoice;
 		do {
-//			try {
-//				Thread.sleep(100); // sleep for quarter second
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
+			try {
+				Thread.sleep(50); // sleep for quarter second
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
-			color = SensorMotorUser.leftCS.getColor();
-			int colorValue = color.getBlue();
-			color = SensorMotorUser.rightCS.getColor();
-			int colorValue2 = color.getBlue();
-			RConsole.println(colorValue + " " + colorValue2); // first is left, second is right
+//			color = SensorMotorUser.leftCS.getColor();
+//			int colorValue = color.getBlue();
+//			color = SensorMotorUser.rightCS.getColor();
+//			int colorValue2 = color.getBlue();
+//			RConsole.println(colorValue + " " + colorValue2); // first is left, second is right
 			
 			//TODO: add line detection method
+			if (robot.lineDetected(SensorMotorUser.leftCS)) {
+				RConsole.print(" left detected\n");
+				Sound.beep();
+			}// else if (robot.lineDetected(SensorMotorUser.rightCS)) {
+//				RConsole.print(" right detected\n");
+//				Sound.beep();
+//			}
 			
 			buttonChoice = Button.readButtons();
 

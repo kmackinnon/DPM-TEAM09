@@ -84,6 +84,16 @@ public class MobileRobot extends SensorMotorUser{
 		setForwardSpeed(0.0);
 	}
 	
+	public void travelCoordinate(int x, int y){
+		
+		double xInCm = x*Map.TILE_SIZE;
+		double yInCm = y*Map.TILE_SIZE;
+		
+		travelCoordinate(xInCm,yInCm);
+		
+	}
+	
+	
 	/**
 	 * Move robot to position at (x,y)
 	 * <p>

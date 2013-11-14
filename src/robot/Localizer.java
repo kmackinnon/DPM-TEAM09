@@ -26,7 +26,7 @@ public class Localizer extends MobileRobot {
 	public void localize() {
 
 		clawMotor.setSpeed(120);
-		clawMotor.rotateTo(340);
+		clawMotor.rotateTo(310);
 
 		ultrasonicLocalization();
 		xyUltrasonicCorrection();

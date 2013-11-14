@@ -138,6 +138,25 @@ public class Odometer extends SensorMotorUser implements TimerListener{
 		}
 	}
 	
+	
+	public void setX(double input){
+		
+		synchronized (lock) {
+			x = input;
+		}
+		
+	}
+	
+	
+	public void setY(double input){
+		
+		synchronized (lock) {
+			y = input;
+		}
+		
+	}
+	
+	
 	/**
 	 * Uses synchronized block to read current x value
 	 * 

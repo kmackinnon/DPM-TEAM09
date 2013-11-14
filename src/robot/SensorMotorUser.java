@@ -48,6 +48,8 @@ public class SensorMotorUser {
 
 	/** The distance between the two wheels */
 	public static final double width = 10.395;
+	
+	public static final double lightSensorToWheel = 1;
 
 	/**
 	 * The speed of the wheel motors when the robot is moving in a straight
@@ -68,6 +70,12 @@ public class SensorMotorUser {
 	public static final int LIFTING_SPEED = 50;
 
 	public static final double sensorWidth = 11.05;
+	
+	public static final int LINE_COLOR = 520;
+	
+	private static final int LINE_COLOR_COUNT_THRESHOLD = 7;
+	
+	private static int lineColorCount = 0;
 	
 	private static boolean isBuilder;
 
@@ -208,6 +216,32 @@ public class SensorMotorUser {
 	public int getUSDistance(){
 		return ultrasonicSensor.getDistance();
 	}
+	
+	
+	public boolean lineDetected(ColorSensor cs){
+		
+		if(cs.getRawLightValue() < LINE_COLOR){
+			
+			lineColorCount++;
+			
+			if(lineColorCount>=LINE_COLOR_COUNT_THRESHOLD){
+				
+				return true;
+				
+			}
+			
+		}
+		
+		else{
+			
+			lineColorCount = 0;
+			
+		}
+		
+		return false;
+		
+	}
+	
 	
 
 }

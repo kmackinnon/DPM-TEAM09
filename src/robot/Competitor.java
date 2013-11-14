@@ -1,12 +1,8 @@
 package robot;
 
 import lejos.nxt.Button;
-import lejos.nxt.LCD;
-import lejos.nxt.comm.RConsole;
-import bluetooth.BluetoothConnection;
 import bluetooth.PlayerRole;
 import bluetooth.StartCorner;
-import bluetooth.Transmission;
 
 /**
  * This class contains the main function, and gives responsibility of the robot
@@ -78,13 +74,18 @@ public class Competitor {
 		}
 		
 		SensorMotorUser.setStartCorner(corner.getCooridinates());*/
-			
-
-		//Localizer localizer = new Localizer();
+		
+		Button.waitForAnyPress();
+		
+		Localizer localizer = new Localizer();
 		/*Explorer explorer = new Explorer();
 		BlockMover blockMover = new BlockMover();*/
 
-		//localizer.localize();
+		localizer.localize();
+		
+		Button.waitForAnyPress();
+		
+		System.exit(0);
 
 		/*explorer.lookForStyrofoamBlocks();*/
 

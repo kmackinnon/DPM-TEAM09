@@ -1,7 +1,7 @@
 package robot;
 
+import lejos.nxt.LCD;
 import lejos.nxt.Sound;
-import lejos.nxt.comm.RConsole;
 
 /**
  * Localizer calculates the position and orientation of the robot at the start
@@ -10,130 +10,232 @@ import lejos.nxt.comm.RConsole;
  */
 
 public class Localizer extends MobileRobot {
-	
-	/** The distance from the wall at which to record the falling edge angle */
-	private final int DIST_TO_WALL = 30;
-	
-	/** A noise margin to filter out noise when localizing */
-	private final int NOISE_MARGIN = 2;
-	
-	/** Distance measured by the ultrasonic sensor */
-	private int distance;
-	
-	/** Boolean to indicate when the robot has detected the falling edge of a wall */
-	private boolean isLatched;
-	
-	/**
-	 * Default constructor
-	 */
+
+	private double angleA; // angle of right wall (assuming facing away)
+	private double angleB; // angle of left wall
+
 	public Localizer() {
-		isLatched = false;
+
 	}
 
-	/**
-	 * Performs the localization routine. This consists of two steps: ultrasonic
-	 * localization and light localization.
-	 * <p>
-	 * Ultrasonic localization uses the corner walls to calculate the angle of
-	 * the robot and an estimate of the x and y position of the robot.
-	 * <p>
-	 * Light localization uses the tile lines to improve on the values obtained
-	 * by the ultrasonic localization.
-	 * @throws InterruptedException 
-	 */
 	public void localize() {
-		// raise the claw to unimpede sensor vision
-		clawMotor.setSpeed(60);
-		clawMotor.rotateTo(310);
+
+		clawMotor.setSpeed(100);
+		clawMotor.rotateTo(320);
+
 		ultrasonicLocalization();
-		lightLocalization();
+		xyUltrasonicCorrection();
+		
+		travelCoordinate(0,0);
+		turnTo(0);
+		
+		LCD.drawInt((int) odo.getAng(), 0, 5);
+
+		clawMotor.rotateTo(0);
 	}
 
-	/**
-	 * Performs falling edge ultrasonic localization.
-	 * @throws InterruptedException 
-	 */
 	private void ultrasonicLocalization() {
-		// a double array to store the latched angle values
-		// first latched angle corresponds to 0th element, second angle to 1st element
-		double[] angles = new double[2];
-		
-		//TODO: delete RConsole stuff
-		RConsole.open();
-		
-		setRotationSpeed(ROTATION_SPEED);
-		
-		// turn until the robot has latched the falling edge
-		// checkForLatched() will modify the values of angleA, tempA, 
-		while (!isLatched) {
-			isLatched = checkForLatched(angles);
+
+		boolean isFacingWall;
+		int countWall = 0;
+		double deltaTheta;
+
+		// determine initial position of looking at or away from wall
+		for (int i = 0; i < 5; i++) {
+			if (getUSDistance() <= 50) {
+				countWall++;
+			}
 		}
 
-//		turnTo(odo.getAng() - 10);
-		isLatched = false;
-		double angleA = (angles[0] + angles[1])/2; // calculate the first angle
-		RConsole.println("" + isLatched);
-		setRotationSpeed(-1 * ROTATION_SPEED);
-		while (!isLatched) {
+		isFacingWall = countWall > 3; // either facing wall or away from wall
+
+		if (!isFacingWall) {
+			fallingEdge();
 		}
-//		// latch the second falling edge
-//		while (!isLatched) {
-//			isLatched = checkForLatched(angles);
-//		}
-//		
-//		double angleB = (angles[0] + angles[1]) / 2; // calculate the second angle
-//		
-//		if (angleA < angleB)
-//			turnTo((angleA + angleB + 270) / 2);
-//		else
-//			turnTo((angleA + angleB - 90) / 2);
-//		
-//		// update the odometer position
-//		odo.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {true, true, true});
-		
-		// TODO: delete
-		RConsole.close();
+
+		// robot starts by facing the wall
+		// only begin falling edge routine once facing away from wall
+		else {
+
+			int count255 = 0;
+
+			while (count255 < 5) {
+				setRotationSpeed(ROTATION_SPEED);
+				if (getUSDistance() == 255) {
+					count255++;
+				}
+			}
+
+			fallingEdge();
+
+		}
+
+		// to stop the rotation
+		setRotationSpeed(0);
+
+		// calculates the corrected angle
+		if (angleB > angleA) {
+			deltaTheta = 225 - ((angleA + angleB) / 2);
+		} else {
+			deltaTheta = 45 - ((angleA + angleB) / 2);
+		}
+
+		// update the odometer position (example to follow:)
+		odo.setPosition(new double[] { 0.0, 0.0, deltaTheta + angleB },
+				new boolean[] { true, true, true });
+
 	}
+
+	private void fallingEdge() {
+		boolean isLatched = false; // whether angle is recorded
+		int currentDistance;
+		int count255 = 0;
+
+		// head to right wall
+		while (!isLatched) {
+			setRotationSpeed(ROTATION_SPEED);
+			currentDistance = getUSDistance();
+
+			// right wall detected
+			if (currentDistance < 30) {
+				angleA = odo.getAng(); // latch angle
+				isLatched = true;
+				break;
+			}
+		}
+
+		// to reset isLatched
+		while (isLatched) {
+			setRotationSpeed(-ROTATION_SPEED);
+			currentDistance = getUSDistance();
+
+			// ensure facing away from walls before attempting to detect angles
+			if (currentDistance == 255) {
+				count255++;
+			} else {
+				count255 = 0;
+			}
+
+			// now ready to detect left wall
+			if (count255 >= 5) {
+				isLatched = false;
+			}
+		}
+
+		// head to left wall
+		while (!isLatched) {
+			setRotationSpeed(-ROTATION_SPEED);
+			currentDistance = getUSDistance();
+
+			// left wall detected
+			if (currentDistance < 30) {
+				angleB = odo.getAng(); // latch angle
+				break;
+			}
+		}
+	}
+	
+	
+	private void xyUltrasonicCorrection(){
+		
+		turnTo(180);
+        odo.setY(getUSDistance()  - 28);
+
+        turnTo(270);
+        odo.setX(getUSDistance() - 28);
+		
+	}
+	
+	
+	
 
 	private void lightLocalization() {
-		// start on an intersection
-		// rotate until we detect a line
-		// based on our current heading, correct for the angle
-		// rotate until we detect another line, correct for this angle
-	}
-	
-	/**
-	 * Helper method for Ultrasonic localization to store the latched angles in an array.
-	 * 
-	 * @param angles a double array within which the latched angles are stored
-	 * @return true if lower bound has been detected, false if lower bound has not been reached
-	 */
-	private boolean checkForLatched(double[] angles) {
-		double [] pos = new double [3];
 
-		distance = getFilteredUSData();
-		if (distance <= (DIST_TO_WALL + NOISE_MARGIN) && distance > DIST_TO_WALL) {
-			// robot turned to the upper bound of the NOISE_MARGIN
-			// get the angle here
-			odo.getPosition(pos);
-			angles[0]= pos[2];
-		} else if (distance >= (DIST_TO_WALL - NOISE_MARGIN) && distance < DIST_TO_WALL) {
-			// detected the lower bound of the NOISE_MARGIN
-			// get the angle here and stop the robot
-			setSpeeds(0.0, 0.0);
-			odo.getPosition(pos);
-			angles[1] = pos[2];
-			return true; // exit the loop
+		double rightAngle1 = -1; // initialized to impossible values
+		double rightAngle2 = -1;
+		double rightAngle3 = -1;
+		double rightAngle4 = -1;
+
+		double leftAngle1 = -1; // initialized to impossible values
+		double leftAngle2 = -1;
+		double leftAngle3 = -1;
+		double leftAngle4 = -1;
+
+		double angle1 = -1; // initialized to impossible values
+		double angle2 = -1;
+		double angle3 = -1;
+		double angle4 = -1;
+
+		boolean allLinesDetected = false;
+
+		while (!allLinesDetected) {
+
+			setRotationSpeed(-ROTATION_SPEED);
+
+			if (lineDetected(rightCS)) {
+				Sound.beep(); // to aid in debugging -- to test for lines
+				if (rightAngle1 == -1) {
+					rightAngle1 = odo.getAng();
+				} else if (rightAngle2 == -1) {
+					rightAngle2 = odo.getAng();
+				} else if (rightAngle3 == -1) {
+					rightAngle3 = odo.getAng();
+				} else if (rightAngle4 == -1) {
+					rightAngle4 = odo.getAng();
+				}
+			}
+
+			// if the robot is crossing a line, get respective angles
+			if (lineDetected(leftCS)) {
+				Sound.beep(); // to aid in debugging -- to test for lines
+				if (leftAngle1 == -1) {
+					leftAngle1 = odo.getAng();
+				} else if (leftAngle2 == -1) {
+					leftAngle2 = odo.getAng();
+				} else if (leftAngle3 == -1) {
+					leftAngle3 = odo.getAng();
+				} else if (leftAngle4 == -1) {
+					leftAngle4 = odo.getAng();
+				}
+			}
+
+			if (leftAngle4 != -1 && rightAngle4 != -1) {
+				allLinesDetected = true;
+			}
+
 		}
-		return false;
+
+		setRotationSpeed(0);
+		
+		angle1 = (leftAngle1+rightAngle1)/2;
+		angle2 = (leftAngle2+rightAngle2)/2;
+		angle3 = (leftAngle3+rightAngle3)/2;
+		angle4 = (leftAngle4+rightAngle4)/2;
+
+		double x, y, thetaY, thetaX;
+
+		thetaY = Math.abs(angle1 - angle3);
+		thetaX = 360 - Math.abs(angle4 - angle2);
+
+		if (thetaY > 180) {
+			thetaY = 360 - thetaY;
+		}
+
+		if (thetaX > 180) {
+			thetaX = 360 - thetaX;
+		}
+
+		// calculate correct x and y positions
+		x = -lightSensorToWheel * Math.cos(Math.toRadians(thetaY / 2));
+		y = -lightSensorToWheel * Math.cos(Math.toRadians(thetaX / 2));
+		
+		odo.setPosition(new double[] { x, y, 0},
+				new boolean[] { true, true, false });
+
+		// navigate to point (0,0) and then set heading to 0 degrees
+		travelCoordinate(0, 0);
+		turnTo(0);
+
 	}
-	
-	// TODO: filter this data
-	private int getFilteredUSData() {
-		//TODO: get rid of rconsole
-		distance = ultrasonicSensor.getDistance();
-		RConsole.println("Distance: " + distance + " Theta: " + odo.getAng());
-		return distance;
-	}
-	
-} // end of doc
+
+}

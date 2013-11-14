@@ -223,48 +223,49 @@ public class SensorMotorUser {
 		return ultrasonicSensor.getDistance();
 	}
 	
-	// signed difference
-	// exponential average
-	private int prevValue = 0;//, prevDiff = 0;
-	//boolean positiveDiff = false;
-	boolean negativeDiff = false;
-	//private int[] window = {0,0,0};
+	private int prevValueL = 0;
+	private int prevValueR = 0;
+	boolean negativeDiffL = false;
+	boolean negativeDiffR = false;
 	
-	public boolean lineDetected(ColorSensor cs){
+	public boolean lineDetected(ColorSensor cs, boolean left) {
 		int value = cs.getRawLightValue();
-		int diff = (value - prevValue);
+		int diff = (left) ? (value - prevValueL) : (value - prevValueR);
+		
+		if (left) {
+			prevValueL = value;
+		} else {
+			prevValueR = value;
+		}
+		
+		//int diff = (value - prevValue);
 		RConsole.println("Diff: " + diff);
 		if(diff<-LINE_DIFF){
-			negativeDiff = true;
+			if (left) {
+				negativeDiffL = true;
+			} else {
+				negativeDiffR = true;
+			}
+			//negativeDiff = true;
 		}
 		
-		if(diff>LINE_DIFF&&negativeDiff){
-			RConsole.println(" detected");
-			
-			negativeDiff = false;
-			
-			return true;
+		if(diff>LINE_DIFF/* && negativeDiff*/){
+			if (negativeDiffL) {
+				RConsole.println("detected");
+				negativeDiffL = false;
+				return true;
+			} else if (negativeDiffR) {
+				RConsole.println("detected");
+				negativeDiffR = false;
+				return true;
+			}
+//			RConsole.println("Detected");
+//			negativeDiff = false;
+//			return true;
 		}
 		
-		prevValue = value;
+		//prevValue = value;
 		return false;
-		
-		
-		//shiftArrayByOne(window,diff);
-		
-		//double average = getMean(window);
-		
-		/*if (average > LINE_DIFF) {
-			prevValue = value;
-			//prevDiff = diff;
-			RConsole.println("Diff: " + diff + " detected");
-			return true;
-		} else {
-			prevValue = value;
-			//prevDiff = diff;
-			RConsole.println("Diff: " + diff);
-			return false;
-		}*/
 	}
 	
 	

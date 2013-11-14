@@ -30,19 +30,21 @@ public class TestLineColor /*extends Thread*/ {
 		
 		MobileRobot robot = new MobileRobot();
 
-		Color color;
+		//Color color;
 
 		RConsole.open(); // opens a USB connection with no timeout
 		robot.setForwardSpeed(SensorMotorUser.FORWARD_SPEED);
 		SensorMotorUser.leftCS.setFloodlight(true);
 		SensorMotorUser.rightCS.setFloodlight(true);
 		int buttonChoice;
+		boolean left = false;
+		boolean right = false;
 		do {
-			try {
-				Thread.sleep(50); // sleep for quarter second
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+//			try {
+//				Thread.sleep(50); // sleep for quarter second
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 
 //			color = SensorMotorUser.leftCS.getColor();
 //			int colorValue = color.getBlue();
@@ -51,13 +53,20 @@ public class TestLineColor /*extends Thread*/ {
 //			RConsole.println(colorValue + " " + colorValue2); // first is left, second is right
 			
 			//TODO: add line detection method
-			if (robot.lineDetected(SensorMotorUser.leftCS)) {
-				RConsole.print(" left detected\n");
+			if (robot.lineDetected(SensorMotorUser.leftCS, true)) {
+				RConsole.println("left");
+				left = true;
+			}
+			if (robot.lineDetected(SensorMotorUser.rightCS, false)) {
+				RConsole.println("right");
+				right = true;
+			}
+			if (left && right) {
+				RConsole.println("both");
 				Sound.beep();
-			}// else if (robot.lineDetected(SensorMotorUser.rightCS)) {
-//				RConsole.print(" right detected\n");
-//				Sound.beep();
-//			}
+				left = false;
+				right = false;
+			}
 			
 			buttonChoice = Button.readButtons();
 

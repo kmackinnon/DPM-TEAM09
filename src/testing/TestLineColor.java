@@ -6,6 +6,7 @@ import lejos.nxt.ColorSensor.Color;
 import lejos.nxt.SensorPort;
 import lejos.nxt.comm.RConsole;
 import robot.MobileRobot;
+import robot.SensorMotorUser;
 
 /**
  * 
@@ -22,31 +23,29 @@ import robot.MobileRobot;
  * @author Keith MacKinnon and Sidney Ng
  * 
  */
-public class TestLineColor extends Thread {
+public class TestLineColor /*extends Thread*/ {
 
 	public static void main(String[] args) {
 		
 		MobileRobot robot = new MobileRobot();
-		ColorSensor lcs = new ColorSensor(SensorPort.S3);
-		ColorSensor rcs = new ColorSensor(SensorPort.S3);
 
 		Color color;
 
 		RConsole.open(); // opens a USB connection with no timeout
-		robot.startMotors();
+		robot.setForwardSpeed(SensorMotorUser.FORWARD_SPEED);
 		
 		int buttonChoice;
 		do {
-			try {
-				Thread.sleep(100); // sleep for quarter second
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+//			try {
+//				Thread.sleep(100); // sleep for quarter second
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 
-			color = lcs.getColor();
-			int colorValue = color.getGreen();
-			color = rcs.getColor();
-			int colorValue2 = color.getGreen();
+			color = SensorMotorUser.leftCS.getColor();
+			int colorValue = color.getBlue();
+			color = SensorMotorUser.rightCS.getColor();
+			int colorValue2 = color.getBlue();
 			RConsole.println(colorValue + " " + colorValue2); // first is left, second is right
 			
 			//TODO: add line detection method

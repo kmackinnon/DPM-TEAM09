@@ -74,9 +74,9 @@ public class SensorMotorUser {
 
 	public static final double sensorWidth = 11.05;
 	
-	public static final int LINE_COLOR = 520;
+	public static final int LINE_COLOR = 20;
 	
-	private static final int LINE_COLOR_COUNT_THRESHOLD = 7;
+//	private static final int LINE_COLOR_COUNT_THRESHOLD = 7;
 	
 	private static int lineColorCount = 0;
 	
@@ -222,29 +222,20 @@ public class SensorMotorUser {
 		return ultrasonicSensor.getDistance();
 	}
 	
-	
-	public boolean lineDetected(ColorSensor cs){
+	private int prevLeft, prevRight;
+	public boolean lineDetected(){
+		int leftValue = leftCS.getColor().getBlue();
+		int rightValue = rightCS.getColor().getBlue();
 		
-		if(cs.getRawLightValue() < LINE_COLOR){
-			
-			lineColorCount++;
-			
-			if(lineColorCount>=LINE_COLOR_COUNT_THRESHOLD){
-				
-				return true;
-				
-			}
-			
+		if(leftValue - prevLeft > LINE_COLOR && rightValue - prevRight > LINE_COLOR){
+			prevLeft = leftValue;
+			prevRight = rightValue;
+			return true;
+		} else {
+			prevLeft = leftValue;
+			prevRight = rightValue;
+			return false;
 		}
-		
-		else{
-			
-			lineColorCount = 0;
-			
-		}
-		
-		return false;
-		
 	}
 	
 	

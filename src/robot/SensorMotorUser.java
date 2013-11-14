@@ -232,12 +232,6 @@ public class SensorMotorUser {
 		int value = cs.getRawLightValue();
 		int diff = (left) ? (value - prevValueL) : (value - prevValueR);
 		
-		if (left) {
-			prevValueL = value;
-		} else {
-			prevValueR = value;
-		}
-		
 		//int diff = (value - prevValue);
 		RConsole.println("Diff: " + diff);
 		if(diff<-LINE_DIFF){
@@ -262,6 +256,12 @@ public class SensorMotorUser {
 //			RConsole.println("Detected");
 //			negativeDiff = false;
 //			return true;
+		}
+		
+		if (left) {
+			prevValueL = value;
+		} else {
+			prevValueR = value;
 		}
 		
 		//prevValue = value;

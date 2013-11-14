@@ -21,7 +21,7 @@ import robot.SensorMotorUser;
  * 6. Return to step 2
  * 
  */
-public class TestLineDetection extends Thread {
+public class TestLineColor extends Thread {
 
 	public static void main(String[] args) {
 		

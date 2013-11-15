@@ -238,11 +238,11 @@ public class SensorMotorUser {
 		
 		if(diff>LINE_DIFF){
 			if (negativeDiffL) {
-				RConsole.println("detected");
+				RConsole.println("Ldetected");
 				negativeDiffL = false;
 				return true;
 			} else if (negativeDiffR) {
-				RConsole.println("detected");
+				RConsole.println("Rdetected");
 				negativeDiffR = false;
 				return true;
 			}

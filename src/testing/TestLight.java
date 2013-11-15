@@ -51,7 +51,7 @@ public class TestLight {
 			buttonChoice = Button.readButtons();
 
 		} while (buttonChoice != Button.ID_ESCAPE);
-		robot.stopMotors();
+		robot.setSpeeds(0.0, 0.0);
 		RConsole.close(); // closes the USB connection
 	}
 

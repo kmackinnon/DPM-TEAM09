@@ -1,6 +1,5 @@
 package robot;
 
-import lejos.nxt.Sound;
 
 /**
  * Explorer looks for styrofoam blocks. As soon as it finds a styrofoam block,
@@ -33,11 +32,18 @@ public class Explorer extends MobileRobot {
 		}
 
 		rowCounter = 0;
+		
+		Intersection current;
 
-		for (int initialRow = rowNumber; forLoopCondition(rowNumber, initialRow); forLoopAfterthought(
+		for (int initialRow = rowNumber; loopCondition(rowNumber, initialRow); loopAfterthought(
 				'R', initialRow)) {
+					
+			current = Map.getIntersection(odo.getX(), odo.getY());
+			
+			//TODO figure out how to determine destination
+			//Dijkstra.algorithm(current,destination);
 
-			for (int initialColumn = columnNumber; forLoopCondition(
+		/*	for (int initialColumn = columnNumber; loopCondition(
 					columnNumber, initialColumn); forLoopAfterthought('C',
 					initialColumn)) {
 
@@ -45,16 +51,13 @@ public class Explorer extends MobileRobot {
 
 				travelToNeighbor(neighbor);
 
-			}
+			}*/
 
 			if (columnNumber == (Map.NUM_OF_INTERSECTIONS)) {
 				columnNumber--;
-			}
-
-			else {
+			} else {
 				columnNumber++;
 			}
-
 		}
 
 	}
@@ -62,59 +65,42 @@ public class Explorer extends MobileRobot {
 	private Intersection useCorrectXYToGetIntersection(int initialRow) {
 
 		if (initialRow == getYStart()) {
-
 			return Map.getIntersection(columnNumber, rowNumber);
-
-		}
-
-		else {
-
+		} else {
 			return Map.getIntersection(rowNumber, columnNumber);
-
 		}
-
 	}
 
-	private boolean forLoopCondition(int currentPosition, int startPosition) {
+	private boolean loopCondition(int currentPosition, int startPosition) {
 
 		if (startPosition < (Map.NUM_OF_INTERSECTIONS - 1)) {
 			return currentPosition < Map.NUM_OF_INTERSECTIONS;
-		}
-
-		else {
+		} else {
 			return currentPosition >= 0;
 		}
-
 	}
 
-	private void forLoopAfterthought(char rowOrColumn, int startPosition) {
+	private void loopAfterthought(char rowOrColumn, int startPosition) {
 
 		if (rowOrColumn == 'R') {
 
 			if (startPosition < (Map.NUM_OF_INTERSECTIONS - 1)) {
 				rowNumber++;
-			}
-
-			else {
+			} else {
 				rowNumber--;
 			}
 
 			rowCounter++;
-
 		}
 
 		else if (rowOrColumn == 'C') {
 
 			if (startPosition < (Map.NUM_OF_INTERSECTIONS - 1)) {
 				columnNumber++;
-			}
-
-			else {
+			} else {
 				columnNumber--;
 			}
-
 		}
-
 	}
 
 }

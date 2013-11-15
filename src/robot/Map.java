@@ -146,10 +146,23 @@ public class Map {
 
 	}
 
+	
+	public static Intersection getIntersection(double x, double y){
+		
+		int xGrid = (int) Math.round(x / Map.TILE_SIZE);
+		int yGrid = (int) Math.round(y / Map.TILE_SIZE);
+		
+		return get(index(xGrid,yGrid));
+			
+	}
+	
+	
+	/** Returns the intersection based on x and y tile coordinates */
 	public static Intersection getIntersection(int x, int y) {
 		return get(index(x, y));
 	}
 
+	/** Returns the intersection based on "intersection" object */
 	public static Intersection getIntersection(Intersection intersection) {
 
 		int index = index(intersection.getX(), intersection.getY());

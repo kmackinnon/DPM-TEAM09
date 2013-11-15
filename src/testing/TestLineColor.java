@@ -54,19 +54,20 @@ public class TestLineColor /*extends Thread*/ {
 			
 			//TODO: add line detection method
 			if (robot.lineDetected(SensorMotorUser.leftCS, true)) {
-				RConsole.println("left");
+//				RConsole.println("left");
 				left = true;
 			}
 			if (robot.lineDetected(SensorMotorUser.rightCS, false)) {
-				RConsole.println("right");
+//				RConsole.println("right");
 				right = true;
+				//Sound.twoBeeps();
 			}
-			if (left && right) {
-				RConsole.println("both");
-				Sound.beep();
-				left = false;
-				right = false;
-			}
+//			if (left && right) {
+//				RConsole.println("both");
+//				Sound.beep();
+//				left = false;
+//				right = false;
+//			}
 			
 			buttonChoice = Button.readButtons();
 

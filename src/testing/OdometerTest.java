@@ -27,7 +27,7 @@ public class OdometerTest {
 		while (option == 0)
 			option = Button.waitForAnyPress();
 		
-		RConsole.open();
+//		RConsole.open();
 		
 		switch(option) {
 		case Button.ID_LEFT:
@@ -44,7 +44,7 @@ public class OdometerTest {
 			break;
 		}
 		Button.waitForAnyPress();
-		RConsole.close();
+//		RConsole.close();
 		System.exit(0);
 	}
 	

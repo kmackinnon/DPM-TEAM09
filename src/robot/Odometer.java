@@ -6,11 +6,7 @@ package robot;
  * 
  */
 
-import lejos.nxt.ColorSensor;
-import lejos.nxt.SensorPort;
-import lejos.nxt.Sound;
 import lejos.nxt.comm.RConsole;
-import lejos.robotics.Color;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
 
@@ -278,32 +274,6 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	public void getDisplacementAndHeading(double[] data) {
 		data[0] = getDisplacement();
 		data[1] = getHeading();
-	}
-
-	
-
-	/**
-	 * this is to filter the wrong value that has been accumulated by the
-	 * colorsensor we have.
-	 * 
-	 * @param cs
-	 *            = colorSensor
-	 * @return the colorID of the detection
-	 */
-	public int getFilteredData(ColorSensor cs) {
-		int colorID;
-		colorID = cs.getColorID();
-		int counter = 2;
-		while (counter != 0) {
-			int currColor = cs.getColorID();
-			if (currColor == colorID)
-				counter--;
-			else {
-				counter = 3;
-				colorID = currColor;
-			}
-		}
-		return colorID;
 	}
 	
 }

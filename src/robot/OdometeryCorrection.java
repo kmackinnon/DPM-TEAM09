@@ -73,7 +73,7 @@ public class OdometeryCorrection extends Thread{
 						odo.theta = odo.theta + Math.toDegrees(angleOff);
 						odo.x = initPos[0] + (length)* Math.sin(angleOff);
 						odo.y = initPos[1] + (length)* Math.cos(angleOff);
-						RConsole.println("x: " + odo.x + "y: " + odo.y + " theta: " + odo.theta);
+//						RConsole.println("x: " + odo.x + "y: " + odo.y + " theta: " + odo.theta);
 					}
 					rightSensor = false;
 					leftSensor = false;

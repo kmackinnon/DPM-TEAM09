@@ -1,6 +1,7 @@
 package robot;
 
 
+
 /**
  * Explorer looks for styrofoam blocks. As soon as it finds a styrofoam block,
  * it takes a rest. It does not move styrofoam blocks or lift them.
@@ -23,54 +24,98 @@ public class Explorer extends MobileRobot {
 
 		if (getXStart() == getYStart()) {
 			rowNumber = getYStart();
-			columnNumber = getXStart();
 		}
 
 		else {
 			rowNumber = getXStart();
-			columnNumber = getYStart();
 		}
 
 		rowCounter = 0;
-		
-		Intersection current;
 
-		for (int initialRow = rowNumber; loopCondition(rowNumber, initialRow); loopAfterthought(
-				'R', initialRow)) {
-					
-			current = Map.getIntersection(odo.getX(), odo.getY());
+		for (int initialRow = rowNumber; loopCondition(rowNumber, initialRow); loopAfterthought(initialRow)) {
 			
-			//TODO figure out how to determine destination
-			//Dijkstra.algorithm(current,destination);
+			travelTo(endOfCurrentRow());
+			
+			travelTo(nextRow());
+		}
 
-		/*	for (int initialColumn = columnNumber; loopCondition(
-					columnNumber, initialColumn); forLoopAfterthought('C',
-					initialColumn)) {
+	}
 
-				Intersection neighbor = useCorrectXYToGetIntersection(initialRow);
-
-				travelToNeighbor(neighbor);
-
-			}*/
-
-			if (columnNumber == (Map.NUM_OF_INTERSECTIONS)) {
-				columnNumber--;
-			} else {
-				columnNumber++;
+	
+	
+	private Intersection endOfCurrentRow(){
+		return getNextDestination(rowNumber);
+	}
+	
+	private Intersection nextRow(){
+		if(getXStart()==0 && getYStart()==0 && rowNumber!=Map.NUM_OF_INTERSECTIONS-1){
+			return getNextDestination(rowNumber+1);
+		}
+		
+		else if(getXStart()==0 && getYStart()== Map.NUM_OF_INTERSECTIONS-1 && rowNumber!=Map.NUM_OF_INTERSECTIONS-1){
+			return getNextDestination(rowNumber+1);
+		}
+		
+		else if(getXStart()==Map.NUM_OF_INTERSECTIONS-1 && getYStart()== Map.NUM_OF_INTERSECTIONS-1 && rowNumber!=0){
+			return getNextDestination(rowNumber-1);
+		}
+		
+		else if(getXStart()==Map.NUM_OF_INTERSECTIONS-1 && getYStart()== 0 && rowNumber!=0){
+			return getNextDestination(rowNumber-1);
+		}
+		
+		return Map.getIntersection(0,0);
+	}
+	
+	
+	private Intersection getNextDestination(int tempRowNumber){
+		
+		if(rowCounter%2 == 0){
+			
+			if(getXStart()==0 && getYStart()==0){
+				return Map.getIntersection(Map.NUM_OF_INTERSECTIONS-1,tempRowNumber);
 			}
+			
+			else if(getXStart() == 0 && getYStart()==Map.NUM_OF_INTERSECTIONS-1){
+				return Map.getIntersection(tempRowNumber,0);
+			}
+			
+			else if(getXStart() == Map.NUM_OF_INTERSECTIONS-1 && getYStart()==Map.NUM_OF_INTERSECTIONS-1){
+				return Map.getIntersection(0,tempRowNumber);
+			}
+			
+			else if(getXStart() == Map.NUM_OF_INTERSECTIONS-1 && getYStart()==0){
+				return Map.getIntersection(tempRowNumber,Map.NUM_OF_INTERSECTIONS-1);
+			}
+			
 		}
-
-	}
-
-	private Intersection useCorrectXYToGetIntersection(int initialRow) {
-
-		if (initialRow == getYStart()) {
-			return Map.getIntersection(columnNumber, rowNumber);
-		} else {
-			return Map.getIntersection(rowNumber, columnNumber);
+		
+		else if(rowCounter%2 != 0){
+				
+			if(getXStart()==0 && getYStart()==0){
+				return Map.getIntersection(0,tempRowNumber);
+			}
+			
+			else if(getXStart() == 0 && getYStart()==Map.NUM_OF_INTERSECTIONS-1){
+				return Map.getIntersection(tempRowNumber,Map.NUM_OF_INTERSECTIONS-1);
+			}
+			
+			else if(getXStart() == Map.NUM_OF_INTERSECTIONS-1 && getYStart()==Map.NUM_OF_INTERSECTIONS-1){
+				return Map.getIntersection(Map.NUM_OF_INTERSECTIONS-1,tempRowNumber);
+			}
+			
+			else if(getXStart() == Map.NUM_OF_INTERSECTIONS-1 && getYStart()==0){
+				return Map.getIntersection(tempRowNumber,0);
+			}
+			
 		}
+		
+		return Map.getIntersection(0,0);
+		
 	}
-
+	
+	
+	
 	private boolean loopCondition(int currentPosition, int startPosition) {
 
 		if (startPosition < (Map.NUM_OF_INTERSECTIONS - 1)) {
@@ -80,27 +125,16 @@ public class Explorer extends MobileRobot {
 		}
 	}
 
-	private void loopAfterthought(char rowOrColumn, int startPosition) {
+	private void loopAfterthought(int startPosition) {
 
-		if (rowOrColumn == 'R') {
-
-			if (startPosition < (Map.NUM_OF_INTERSECTIONS - 1)) {
-				rowNumber++;
-			} else {
-				rowNumber--;
-			}
-
-			rowCounter++;
+		if (startPosition < (Map.NUM_OF_INTERSECTIONS - 1)) {
+			rowNumber++;
+		} else {
+			rowNumber--;
 		}
 
-		else if (rowOrColumn == 'C') {
+		rowCounter++;
 
-			if (startPosition < (Map.NUM_OF_INTERSECTIONS - 1)) {
-				columnNumber++;
-			} else {
-				columnNumber--;
-			}
-		}
 	}
 
 }

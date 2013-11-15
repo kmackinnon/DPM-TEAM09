@@ -11,24 +11,30 @@ import lejos.nxt.comm.RConsole;
  * styrofoam
  * 
  */
-public class BlockDetector extends SensorMotorUser{
-	
+public class BlockDetector extends SensorMotorUser {
+
 	private static final int DIST_TO_STOP = 11;
-	
+
 	private static final int LIGHT_DIFF = 5;
-	
+
 	public BlockDetector() {
 
 	}
-	
-	
-	
-	private int[] window = {255, 255, 255, 255, 255};
+
+	private int[] window = { 255, 255, 255, 255, 255 };
 	private int prevValue = 0;
 	private boolean prevLatch = false;
+
+	/**
+	 * Returns a boolean indicating whether or not a block is detected by the
+	 * ultrasonic or color sensor.
+	 * 
+	 * @return true if a block is detected, false otherwise.
+	 */
+	
 	public boolean objectDetected() {
-		//SensorMotorUser.frontCS.setFloodlight(true);
-		
+		// SensorMotorUser.frontCS.setFloodlight(true);
+
 		// stopping by ultrasonic sensor
 		shiftArrayByOne(window, ultrasonicSensor.getDistance());
 		int median = getMedian(window);
@@ -36,7 +42,7 @@ public class BlockDetector extends SensorMotorUser{
 		if (median <= DIST_TO_STOP) {
 			return true;
 		}
-		
+
 		// stopping by color sensor differential
 		boolean latch = false;
 		int value = frontCS.getRawLightValue();
@@ -51,73 +57,44 @@ public class BlockDetector extends SensorMotorUser{
 		prevValue = value;
 		return false;
 	}
-	
-	public boolean blockDetected() {
-		Color colorValue = frontCS.getColor();
-		double redValue = colorValue.getRed();
-		double greenValue = colorValue.getGreen();
-		double blueValue = colorValue.getBlue();
 
-		RConsole.println(redValue + " " + greenValue + " " + blueValue);
-
-		double testValue = -1.0;
-		if (blueValue != 0) {
-			testValue = ((redValue / blueValue) * (greenValue / blueValue));
-		}
-		
-		RConsole.println("testValue: " + testValue);// + " distance: " + distance);
-		
-		if (testValue < .9 && testValue > .75) {
-			return true; // this is only true within a certain distance 5-7 by the ultrasonic readings
-		}
-		
-		return false;
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	// TODO fill in
 	/**
-	 * Returns a boolean indicating whether or not a block is detected by the ultrasonic or color sensor.
-	 * 
-	 * @return true if a block is detected, false otherwise.
-	 */
-	public boolean frontDetectBlock() {
-		
-		return false;
-	}
-
-	// TODO fill in
-	/**Returns a boolean indicating whether or not the block is styrofoam.
+	 * Returns a boolean indicating whether or not the block is styrofoam.
 	 * 
 	 * @return true if styrofoam, false otherwise.
 	 */
-	public boolean isStyrofoam() {
+	public boolean isStyrofoam(double red, double green, double blue) {
+
+		//RConsole.println(red + " " + green + " " + blue);
+
+		double testValue = -1.0;
+		if (blue != 0) {
+			testValue = ((red / blue) * (green / blue));
+		}
+
+		//RConsole.println("testValue: " + testValue);
+
+		if (testValue > .75 && testValue < .9 ) {
+			return true; // this is only true when 5-7 cm from block
+		}
 
 		return false;
 	}
 
-	// TODO fill in
-	/**Returns a boolean indicating whether or not the block is wooden.
+	/**
+	 * Returns a boolean indicating whether or not the block is wooden.
 	 * 
 	 * @return true if wooden, false otherwise.
 	 */
-	public boolean isWood() {
+	public boolean isWood(double red, double green, double blue) {
+		
+		double testValue = -1.0;
+		
+		testValue = ((red / blue) * (green / blue));
+		
+		if (testValue > 1.9){
+			return true;
+		}
 
 		return false;
 	}

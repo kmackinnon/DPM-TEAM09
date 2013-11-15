@@ -1,7 +1,5 @@
 package robot;
 
-
-
 /**
  * Explorer looks for styrofoam blocks. As soon as it finds a styrofoam block,
  * it takes a rest. It does not move styrofoam blocks or lift them.
@@ -68,24 +66,53 @@ public class Explorer extends MobileRobot {
 	}
 	
 	
+	
+	private Intersection getValidIntersection(int tempRowNumber, int defaultDestination, boolean yIsRow){
+	
+		Intersection intersection;
+		
+		for(int i = 1; i<= Map.NUM_OF_INTERSECTIONS; i++){
+			
+			if(yIsRow){
+				
+				intersection = Map.getIntersection(Math.abs(defaultDestination-i),tempRowNumber);
+				
+			}
+			
+			else{
+				
+				intersection = Map.getIntersection(tempRowNumber,Math.abs(defaultDestination-i));
+				
+			}
+			
+			if(intersection!=null){
+				return intersection;
+			}
+		
+		}
+		
+		return Map.getIntersection(0,0);
+	}
+	
+	
 	private Intersection getNextDestination(int tempRowNumber){
 		
 		if(rowCounter%2 == 0){
 			
 			if(getXStart()==0 && getYStart()==0){
-				return Map.getIntersection(Map.NUM_OF_INTERSECTIONS-1,tempRowNumber);
+				return getValidIntersection(tempRowNumber,Map.NUM_OF_INTERSECTIONS,true);
 			}
 			
 			else if(getXStart() == 0 && getYStart()==Map.NUM_OF_INTERSECTIONS-1){
-				return Map.getIntersection(tempRowNumber,0);
+				return getValidIntersection(tempRowNumber,1,false);
 			}
 			
 			else if(getXStart() == Map.NUM_OF_INTERSECTIONS-1 && getYStart()==Map.NUM_OF_INTERSECTIONS-1){
-				return Map.getIntersection(0,tempRowNumber);
+				return getValidIntersection(tempRowNumber,1,true);
 			}
 			
 			else if(getXStart() == Map.NUM_OF_INTERSECTIONS-1 && getYStart()==0){
-				return Map.getIntersection(tempRowNumber,Map.NUM_OF_INTERSECTIONS-1);
+				return getValidIntersection(tempRowNumber,Map.NUM_OF_INTERSECTIONS,false);
 			}
 			
 		}
@@ -93,19 +120,19 @@ public class Explorer extends MobileRobot {
 		else if(rowCounter%2 != 0){
 				
 			if(getXStart()==0 && getYStart()==0){
-				return Map.getIntersection(0,tempRowNumber);
+				return getValidIntersection(tempRowNumber,1,true);
 			}
 			
 			else if(getXStart() == 0 && getYStart()==Map.NUM_OF_INTERSECTIONS-1){
-				return Map.getIntersection(tempRowNumber,Map.NUM_OF_INTERSECTIONS-1);
+				return getValidIntersection(tempRowNumber,Map.NUM_OF_INTERSECTIONS,false);
 			}
 			
 			else if(getXStart() == Map.NUM_OF_INTERSECTIONS-1 && getYStart()==Map.NUM_OF_INTERSECTIONS-1){
-				return Map.getIntersection(Map.NUM_OF_INTERSECTIONS-1,tempRowNumber);
+				return getValidIntersection(tempRowNumber,Map.NUM_OF_INTERSECTIONS,true);
 			}
 			
 			else if(getXStart() == Map.NUM_OF_INTERSECTIONS-1 && getYStart()==0){
-				return Map.getIntersection(tempRowNumber,0);
+				return getValidIntersection(tempRowNumber,1,false);
 			}
 			
 		}

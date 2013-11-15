@@ -54,8 +54,11 @@ public class Competitor {
 			connectBT(); // start the BT connection determines characteristics
 
 		} else {
-			int[] testGreen = { 0, 5, 2, 9 }; // green zone
-			int[] testRed = { 6, 3, 8, 4 }; // red zone
+			//int[] testGreen = { 0, 5, 2, 9 }; // green zone
+			//int[] testRed = { 6, 3, 8, 4 }; // red zone
+			
+			int[] testGreen = { 0, 3, 2, 4 };
+			int[] testRed = {4, 3, 5, 4 };
 
 			// set corner
 			corner = StartCorner.BOTTOM_LEFT;
@@ -63,9 +66,10 @@ public class Competitor {
 			// set role. For now, assume the robot will be a builder.
 			SensorMotorUser.becomeBuilder(true);
 
-			// TODO fix Map. Something there is causing exception 67.
-			/*Map.setForbiddenZone(testGreen);
-			Map.setTargetZone(testRed);*/
+			// ensure that map size is big enough for test data
+			Map.setTargetZone(testGreen);
+			Map.setForbiddenZone(testRed);
+			
 		}
 
 		// sets the start corner from the test data or from the BT connection
@@ -74,9 +78,11 @@ public class Competitor {
 		
 	
 		localizer.localize();
-		Sound.beep(); 
+		Sound.beep();
 		
-		explorer.lookForStyrofoamBlocks();
+		explorer.travelCoordinate(0,3);
+		
+		//explorer.lookForStyrofoamBlocks();
 
 		System.exit(0);
 	}

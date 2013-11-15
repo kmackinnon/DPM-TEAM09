@@ -3,10 +3,11 @@ package robot;
 import java.util.Arrays;
 
 import lejos.nxt.ColorSensor;
-import lejos.nxt.LCD;
+import lejos.nxt.ColorSensor.Color;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
+import lejos.nxt.Sound;
 import lejos.nxt.UltrasonicSensor;
 import lejos.nxt.comm.RConsole;
 
@@ -77,10 +78,6 @@ public class SensorMotorUser {
 	
 	public static final int LINE_DIFF = 20;
 	
-//	private static final int LINE_COLOR_COUNT_THRESHOLD = 7;
-	
-//	private static int lineColorCount = 0;
-	
 	private static boolean isBuilder;
 
 	private static boolean isBuilderHasBeenSet = false;
@@ -89,9 +86,7 @@ public class SensorMotorUser {
 	
 	private static boolean startCornerHasBeenSet = false;
 	
-	
-	
-	
+
 	
 	
 	public static void becomeBuilder(boolean willBuild){
@@ -225,14 +220,13 @@ public class SensorMotorUser {
 	
 	private int prevValueL = 0;
 	private int prevValueR = 0;
-	boolean negativeDiffL = false;
-	boolean negativeDiffR = false;
+	private boolean negativeDiffL = false;
+	private boolean negativeDiffR = false;
 	
 	public boolean lineDetected(ColorSensor cs, boolean left) {
 		int value = cs.getRawLightValue();
 		int diff = (left) ? (value - prevValueL) : (value - prevValueR);
 		
-		//int diff = (value - prevValue);
 		RConsole.println("Diff: " + diff);
 		if(diff<-LINE_DIFF){
 			if (left) {
@@ -240,10 +234,9 @@ public class SensorMotorUser {
 			} else {
 				negativeDiffR = true;
 			}
-			//negativeDiff = true;
 		}
 		
-		if(diff>LINE_DIFF/* && negativeDiff*/){
+		if(diff>LINE_DIFF){
 			if (negativeDiffL) {
 				RConsole.println("detected");
 				negativeDiffL = false;
@@ -253,9 +246,6 @@ public class SensorMotorUser {
 				negativeDiffR = false;
 				return true;
 			}
-//			RConsole.println("Detected");
-//			negativeDiff = false;
-//			return true;
 		}
 		
 		if (left) {
@@ -264,7 +254,6 @@ public class SensorMotorUser {
 			prevValueR = value;
 		}
 		
-		//prevValue = value;
 		return false;
 	}
 	

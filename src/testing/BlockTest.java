@@ -1,10 +1,11 @@
 package testing;
 
 import lejos.nxt.Button;
-import lejos.nxt.ColorSensor;
-import lejos.nxt.ColorSensor.Color;
-import lejos.nxt.SensorPort;
+import lejos.nxt.Sound;
 import lejos.nxt.comm.RConsole;
+import robot.BlockDetector;
+import robot.MobileRobot;
+import robot.SensorMotorUser;
 
 /**
  * 
@@ -16,36 +17,47 @@ import lejos.nxt.comm.RConsole;
  * @author Sidney Ng
  * 
  */
-public class BlockTest extends Thread {
+public class BlockTest /*extends Thread*/ {
 
 	public static void main(String[] args) {
-
-		ColorSensor cs = new ColorSensor(SensorPort.S2);
-		cs.setFloodlight(true);
-		Color color;
+		//MobileRobot robot = new MobileRobot();
+		BlockDetector blockDetector = new BlockDetector();
+		
+		//SensorMotorUser.frontCS.setFloodlight(true);
+		SensorMotorUser.clawMotor.setSpeed(60);
+		SensorMotorUser.clawMotor.rotateTo(320);
 
 		RConsole.open(); // opens a USB connection with no timeout
-
+		
+		//robot.setForwardSpeed(SensorMotorUser.FORWARD_SPEED);
+		boolean object = false;
 		int buttonChoice;
+		
 		do {
-			try {
-				Thread.sleep(100); // sleep for tenth of a second
-			} catch (Exception e) {
-				e.printStackTrace();
+//			try {
+//				Thread.sleep(25); // 20 polls per second
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+
+			if (!object) {
+				if (blockDetector.objectDetected()) {
+					//robot.stopMotors();
+					
+					object = true;
+				}
 			}
-
-			color = cs.getColor();
-			int redValue = color.getRed();
-			int greenValue = color.getGreen();
-			int blueValue = color.getBlue();
-			// boolean block;
-
-			RConsole.println(Integer.toString(redValue) + " "
-					+ Integer.toString(greenValue) + " "
-					+ Integer.toString(blueValue));
-
+			
+			
+			if (object) {
+				if (blockDetector.blockDetected()) {
+					RConsole.println("block");
+					Sound.beep();
+				}
+			}
+			
 			buttonChoice = Button.readButtons();
-
+			
 		} while (buttonChoice != Button.ID_ESCAPE);
 		RConsole.close(); // closes the USB connection
 	}

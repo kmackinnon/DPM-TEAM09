@@ -1,60 +1,65 @@
 package robot;
 
-import lejos.robotics.Color;
+import lejos.nxt.comm.RConsole;
 
 public class OdometeryCorrection extends Thread{
 	private Odometer odo;
-	
+	private Object lock = new Object();
 	public OdometeryCorrection(Odometer odo){
 		this.odo = odo;
 	}
-	public void correction() {
+	/**
+	 * This method helps the odometer get the correct position of the robot.
+	 */
+	public void run() {
 		double[] initPos = new double[3];
 		double[] destination = new double[3];
-
-		while ((odo.getFilteredData(odo.leftCS) == Color.BLACK)
-				|| (odo.getFilteredData(odo.rightCS) == Color.BLACK));
 		
-		odo.getPosition(initPos);
-		
-		if (odo.getFilteredData(odo.leftCS) == Color.BLACK) {
-			double prevRightTacho = odo.rightMotor.getTachoCount();
-			
-			while (odo.getFilteredData(odo.rightCS) == Color.BLACK);
-			
-			odo.getPosition(destination);
-			
-			double lastRightTacho = odo.rightMotor.getTachoCount();
-			double length = 2 * Math.PI * odo.rightRadius
-					* ((lastRightTacho - prevRightTacho) / 360);
-			
-			double angleOff = Math.atan(length / odo.sensorWidth);
-			
-			synchronized (odo.lock) {
-				odo.theta = odo.theta - angleOff;
-				odo.x = initPos[0] - (initPos[0] - destination[0])
-						* Math.sin(angleOff);
-				odo.y = initPos[1] - (initPos[1] - destination[1])
-						* Math.cos(angleOff);
-			}
-			
-		} else {
-			double prevLeftTacho = odo.leftMotor.getTachoCount();
-			
-			while (odo.getFilteredData(odo.leftCS) == Color.BLACK);
-			odo.getPosition(destination);
-			
-			double lastLeftTacho = odo.leftMotor.getTachoCount();
-			double length = 2 * Math.PI * odo.leftRadius
-					* ((lastLeftTacho - prevLeftTacho) / 360);
-			
-			double angleOff = Math.atan(length / odo.sensorWidth);
-			synchronized (odo.lock) {
-				odo.theta = odo.theta + angleOff;
-				odo.x = initPos[0] + (initPos[0] - destination[0])
-						* Math.sin(angleOff);
-				odo.y = initPos[1] + (initPos[1] - destination[1])
-						* Math.cos(angleOff);
+		while(true){
+			if(MobileRobot.isTurning!=true){
+				while (SensorMotorUser.lineDetected(SensorMotorUser.leftCS,true) || SensorMotorUser.lineDetected(SensorMotorUser.rightCS,false));
+					
+				odo.getPosition(initPos);
+					
+				if (SensorMotorUser.lineDetected(SensorMotorUser.leftCS,true)) {
+					double prevRightTacho = SensorMotorUser.rightMotor.getTachoCount();
+						
+					while (SensorMotorUser.lineDetected(SensorMotorUser.rightCS,false));
+						
+					odo.getPosition(destination);
+						
+					double lastRightTacho = SensorMotorUser.rightMotor.getTachoCount();
+					double length = 2 * Math.PI * SensorMotorUser.rightRadius
+							* ((lastRightTacho - prevRightTacho) / 360);
+						
+					double angleOff = + Math.atan(length / SensorMotorUser.sensorWidth);
+						
+					synchronized (lock) {
+						odo.x = initPos[0] + (length)* Math.sin(angleOff);
+						odo.y = initPos[1] + (length)* Math.cos(angleOff);
+						odo.theta = odo.theta + Math.toDegrees(angleOff);
+						RConsole.println("x: " + odo.x + "y: " + odo.y + " theta: " + odo.theta);
+						}
+					} 
+				else {
+					double prevLeftTacho = SensorMotorUser.leftMotor.getTachoCount();
+						
+					while (SensorMotorUser.lineDetected(SensorMotorUser.leftCS,true));
+					
+					odo.getPosition(destination);
+					
+					double lastLeftTacho = SensorMotorUser.leftMotor.getTachoCount();
+					double length = 2 * Math.PI * SensorMotorUser.leftRadius
+						* ((lastLeftTacho - prevLeftTacho) / 360);
+						
+					double angleOff = -Math.atan(length / SensorMotorUser.sensorWidth);
+					synchronized (lock) {
+						odo.theta = odo.theta + Math.toDegrees(angleOff);
+						odo.x = initPos[0] + (length)* Math.sin(angleOff);
+						odo.y = initPos[1] + (length)* Math.cos(angleOff);
+						RConsole.println("x: " + odo.x + "y: " + odo.y + " theta: " + odo.theta);
+					}
+				}
 			}
 		}
 	}

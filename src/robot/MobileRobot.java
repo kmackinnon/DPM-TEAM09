@@ -17,7 +17,7 @@ public class MobileRobot extends SensorMotorUser {
 
 	double[] pos = new double[3];
 	private double forwardSpeed, rotationSpeed;
-
+	public static boolean isTurning = false;
 	/**
 	 * Default Constructor
 	 * <p>
@@ -155,7 +155,7 @@ public class MobileRobot extends SensorMotorUser {
 	 *            angle to turn
 	 */
 	public void turnTo(double angle) {
-
+		isTurning = true;
 		double[] currPos = new double[3];
 		double currSpeed = ROTATION_SPEED;
 		double angDiff;
@@ -182,6 +182,7 @@ public class MobileRobot extends SensorMotorUser {
 			angDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
 		}
 		setSpeeds(0.0, 0.0);
+		isTurning = false;
 	}
 
 	// mutators

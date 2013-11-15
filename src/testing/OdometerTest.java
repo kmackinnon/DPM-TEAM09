@@ -1,7 +1,10 @@
 package testing;
 
 import lejos.nxt.Button;
+import lejos.nxt.comm.RConsole;
 import robot.MobileRobot;
+import robot.Odometer;
+import robot.OdometeryCorrection;
 
 /**
  * Test functionality of the Mobile Robot and accuracy of the Odometer.
@@ -17,17 +20,22 @@ public class OdometerTest {
 	
 	public static void main(String[] args) {
 		MobileRobot robot = new MobileRobot();
-
+		Odometer odo = new Odometer();
+		OdometeryCorrection corr = new OdometeryCorrection(odo);
 		int option = 0; // don't bother with button inputs
 		
 		while (option == 0)
 			option = Button.waitForAnyPress();
 		
+		RConsole.open();
+		
 		switch(option) {
 		case Button.ID_LEFT:
+			corr.start();
 			squareTest(robot);
 			break;
 		case Button.ID_RIGHT:
+			corr.start();
 			triangleTest(robot);
 			break;
 		default:
@@ -35,8 +43,8 @@ public class OdometerTest {
 			System.exit(-1);
 			break;
 		}
-		
 		Button.waitForAnyPress();
+		RConsole.close();
 		System.exit(0);
 	}
 	

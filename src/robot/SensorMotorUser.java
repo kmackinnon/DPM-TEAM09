@@ -218,16 +218,16 @@ public class SensorMotorUser {
 		return ultrasonicSensor.getDistance();
 	}
 	
-	private int prevValueL = 0;
-	private int prevValueR = 0;
-	private boolean negativeDiffL = false;
-	private boolean negativeDiffR = false;
+	private static int prevValueL = 0;
+	private static int prevValueR = 0;
+	private static boolean negativeDiffL = false;
+	private static boolean negativeDiffR = false;
 	
-	public boolean lineDetected(ColorSensor cs, boolean left) {
+	public static boolean lineDetected(ColorSensor cs, boolean left) {
 		int value = cs.getRawLightValue();
 		int diff = (left) ? (value - prevValueL) : (value - prevValueR);
 		
-		RConsole.println("Diff: " + diff);
+		//RConsole.println("Diff: " + diff);
 		if(diff<-LINE_DIFF){
 			if (left) {
 				negativeDiffL = true;

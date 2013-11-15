@@ -9,6 +9,7 @@ package robot;
 import lejos.nxt.ColorSensor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.Sound;
+import lejos.nxt.comm.RConsole;
 import lejos.robotics.Color;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
@@ -113,6 +114,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 
 			x += displacement * Math.sin(Math.toRadians(theta));
 			y += displacement * Math.cos(Math.toRadians(theta));
+			RConsole.println("x: " + x + "y: " + y + " theta: " + theta);
 		}
 
 		oldDisp += displacement;
@@ -278,59 +280,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		data[1] = getHeading();
 	}
 
-	/**
-	 * This method helps the odometer get the correct position of the robot.
-	 */
-	public void correction() {
-		double[] initPos = new double[3];
-		double[] destination = new double[3];
-
-		while ((getFilteredData(leftCS) == Color.BLACK)
-				|| (getFilteredData(rightCS) == Color.BLACK))
-			;
-		
-		if (getFilteredData(leftCS) == Color.BLACK) {
-			double prevRightTacho = rightMotor.getTachoCount();
-			
-			while (getFilteredData(rightCS) == Color.BLACK)
-				;
-			getPosition(destination);
-			
-			double lastRightTacho = rightMotor.getTachoCount();
-			double length = 2 * Math.PI * rightRadius
-					* ((lastRightTacho - prevRightTacho) / 360);
-			
-			double angleOff = Math.atan(length / sensorWidth);
-			
-			synchronized (lock) {
-				theta = theta - angleOff;
-				x = initPos[0] - (initPos[0] - destination[0])
-						* Math.sin(angleOff);
-				y = initPos[1] - (initPos[1] - destination[1])
-						* Math.cos(angleOff);
-			}
-			
-		} else {
-			double prevLeftTacho = leftMotor.getTachoCount();
-			
-			while (getFilteredData(leftCS) == Color.BLACK)
-				;
-			getPosition(destination);
-			
-			double lastLeftTacho = leftMotor.getTachoCount();
-			double length = 2 * Math.PI * leftRadius
-					* ((lastLeftTacho - prevLeftTacho) / 360);
-			
-			double angleOff = Math.atan(length / sensorWidth);
-			synchronized (lock) {
-				theta = theta + angleOff;
-				x = initPos[0] + (initPos[0] - destination[0])
-						* Math.sin(angleOff);
-				y = initPos[1] + (initPos[1] - destination[1])
-						* Math.cos(angleOff);
-			}
-		}
-	}
+	
 
 	/**
 	 * this is to filter the wrong value that has been accumulated by the
@@ -343,7 +293,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	public int getFilteredData(ColorSensor cs) {
 		int colorID;
 		colorID = cs.getColorID();
-		int counter = 3;
+		int counter = 2;
 		while (counter != 0) {
 			int currColor = cs.getColorID();
 			if (currColor == colorID)

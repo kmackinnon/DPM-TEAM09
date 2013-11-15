@@ -31,7 +31,7 @@ public class Localizer extends MobileRobot {
 		ultrasonicLocalization();
 		xyUltrasonicCorrection();
 		
-		travelCoordinate(0,0);
+		travelTileCoordinate(0,0);
 		turnTo(0);
 	}
 

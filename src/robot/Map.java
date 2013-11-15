@@ -12,7 +12,7 @@ public class Map {
 	public final static double TILE_SIZE = 30.48;
 
 	/** There are 11 intersections in both the x and y directions. */
-	public final static int NUM_OF_INTERSECTIONS = 11;
+	public final static int NUM_OF_INTERSECTIONS = 7;
 
 	private static ArrayList<Intersection> intersectionList = new ArrayList<Intersection>();
 

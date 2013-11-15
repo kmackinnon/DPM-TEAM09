@@ -26,7 +26,7 @@ public class Competitor {
 	private static int[] redZone;
 
 	public static void main(String[] args) throws InterruptedException {
-
+		
 		Map.initializeMap();
 
 		Localizer localizer = new Localizer();
@@ -74,15 +74,13 @@ public class Competitor {
 
 		// sets the start corner from the test data or from the BT connection
 		SensorMotorUser
-				.setStartCorner(new int[] { corner.getX(), corner.getY() });
+				.setStartCorner(corner.getCooridinates());
 		
 	
 		localizer.localize();
 		Sound.beep();
-		
-		explorer.travelCoordinate(0,3);
-		
-		//explorer.lookForStyrofoamBlocks();
+
+		explorer.lookForStyrofoamBlocks();
 
 		System.exit(0);
 	}

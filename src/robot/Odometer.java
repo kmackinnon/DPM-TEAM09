@@ -14,7 +14,6 @@ import lejos.util.Timer;
 import lejos.util.TimerListener;
 
 public class Odometer extends SensorMotorUser implements TimerListener {
-
 	/** Default period for the Timer object */
 	private static final int DEFAULT_PERIOD = 25;
 
@@ -23,13 +22,15 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 
 	// position data
 	/** Lock object to lock x, y and theta variables for reading and writing */
-	private Object lock;
+	protected Object lock;
 
 	/** Current x/y position */
-	private double x, y;
+	protected double x;
+
+	protected double y;
 
 	/** Current theta value */
-	private double theta;
+	protected double theta;
 
 	/** Displacement/heading value */
 	private double displacement, heading;
@@ -57,7 +58,6 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		oldDisp = 0.0;
 		oldHeading = 0.0;
 		lock = new Object();
-
 		// start the odometer immediately, if necessary
 		if (start)
 			odometerTimer.start();

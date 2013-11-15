@@ -27,16 +27,13 @@ public class MobileRobot extends SensorMotorUser {
 	}
 
 	public void travelTo(Intersection destination) {
-
 		Intersection source = Map.getIntersection(odo.getX(), odo.getY());
 
 		ArrayList<Intersection> listOfWayPoints = Dijkstra.algorithm(source,
 				destination);
 
 		for (Intersection intersection : listOfWayPoints) {
-
 			travelCoordinate(intersection.getXInCm(), intersection.getYInCm());
-
 		}
 
 	}
@@ -46,16 +43,13 @@ public class MobileRobot extends SensorMotorUser {
 	}
 
 	public void travelToTargetZone() {
-
 		Intersection source = Map.getIntersection(odo.getX(), odo.getY());
 
 		ArrayList<Intersection> listOfWayPoints = Dijkstra
 				.algorithmForTargetZone(source);
 
 		for (Intersection intersection : listOfWayPoints) {
-
 			travelCoordinate(intersection.getXInCm(), intersection.getYInCm());
-
 		}
 
 	}
@@ -269,15 +263,6 @@ public class MobileRobot extends SensorMotorUser {
 			rightMotor.setSpeed(1);
 		else
 			rightMotor.setSpeed((int) rightSpeed);
-
-	}
-
-	/**
-	 * Stops both motors. Calls NXTRegulatedMotor.stop()
-	 */
-	public void stopMotors() {
-		rightMotor.stop();
-		leftMotor.stop();
 	}
 
 	/**

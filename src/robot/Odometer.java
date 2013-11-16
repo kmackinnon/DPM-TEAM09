@@ -73,7 +73,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		//odometerTimer.start();
 	}
 
-	boolean tempTiming = true;
+	//boolean tempTiming = true;
 	/**
 	 * Executes every period.
 	 * <p>
@@ -83,9 +83,9 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	 */
 	public void timedOut() {
 
-		if(tempTiming){
+/*		if(tempTiming){
 			LCD.drawString(" "+ System.currentTimeMillis(), 0, 0);
-		}
+		}*/
 		
 		if (doCorrection) {
 			correctOdometer();
@@ -109,10 +109,10 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		oldDisp += displacement;
 		oldHeading += heading;
 		
-		if(tempTiming){
+/*		if(tempTiming){
 			LCD.drawString(" "+ System.currentTimeMillis(), 0, 1);
 			tempTiming = false;
-		}
+		}*/
 	}
 	
 	public void startOdometer(){
@@ -299,12 +299,12 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 				prevLeftTacho = leftMotor.getTachoCount();
 				rightSensorDetected = true;
 			}
-			Sound.beep();
+			//Sound.beep();
 		}
 
-		if (leftSensorDetected && !rightSensorDetected) {
+		if (leftSensorDetected && (!rightSensorDetected)) {
 
-			//Sound.beep();
+			Sound.beep();
 			
 			if (lineDetected(rightCS)) {
 
@@ -321,9 +321,9 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 
 		}
 
-		if (!leftSensorDetected && rightSensorDetected) {
+		if ((!leftSensorDetected) && (rightSensorDetected)) {
 
-			//Sound.beep();
+			Sound.beep();
 			
 			if (lineDetected(leftCS)) {
 
@@ -343,7 +343,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 
 		if (leftSensorDetected && rightSensorDetected) {
 
-			Sound.beep();
+			//Sound.beep();
 			
 			if (distanceTravelledByLaggingWheel != 0) {
 

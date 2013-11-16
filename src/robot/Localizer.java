@@ -14,6 +14,8 @@ public class Localizer extends MobileRobot {
 	private double angleA; // angle of right wall (assuming facing away)
 	private double angleB; // angle of left wall
 	
+	private final int SLEEP_PERIOD = 25;
+	
 	int distanceArray[] = new int[5];
 	int medianDistance;
 	
@@ -93,9 +95,10 @@ public class Localizer extends MobileRobot {
 			deltaTheta = 45 - ((angleA + angleB) / 2);
 		}
 
-		// update the odometer position (example to follow:)
-		odo.setPosition(new double[] { 0.0, 0.0, deltaTheta + angleB },
-				new boolean[] { true, true, true });
+		// update the odometer position
+		odo.setX(0);
+		odo.setY(0);
+		odo.setTheta(deltaTheta + angleB);
 
 	}
 
@@ -116,7 +119,7 @@ public class Localizer extends MobileRobot {
 
 			// right wall detected
 			if (medianDistance < 30) {
-				angleA = odo.getAng(); // latch angle
+				angleA = odo.getTheta(); // latch angle
 				isLatched = true;
 				break;
 			}
@@ -162,7 +165,7 @@ public class Localizer extends MobileRobot {
 
 			// left wall detected
 			if (medianDistance < 30) {
-				angleB = odo.getAng(); // latch angle
+				angleB = odo.getTheta(); // latch angle
 				break;
 			}
 			

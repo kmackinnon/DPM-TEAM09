@@ -3,13 +3,11 @@ package robot;
 import java.util.Arrays;
 
 import lejos.nxt.ColorSensor;
-import lejos.nxt.ColorSensor.Color;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.Sound;
 import lejos.nxt.UltrasonicSensor;
-import lejos.nxt.comm.RConsole;
 
 /**
  * SensorMotorUser contains methods that are needed when using the data received
@@ -44,15 +42,13 @@ public class SensorMotorUser {
 	public static final ColorSensor rightCS = new ColorSensor(SensorPort.S3);
 
 	/** The radius of the left wheel. */
-	public static final double leftRadius = 2.11;
+	public static final double LEFT_RADIUS = 2.11;
 
 	/** The radius of the right wheel. */
-	public static final double rightRadius = 2.11;
+	public static final double RIGHT_RADIUS = 2.11;
 
 	/** The distance between the two wheels */
-	public static final double width = 10.395;
-	
-	public static final double lightSensorToWheel = 1;
+	public static final double WIDTH = 10.395;
 
 	/**
 	 * The speed of the wheel motors when the robot is moving in a straight
@@ -71,12 +67,8 @@ public class SensorMotorUser {
 	 * number is how many degrees the motor rotates per second
 	 */
 	public static final int LIFTING_SPEED = 50;
-	
-	public static final int SLEEP_PERIOD = 25;
 
-	public static final double sensorWidth = 11.05;
-	
-	public static final int LINE_DIFF = 20;
+	public static final double SENSOR_WIDTH = 11.05;
 	
 	private static boolean isBuilder;
 
@@ -218,48 +210,7 @@ public class SensorMotorUser {
 		return ultrasonicSensor.getDistance();
 	}
 	
-	private static int prevValueL = 0;
-	private static int prevValueR = 0;
-	private static boolean negativeDiffL = false;
-	private static boolean negativeDiffR = false;
 	
-	public static boolean lineDetected(ColorSensor cs, boolean left) {
-		int value = cs.getRawLightValue();
-		int diff = (left) ? (value - prevValueL) : (value - prevValueR);
-		
-		RConsole.println("Diff: " + diff);
-		if(diff<-LINE_DIFF){
-			if (left) {
-				negativeDiffL = true;
-			} else {
-				negativeDiffR = true;
-			}
-		}
-		
-		if (left) {
-			prevValueL = value;
-		} else {
-			prevValueR = value;
-		}
-		
-		if(diff>LINE_DIFF){
-			if (negativeDiffL && left) {
-//				RConsole.println("Ldetected");
-				Sound.beep();
-				negativeDiffL = false;
-				return true;
-			} else if (negativeDiffR && !left) {
-//				RConsole.println("Rdetected");
-				Sound.beep();
-				negativeDiffR = false;
-				return true;
-			}
-		}
-		
-		
-		
-		return false;
-	}
 	
 	
 	

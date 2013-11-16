@@ -6,7 +6,8 @@ package robot;
  * 
  */
 
-import lejos.nxt.comm.RConsole;
+import lejos.nxt.ColorSensor;
+import lejos.nxt.Sound;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
 
@@ -19,15 +20,15 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 
 	// position data
 	/** Lock object to lock x, y and theta variables for reading and writing */
-	protected Object lock;
+	private Object lock;
 
 	/** Current x/y position */
-	protected double x;
+	private double x;
 
-	protected double y;
+	private double y;
 
 	/** Current theta value */
-	protected double theta;
+	private double theta;
 
 	/** Displacement/heading value */
 	private double displacement, heading;
@@ -35,7 +36,18 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	/** Previous displacement/heading values */
 	private double oldDisp, oldHeading;
 
-	/** light sensors for the correction */
+	/** Odometer correction variables */
+	private static final int LINE_DIFF = 20;
+	
+	private boolean leftSensorDetected;
+	private boolean rightSensorDetected;
+
+	private double prevRightTacho;
+	private double prevLeftTacho;
+
+	private double[] positionAtFirstDetection;
+
+	boolean doCorrection = false;
 
 	/**
 	 * Odometer constructor
@@ -46,49 +58,20 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	 *            Boolean indicating whether to start the timer on
 	 *            initialization
 	 */
-	public Odometer(int period, boolean start) {
+	public Odometer() {
 		// initialise variables
-		odometerTimer = new Timer(period, this);
+		odometerTimer = new Timer(DEFAULT_PERIOD, this);
 		x = 0.0;
 		y = 0.0;
 		theta = 0.0;
 		oldDisp = 0.0;
 		oldHeading = 0.0;
 		lock = new Object();
+		
 		// start the odometer immediately, if necessary
-		if (start)
-			odometerTimer.start();
+		odometerTimer.start();
 	}
 
-	/**
-	 * Default Constructor uses the DEFAULT_PERIOD and does not start on
-	 * initialization
-	 */
-	public Odometer() {
-		this(DEFAULT_PERIOD, false);
-	}
-
-	/**
-	 * Constructor with default period. Takes in boolean to indicate start on
-	 * initialization
-	 * 
-	 * @param start
-	 *            Boolean indicating whether to start the timer on
-	 *            initialization
-	 */
-	public Odometer(boolean start) {
-		this(DEFAULT_PERIOD, start);
-	}
-
-	/**
-	 * Constructor does not start on initialization and takes a period for the
-	 * timer object
-	 * 
-	 * @param period
-	 */
-	public Odometer(int period) {
-		this(period, false);
-	}
 
 	/**
 	 * Executes every period.
@@ -98,6 +81,11 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	 * values based on the delta displacement and heading calculations.
 	 */
 	public void timedOut() {
+
+		if (doCorrection) {
+			correctOdometer();
+		}
+
 		displacement = getDisplacement();
 		heading = getHeading();
 		displacement -= oldDisp;
@@ -110,11 +98,32 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 
 			x += displacement * Math.sin(Math.toRadians(theta));
 			y += displacement * Math.cos(Math.toRadians(theta));
-			RConsole.println("x: " + x + "y: " + y + " theta: " + theta);
+			//RConsole.println("x: " + x + "y: " + y + " theta: " + theta);
 		}
 
 		oldDisp += displacement;
 		oldHeading += heading;
+	}
+
+	public void turnOnCorrection() {
+		
+		leftCS.setFloodlight(true);
+		rightCS.setFloodlight(true);
+
+		leftSensorDetected = false;
+		rightSensorDetected = false;
+
+		doCorrection = true;
+
+	}
+
+	public void turnOffCorrection() {
+		
+		leftCS.setFloodlight(false);
+		rightCS.setFloodlight(false);
+
+		doCorrection = false;
+
 	}
 
 	// accessors
@@ -133,27 +142,6 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		}
 	}
 
-	// mutators
-	/**
-	 * Updates odometer x, y, theta values to new coordinates
-	 * 
-	 * @param pos
-	 *            array of coordinates to change; 0th element for x, 1st element
-	 *            for y, 2nd element for theta
-	 * @param update
-	 *            array of booleans to indicate whether corresponding value in
-	 *            pos array needs to update
-	 */
-	public void setPosition(double[] pos, boolean[] update) {
-		synchronized (lock) {
-			if (update[0])
-				x = pos[0];
-			if (update[1])
-				y = pos[1];
-			if (update[2])
-				theta = pos[2];
-		}
-	}
 
 	public void setX(double input) {
 		synchronized (lock) {
@@ -167,6 +155,12 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 			y = input;
 		}
 
+	}
+
+	public void setTheta(double input) {
+		synchronized (lock) {
+			theta = input;
+		}
 	}
 
 	/**
@@ -200,7 +194,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	 * 
 	 * @return current theta value
 	 */
-	public double getAng() {
+	public double getTheta() {
 		double result;
 
 		synchronized (lock) {
@@ -217,7 +211,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	 * @param double angle angle to fix
 	 * @return angle value within range of 0.0 to 359.9
 	 */
-	public static double fixDegAngle(double angle) {
+	private static double fixDegAngle(double angle) {
 		if (angle < 0.0)
 			angle = 360.0 + (angle % 360.0);
 
@@ -247,9 +241,9 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	 * 
 	 * @return the change in displacement
 	 */
-	public double getDisplacement() {
-		return (leftMotor.getTachoCount() * leftRadius + rightMotor
-				.getTachoCount() * rightRadius)
+	private double getDisplacement() {
+		return (leftMotor.getTachoCount() * LEFT_RADIUS + rightMotor
+				.getTachoCount() * RIGHT_RADIUS)
 				* Math.PI / 360.0;
 	}
 
@@ -258,22 +252,138 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	 * 
 	 * @return the heading
 	 */
-	public double getHeading() {
-		return (leftMotor.getTachoCount() * leftRadius - rightMotor
-				.getTachoCount() * rightRadius)
-				/ width;
+	private double getHeading() {
+		return (leftMotor.getTachoCount() * LEFT_RADIUS - rightMotor
+				.getTachoCount() * RIGHT_RADIUS)
+				/ WIDTH;
 	}
 
-	/**
-	 * Calculates the total change in heading and coordinate
-	 * 
-	 * @param data
-	 *            the double array storing displacement as 0th element and
-	 *            heading as the 1st element
-	 */
-	public void getDisplacementAndHeading(double[] data) {
-		data[0] = getDisplacement();
-		data[1] = getHeading();
+	private void correctOdometer() {
+
+		double distanceTravelledByLaggingWheel = 0;
+		double angleOff = 0;
+
+		if (!leftSensorDetected && !rightSensorDetected) {
+
+			if (lineDetected(leftCS)) {
+				// if left has detected, then this is a new line; take position
+				// and tacho count
+				getPosition(positionAtFirstDetection);
+				prevRightTacho = rightMotor.getTachoCount();
+				leftSensorDetected = true;
+			}
+
+			if (lineDetected(rightCS)) {
+				// if right has detected, then this is a new line; take position
+				// and tacho count
+				getPosition(positionAtFirstDetection);
+				prevLeftTacho = leftMotor.getTachoCount();
+				rightSensorDetected = true;
+			}
+
+		}
+
+		if (leftSensorDetected && !rightSensorDetected) {
+
+			if (lineDetected(rightCS)) {
+
+				double currentRightTacho = rightMotor.getTachoCount();
+
+				distanceTravelledByLaggingWheel = 2 * Math.PI * RIGHT_RADIUS
+						* ((currentRightTacho - prevRightTacho) / 360);
+
+				angleOff = Math.atan(distanceTravelledByLaggingWheel
+						/ SENSOR_WIDTH);
+				rightSensorDetected = true;
+
+			}
+
+		}
+
+		if (!leftSensorDetected && rightSensorDetected) {
+
+			if (lineDetected(leftCS)) {
+
+				double currentLeftTacho = leftMotor.getTachoCount();
+
+				distanceTravelledByLaggingWheel = 2 * Math.PI * LEFT_RADIUS
+						* ((currentLeftTacho - prevLeftTacho) / 360);
+				
+				angleOff = -Math.atan(distanceTravelledByLaggingWheel
+						/ SENSOR_WIDTH);
+
+				leftSensorDetected = true;
+
+			}
+
+		}
+
+		if (leftSensorDetected && rightSensorDetected) {
+
+			if (distanceTravelledByLaggingWheel != 0) {
+
+				setX(positionAtFirstDetection[0]
+						+ (distanceTravelledByLaggingWheel)
+						* Math.sin(angleOff));
+				setY(positionAtFirstDetection[1]
+						+ (distanceTravelledByLaggingWheel)
+						* Math.cos(angleOff));
+				setTheta(theta + Math.toDegrees(angleOff));
+
+			}
+
+			rightSensorDetected = false;
+			leftSensorDetected = false;
+
+		}
 	}
+	
+	
+	
+	private int prevValueL = 0;
+	private int prevValueR = 0;
+	private boolean negativeDiffL = false;
+	private boolean negativeDiffR = false;
+	
+	private boolean lineDetected(ColorSensor cs) {
+		
+		boolean left = (cs==leftCS);
+		
+		int value = cs.getRawLightValue();
+		int diff = (left) ? (value - prevValueL) : (value - prevValueR);
+		
+//		RConsole.println("Diff: " + diff);
+		if(diff<-LINE_DIFF){
+			if (left) {
+				negativeDiffL = true;
+			} else {
+				negativeDiffR = true;
+			}
+		}
+		
+		if (left) {
+			prevValueL = value;
+		} else {
+			prevValueR = value;
+		}
+		
+		if(diff>LINE_DIFF){
+			if (negativeDiffL && left) {
+//				RConsole.println("Ldetected");
+				Sound.beep();
+				negativeDiffL = false;
+				return true;
+			} else if (negativeDiffR && !left) {
+//				RConsole.println("Rdetected");
+				Sound.beep();
+				negativeDiffR = false;
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	
 	
 }

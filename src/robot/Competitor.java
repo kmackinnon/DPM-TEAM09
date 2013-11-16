@@ -54,22 +54,7 @@ public class Competitor {
 			connectBT(); // start the BT connection determines characteristics
 
 		} else {
-			//int[] testGreen = { 0, 5, 2, 9 }; // green zone
-			//int[] testRed = { 6, 3, 8, 4 }; // red zone
-			
-			int[] testGreen = { 0, 3, 2, 4 };
-			int[] testRed = {4, 3, 5, 4 };
-
-			// set corner
-			corner = StartCorner.BOTTOM_LEFT;
-
-			// set role. For now, assume the robot will be a builder.
-			SensorMotorUser.becomeBuilder(true);
-
-			// ensure that map size is big enough for test data
-			Map.setTargetZone(testGreen);
-			Map.setForbiddenZone(testRed);
-			
+			testWithoutBluetooth();
 		}
 
 		// sets the start corner from the test data or from the BT connection
@@ -84,9 +69,12 @@ public class Competitor {
 
 		System.exit(0);
 	}
+	
+	
+	
 
 	/** This sets up the demo by setting starting corner and player type. */
-	public static void connectBT() {
+	private static void connectBT() {
 		BluetoothConnection conn = new BluetoothConnection();
 
 		// as of this point, the bluetooth connection is closed again, and
@@ -129,4 +117,24 @@ public class Competitor {
 			Map.setForbiddenZone(greenZone);
 		}
 	}
+	
+	private static void testWithoutBluetooth(){
+		
+		int[] testGreen = { 0, 3, 2, 4 };
+		int[] testRed = {4, 3, 5, 4 };
+
+		// set corner
+		corner = StartCorner.BOTTOM_LEFT;
+
+		// set role. For now, assume the robot will be a builder.
+		SensorMotorUser.becomeBuilder(true);
+
+		// ensure that map size is big enough for test data
+		Map.setTargetZone(testGreen);
+		Map.setForbiddenZone(testRed);
+		
+	}
+	
+	
+	
 }

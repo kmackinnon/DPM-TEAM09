@@ -40,11 +40,11 @@ public class OdometeryCorrection extends Thread{
 						odo.getPosition(destination);
 
 						double lastLeftTacho = SensorMotorUser.leftMotor.getTachoCount();
-						length = 2 * Math.PI * SensorMotorUser.leftRadius
+						length = 2 * Math.PI * SensorMotorUser.LEFT_RADIUS
 								* ((lastLeftTacho - prevLeftTacho) / 360);
 							
-						angleOff = -Math.atan(length / SensorMotorUser.sensorWidth);
-						rightSensor = true;
+						angleOff = -Math.atan(length / SensorMotorUser.SENSOR_WIDTH);
+						leftSensor = true;
 					}
 				}
 				if (!rightSensor) { // right sensor has not detected since last line
@@ -60,11 +60,11 @@ public class OdometeryCorrection extends Thread{
 						odo.getPosition(destination);
 						
 						double lastRightTacho = SensorMotorUser.rightMotor.getTachoCount();
-						length = 2 * Math.PI * SensorMotorUser.rightRadius
+						length = 2 * Math.PI * SensorMotorUser.RIGHT_RADIUS
 								* ((lastRightTacho - prevRightTacho) / 360);
 						
-						angleOff = + Math.atan(length / SensorMotorUser.sensorWidth);
-						leftSensor = true;
+						angleOff = + Math.atan(length / SensorMotorUser.SENSOR_WIDTH);
+						rightSensor = true;
 					}
 				}
 				

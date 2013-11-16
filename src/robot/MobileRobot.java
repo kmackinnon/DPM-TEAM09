@@ -12,12 +12,11 @@ import java.util.ArrayList;
  */
 
 public class MobileRobot extends SensorMotorUser {
-	public static Odometer odo = new Odometer(true);
-	public static BlockDetector blockDetector;
+	public static Odometer odo = new Odometer();
+	public static BlockDetector blockDetector = new BlockDetector();
 
 	double[] pos = new double[3];
 	private double forwardSpeed, rotationSpeed;
-	public static boolean isTurning = false;
 	/**
 	 * Default Constructor
 	 * <p>
@@ -152,7 +151,6 @@ public class MobileRobot extends SensorMotorUser {
 	 *            angle to turn
 	 */
 	public void turnTo(double angle) {
-		isTurning = true;
 		double[] currPos = new double[3];
 		double currSpeed = ROTATION_SPEED;
 		double angDiff;
@@ -179,7 +177,6 @@ public class MobileRobot extends SensorMotorUser {
 			angDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
 		}
 		setSpeeds(0.0, 0.0);
-		isTurning = false;
 	}
 
 	// mutators
@@ -228,10 +225,10 @@ public class MobileRobot extends SensorMotorUser {
 		this.forwardSpeed = forwardSpeed;
 		this.rotationSpeed = rotationalSpeed;
 
-		leftSpeed = (forwardSpeed + rotationalSpeed * width * Math.PI / 360.0)
-				* 180.0 / (leftRadius * Math.PI);
-		rightSpeed = (forwardSpeed - rotationalSpeed * width * Math.PI / 360.0)
-				* 180.0 / (rightRadius * Math.PI);
+		leftSpeed = (forwardSpeed + rotationalSpeed * WIDTH * Math.PI / 360.0)
+				* 180.0 / (LEFT_RADIUS * Math.PI);
+		rightSpeed = (forwardSpeed - rotationalSpeed * WIDTH * Math.PI / 360.0)
+				* 180.0 / (RIGHT_RADIUS * Math.PI);
 
 		// set motor directions
 		if (leftSpeed > 0.0)

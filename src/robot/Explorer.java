@@ -21,9 +21,14 @@ public class Explorer extends MobileRobot {
 	 */
 	public void lookForStyrofoamBlocks() {
 
+		odo.turnOnCorrection();
 		
+		travelCoordinate(0, 60.96);
+		travelCoordinate(60.96, 60.96);
+		travelCoordinate(60.96, 0);
+		travelCoordinate(0,0);
 		
-		if (getXStart() == getYStart()) {
+/*		if (getXStart() == getYStart()) {
 			rowNumber = getYStart();
 		}
 
@@ -38,7 +43,7 @@ public class Explorer extends MobileRobot {
 			travelTo(endOfCurrentRow());
 			
 			travelTo(nextRow());
-		}
+		}*/
 
 	}
 

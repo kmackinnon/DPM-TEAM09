@@ -70,6 +70,8 @@ public class SensorMotorUser {
 
 	public static final double SENSOR_WIDTH = 11.05;
 	
+	
+	
 	private static boolean isBuilder;
 
 	private static boolean isBuilderHasBeenSet = false;

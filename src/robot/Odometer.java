@@ -7,6 +7,7 @@ package robot;
  */
 
 import lejos.nxt.ColorSensor;
+import lejos.nxt.LCD;
 import lejos.nxt.Sound;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
@@ -37,7 +38,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	private double oldDisp, oldHeading;
 
 	/** Odometer correction variables */
-	private static final int LINE_DIFF = 20;
+
 	
 	private boolean leftSensorDetected;
 	private boolean rightSensorDetected;
@@ -67,12 +68,12 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		oldDisp = 0.0;
 		oldHeading = 0.0;
 		lock = new Object();
-		
+
 		// start the odometer immediately, if necessary
-		odometerTimer.start();
+		//odometerTimer.start();
 	}
 
-
+	boolean tempTiming = true;
 	/**
 	 * Executes every period.
 	 * <p>
@@ -82,6 +83,10 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	 */
 	public void timedOut() {
 
+		if(tempTiming){
+			LCD.drawString(" "+ System.currentTimeMillis(), 0, 0);
+		}
+		
 		if (doCorrection) {
 			correctOdometer();
 		}
@@ -103,6 +108,15 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 
 		oldDisp += displacement;
 		oldHeading += heading;
+		
+		if(tempTiming){
+			LCD.drawString(" "+ System.currentTimeMillis(), 0, 1);
+			tempTiming = false;
+		}
+	}
+	
+	public void startOdometer(){
+		odometerTimer.start();
 	}
 
 	public void turnOnCorrection() {
@@ -258,14 +272,17 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 				/ WIDTH;
 	}
 
+	
+
 	private void correctOdometer() {
 
 		double distanceTravelledByLaggingWheel = 0;
 		double angleOff = 0;
 
 		if (!leftSensorDetected && !rightSensorDetected) {
-
 			if (lineDetected(leftCS)) {
+				//Sound.beep();
+				
 				// if left has detected, then this is a new line; take position
 				// and tacho count
 				getPosition(positionAtFirstDetection);
@@ -274,17 +291,21 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 			}
 
 			if (lineDetected(rightCS)) {
+				//Sound.beep();
+				
 				// if right has detected, then this is a new line; take position
 				// and tacho count
 				getPosition(positionAtFirstDetection);
 				prevLeftTacho = leftMotor.getTachoCount();
 				rightSensorDetected = true;
 			}
-
+			Sound.beep();
 		}
 
 		if (leftSensorDetected && !rightSensorDetected) {
 
+			//Sound.beep();
+			
 			if (lineDetected(rightCS)) {
 
 				double currentRightTacho = rightMotor.getTachoCount();
@@ -302,6 +323,8 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 
 		if (!leftSensorDetected && rightSensorDetected) {
 
+			//Sound.beep();
+			
 			if (lineDetected(leftCS)) {
 
 				double currentLeftTacho = leftMotor.getTachoCount();
@@ -320,6 +343,8 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 
 		if (leftSensorDetected && rightSensorDetected) {
 
+			Sound.beep();
+			
 			if (distanceTravelledByLaggingWheel != 0) {
 
 				setX(positionAtFirstDetection[0]
@@ -336,16 +361,19 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 			leftSensorDetected = false;
 
 		}
+		
+
+		
 	}
-	
 	
 	
 	private int prevValueL = 0;
 	private int prevValueR = 0;
 	private boolean negativeDiffL = false;
 	private boolean negativeDiffR = false;
+	private static final int LINE_DIFF = 20;
 	
-	private boolean lineDetected(ColorSensor cs) {
+	public boolean lineDetected(ColorSensor cs) {
 		
 		boolean left = (cs==leftCS);
 		
@@ -370,12 +398,12 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		if(diff>LINE_DIFF){
 			if (negativeDiffL && left) {
 //				RConsole.println("Ldetected");
-				Sound.beep();
+				//Sound.beep();
 				negativeDiffL = false;
 				return true;
 			} else if (negativeDiffR && !left) {
 //				RConsole.println("Rdetected");
-				Sound.beep();
+				//Sound.beep();
 				negativeDiffR = false;
 				return true;
 			}
@@ -383,6 +411,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		
 		return false;
 	}
+	
 	
 	
 	

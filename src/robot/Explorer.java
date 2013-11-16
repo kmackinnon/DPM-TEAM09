@@ -1,5 +1,7 @@
 package robot;
 
+import lejos.nxt.Sound;
+
 
 /**
  * Explorer looks for styrofoam blocks. As soon as it finds a styrofoam block,
@@ -11,6 +13,10 @@ public class Explorer extends MobileRobot {
 	int rowNumber;
 	int columnNumber;
 	int rowCounter;
+	
+	private final int SLEEP_PERIOD = 25;
+
+	long correctionStart, correctionEnd;
 
 	public Explorer() {
 
@@ -21,12 +27,37 @@ public class Explorer extends MobileRobot {
 	 */
 	public void lookForStyrofoamBlocks() {
 
+		//liftClaw();
+		
 		odo.turnOnCorrection();
 		
-		travelCoordinate(0, 60.96);
-		travelCoordinate(60.96, 60.96);
-		travelCoordinate(60.96, 0);
+		odo.startOdometer();
+		
+		/*leftCS.setFloodlight(true);
+		rightCS.setFloodlight(true);*/
+
+		travelCoordinate(0,60.96);
+		travelCoordinate(60.96,60.96);
+		travelCoordinate(60.96,0);
 		travelCoordinate(0,0);
+		
+		/*while(true){
+			
+			correctionStart = System.currentTimeMillis();
+			
+			if(lineDetected(leftCS,true)){
+				Sound.beep();
+			}
+			
+			if(lineDetected(rightCS,false)){
+				Sound.beep();
+			}
+			
+			threadSleep();
+			
+		}*/
+		
+		
 		
 /*		if (getXStart() == getYStart()) {
 			rowNumber = getYStart();
@@ -170,6 +201,22 @@ public class Explorer extends MobileRobot {
 
 		rowCounter++;
 
+	}
+	
+	private void threadSleep(){
+		
+		correctionEnd = System.currentTimeMillis();
+        if (correctionEnd - correctionStart < SLEEP_PERIOD) {
+                try {
+                        Thread.sleep(SLEEP_PERIOD
+                                        - (correctionEnd - correctionStart));
+                } catch (InterruptedException e) {
+                        // there is nothing to be done here because it is not
+                        // expected that the localization will be
+                        // interrupted by another thread
+                }
+        }
+		
 	}
 
 }

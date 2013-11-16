@@ -20,8 +20,7 @@ public class OdometerTest {
 	
 	public static void main(String[] args) {
 		MobileRobot robot = new MobileRobot();
-		Odometer odo = new Odometer();
-		OdometeryCorrection corr = new OdometeryCorrection(odo);
+		//OdometeryCorrection corr = new OdometeryCorrection(MobileRobot.odo);
 		int option = 0; // don't bother with button inputs
 		
 		while (option == 0)
@@ -31,12 +30,12 @@ public class OdometerTest {
 		
 		switch(option) {
 		case Button.ID_LEFT:
-			corr.start();
+			//corr.start();
 			squareTest(robot);
 			break;
 		case Button.ID_RIGHT:
-			corr.start();
-			triangleTest(robot);
+			//corr.start();
+			//triangleTest(robot);
 			break;
 		default:
 			System.out.println("Error - invalid button");
@@ -49,20 +48,17 @@ public class OdometerTest {
 	}
 	
 	public static void squareTest(MobileRobot robot) {
-		robot.travelMag(60.96);
-		robot.turnTo(MobileRobot.odo.getAng() + 90.0);
-		robot.travelMag(60.96);
-		robot.turnTo(MobileRobot.odo.getAng() + 90.0);
-		robot.travelMag(60.96);
-		robot.turnTo(MobileRobot.odo.getAng() + 90.0);
-		robot.travelMag(60.96);
+		robot.travelCoordinate(0,60.96);
+		robot.travelCoordinate(60.96,60.96);
+		robot.travelCoordinate(60.96,0);
+		robot.travelCoordinate(0,0);
 		robot.turnTo(0.0);
 	}
 	
-	public static void triangleTest(MobileRobot robot) {
+/*	public static void triangleTest(MobileRobot robot) {
 		robot.travelCoordinate(60.0, 30.0);
 		robot.travelCoordinate(30.0, 30.0);
 		robot.travelCoordinate(30.0, 60.0);
 		robot.travelCoordinate(60.0, 0.0);
-	}
+	}*/
 }

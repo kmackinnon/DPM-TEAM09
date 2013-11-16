@@ -67,6 +67,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		theta = 0.0;
 		oldDisp = 0.0;
 		oldHeading = 0.0;
+		
 		lock = new Object();
 
 		// start the odometer immediately, if necessary
@@ -279,30 +280,45 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		double distanceTravelledByLaggingWheel = 0;
 		double angleOff = 0;
 
-		if (!leftSensorDetected && !rightSensorDetected) {
+		if ((!leftSensorDetected) && (!rightSensorDetected)) {
 			if (lineDetected(leftCS)) {
-				//Sound.beep();
+				Sound.beep();
 				
 				// if left has detected, then this is a new line; take position
 				// and tacho count
 				getPosition(positionAtFirstDetection);
 				prevRightTacho = rightMotor.getTachoCount();
+				
 				leftSensorDetected = true;
+//				Sound.beep();
 			}
 
 			if (lineDetected(rightCS)) {
-				//Sound.beep();
+				Sound.beep();
 				
 				// if right has detected, then this is a new line; take position
 				// and tacho count
 				getPosition(positionAtFirstDetection);
 				prevLeftTacho = leftMotor.getTachoCount();
+				
 				rightSensorDetected = true;
+				//Sound.beep();
+				
 			}
 			//Sound.beep();
 		}
+		
+		if(leftSensorDetected){
 
-		if (leftSensorDetected && (!rightSensorDetected)) {
+			Sound.beep();
+		}
+		
+		if(rightSensorDetected){
+
+			Sound.beep();
+		}
+
+		/*if (leftSensorDetected && (!rightSensorDetected)) {
 
 			Sound.beep();
 			
@@ -360,7 +376,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 			rightSensorDetected = false;
 			leftSensorDetected = false;
 
-		}
+		}*/
 		
 
 		

@@ -1,129 +1,201 @@
 package robot;
 
-import lejos.nxt.comm.RConsole;
+import lejos.nxt.ColorSensor;
+import lejos.nxt.Sound;
+import lejos.util.Timer;
+import lejos.util.TimerListener;
 
-public class OdometeryCorrection extends Thread{
-	private Odometer odo;
-	private Object lock = new Object();
-	private boolean leftSensor = false;
-	private boolean rightSensor = false;
+public class OdometeryCorrection extends SensorMotorUser implements TimerListener{
 	
+	private static final int DEFAULT_PERIOD = 25;
+	
+	private Timer correctionTimer;
+	
+	private Odometer odo;
+	
+	private boolean leftSensorDetected;
+	private boolean rightSensorDetected;
+
 	private double prevRightTacho;
 	private double prevLeftTacho;
-	private double angleOff;
-	private double length;
+
+	private double[] positionAtFirstDetection;
+	
+	private boolean doCorrection = false;
+
 	
 	public OdometeryCorrection(Odometer odo){
 		this.odo = odo;
-		SensorMotorUser.leftCS.setFloodlight(true);
-		SensorMotorUser.rightCS.setFloodlight(true);
-	}
-	/**
-	 * This method helps the odometer get the correct position of the robot.
-	 */
-	public void run() {
-		double[] initPos = new double[3];
-		double[] destination = new double[3];
 		
-		while(true) {
-			if(MobileRobot.isTurning!=true) {
-				if (!leftSensor) { // left sensor has not detected since last line
-					if (!rightSensor) {
-						if (SensorMotorUser.lineDetected(SensorMotorUser.leftCS,true)) {
-							// if left has detected, then this is a new line; take position and tacho count
-							odo.getPosition(initPos);
-							prevRightTacho = SensorMotorUser.rightMotor.getTachoCount();
-							leftSensor = true;
-						}
-					} else if (SensorMotorUser.lineDetected(SensorMotorUser.leftCS,true)) {
-						// this is an old line, take the position and tacho count so we can calc the dist traveled
-						odo.getPosition(destination);
+		correctionTimer = new Timer(DEFAULT_PERIOD,this);
+		
+	}
 
-						double lastLeftTacho = SensorMotorUser.leftMotor.getTachoCount();
-						length = 2 * Math.PI * SensorMotorUser.LEFT_RADIUS
-								* ((lastLeftTacho - prevLeftTacho) / 360);
-							
-						angleOff = -Math.atan(length / SensorMotorUser.SENSOR_WIDTH);
-						leftSensor = true;
-					}
-				}
-				if (!rightSensor) { // right sensor has not detected since last line
-					if (!leftSensor) {
-						if (SensorMotorUser.lineDetected(SensorMotorUser.rightCS,false)) {
-							// if right has detected, then this is a new line; take position and tacho count
-							odo.getPosition(initPos);
-							prevLeftTacho = SensorMotorUser.rightMotor.getTachoCount();
-							rightSensor = true;
-						}
-					} else if (SensorMotorUser.lineDetected(SensorMotorUser.rightCS,false)) {
-						// this is an old line, take the position and tacho count so we can calc the dist traveled
-						odo.getPosition(destination);
-						
-						double lastRightTacho = SensorMotorUser.rightMotor.getTachoCount();
-						length = 2 * Math.PI * SensorMotorUser.RIGHT_RADIUS
-								* ((lastRightTacho - prevRightTacho) / 360);
-						
-						angleOff = + Math.atan(length / SensorMotorUser.SENSOR_WIDTH);
-						rightSensor = true;
-					}
-				}
+	public void turnOnCorrection() {
+		
+		leftCS.setFloodlight(true);
+		rightCS.setFloodlight(true);
+
+		leftSensorDetected = false;
+		rightSensorDetected = false;
+
+		doCorrection = true;
+		
+		correctionTimer.start();
+
+	}
+
+	public void turnOffCorrection() {
+		
+		leftCS.setFloodlight(false);
+		rightCS.setFloodlight(false);
+
+		doCorrection = false;
+		
+		correctionTimer.stop();
+
+	}
+	
+	
+	
+	public void timedOut(){
+		
+		double distanceTravelledByLaggingWheel = 0;
+		double angleOff = 0;
+
+		if ((!leftSensorDetected) && (!rightSensorDetected)) {
+			
+			
+			
+			if (lineDetected(leftCS)) {
 				
-				if (rightSensor && leftSensor) {
-					synchronized (lock) {
-						odo.theta = odo.theta + Math.toDegrees(angleOff);
-						odo.x = initPos[0] + (length)* Math.sin(angleOff);
-						odo.y = initPos[1] + (length)* Math.cos(angleOff);
-//						RConsole.println("x: " + odo.x + "y: " + odo.y + " theta: " + odo.theta);
-					}
-					rightSensor = false;
-					leftSensor = false;
-				}
+				// if left has detected, then this is a new line; take position
+				// and tacho count
+				odo.getPosition(positionAtFirstDetection);
+				prevRightTacho = rightMotor.getTachoCount();
 				
+				leftSensorDetected = true;
+			}
+
+			if (lineDetected(rightCS)) {
 				
-//				while (SensorMotorUser.lineDetected(SensorMotorUser.leftCS,true) || SensorMotorUser.lineDetected(SensorMotorUser.rightCS,false));
-//					
-//				odo.getPosition(initPos);
-//					
-//				if (SensorMotorUser.lineDetected(SensorMotorUser.leftCS,true)) {
-//					double prevRightTacho = SensorMotorUser.rightMotor.getTachoCount();
-//						
-//					while (SensorMotorUser.lineDetected(SensorMotorUser.rightCS,false));
-//						
-//					odo.getPosition(destination);
-//						
-//					double lastRightTacho = SensorMotorUser.rightMotor.getTachoCount();
-//					double length = 2 * Math.PI * SensorMotorUser.rightRadius
-//							* ((lastRightTacho - prevRightTacho) / 360);
-//						
-//					double angleOff = + Math.atan(length / SensorMotorUser.sensorWidth);
-//						
-//					synchronized (lock) {
-//						odo.x = initPos[0] + (length)* Math.sin(angleOff);
-//						odo.y = initPos[1] + (length)* Math.cos(angleOff);
-//						odo.theta = odo.theta + Math.toDegrees(angleOff);
-//						RConsole.println("x: " + odo.x + "y: " + odo.y + " theta: " + odo.theta);
-//						}
-//					} 
-//				else {
-//					double prevLeftTacho = SensorMotorUser.leftMotor.getTachoCount();
-//						
-//					while (SensorMotorUser.lineDetected(SensorMotorUser.leftCS,true));
-//					
-//					odo.getPosition(destination);
-//					
-//					double lastLeftTacho = SensorMotorUser.leftMotor.getTachoCount();
-//					double length = 2 * Math.PI * SensorMotorUser.leftRadius
-//						* ((lastLeftTacho - prevLeftTacho) / 360);
-//						
-//					double angleOff = -Math.atan(length / SensorMotorUser.sensorWidth);
-//					synchronized (lock) {
-//						odo.theta = odo.theta + Math.toDegrees(angleOff);
-//						odo.x = initPos[0] + (length)* Math.sin(angleOff);
-//						odo.y = initPos[1] + (length)* Math.cos(angleOff);
-//						RConsole.println("x: " + odo.x + "y: " + odo.y + " theta: " + odo.theta);
-//					}
-//				}
+				// if right has detected, then this is a new line; take position
+				// and tacho count
+				odo.getPosition(positionAtFirstDetection);
+				prevLeftTacho = leftMotor.getTachoCount();
+				
+				rightSensorDetected = true;
+				
+			}
+
+		}
+		
+
+		if (leftSensorDetected && (!rightSensorDetected)) {
+			
+			Sound.beep();
+
+			if (lineDetected(rightCS)) {
+
+				double currentRightTacho = rightMotor.getTachoCount();
+
+				distanceTravelledByLaggingWheel = 2 * Math.PI * RIGHT_RADIUS
+						* ((currentRightTacho - prevRightTacho) / 360);
+
+				angleOff = Math.atan(distanceTravelledByLaggingWheel
+						/ SENSOR_WIDTH);
+				rightSensorDetected = true;
+
+			}
+
+		}
+
+		if ((!leftSensorDetected) && (rightSensorDetected)) {
+
+			if (lineDetected(leftCS)) {
+
+				double currentLeftTacho = leftMotor.getTachoCount();
+
+				distanceTravelledByLaggingWheel = 2 * Math.PI * LEFT_RADIUS
+						* ((currentLeftTacho - prevLeftTacho) / 360);
+				
+				angleOff = -Math.atan(distanceTravelledByLaggingWheel
+						/ SENSOR_WIDTH);
+
+				leftSensorDetected = true;
+
+			}
+
+		}
+
+		if (leftSensorDetected && rightSensorDetected) {
+			
+			if (distanceTravelledByLaggingWheel != 0) {
+
+				odo.setX(positionAtFirstDetection[0]
+						+ (distanceTravelledByLaggingWheel)
+						* Math.sin(angleOff));
+				odo.setY(positionAtFirstDetection[1]
+						+ (distanceTravelledByLaggingWheel)
+						* Math.cos(angleOff));
+				odo.setTheta(odo.getTheta() + Math.toDegrees(angleOff));
+
+			}
+
+			rightSensorDetected = false;
+			leftSensorDetected = false;
+
+		}
+		
+		
+	}
+	
+	
+	
+	private int prevValueL = 0;
+	private int prevValueR = 0;
+	private boolean negativeDiffL = false;
+	private boolean negativeDiffR = false;
+	private static final int LINE_DIFF = 20;
+	
+	public boolean lineDetected(ColorSensor cs) {
+		
+		boolean left = (cs==leftCS);
+		
+		int value = cs.getRawLightValue();
+		int diff = (left) ? (value - prevValueL) : (value - prevValueR);
+		
+//		RConsole.println("Diff: " + diff);
+		if(diff<-LINE_DIFF){
+			if (left) {
+				negativeDiffL = true;
+			} else {
+				negativeDiffR = true;
 			}
 		}
+		
+		if (left) {
+			prevValueL = value;
+		} else {
+			prevValueR = value;
+		}
+		
+		if(diff>LINE_DIFF){
+			if (negativeDiffL && left) {
+//				RConsole.println("Ldetected");
+				Sound.beep();
+				negativeDiffL = false;
+				return true;
+			} else if (negativeDiffR && !left) {
+//				RConsole.println("Rdetected");
+				Sound.beep();
+				negativeDiffR = false;
+				return true;
+			}
+		}
+		
+		return false;
 	}
+	
+	
 }

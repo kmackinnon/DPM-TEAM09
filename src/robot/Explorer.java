@@ -28,18 +28,17 @@ public class Explorer extends MobileRobot {
 	public void lookForStyrofoamBlocks() {
 
 		//liftClaw();
+
+		corr.turnOnCorrection();
 		
-		odo.turnOnCorrection();
-		
-		odo.startOdometer();
 		
 		/*leftCS.setFloodlight(true);
 		rightCS.setFloodlight(true);*/
 
-		travelCoordinate(0,60.96);
-		travelCoordinate(60.96,60.96);
-		travelCoordinate(60.96,0);
-		travelCoordinate(0,0);
+		travelCoordinate(0,6*Map.TILE_SIZE);
+		//travelCoordinate(60.96,60.96);
+		//travelCoordinate(60.96,0);
+		//travelCoordinate(0,0);
 		
 		/*while(true){
 			

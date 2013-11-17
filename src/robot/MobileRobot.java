@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 public class MobileRobot extends SensorMotorUser {
 	public static Odometer odo = new Odometer();
+	public static OdometeryCorrection corr = new OdometeryCorrection(odo);
 	public static BlockDetector blockDetector = new BlockDetector();
 
 	double[] pos = new double[3];

@@ -6,9 +6,6 @@ package robot;
  * 
  */
 
-import lejos.nxt.ColorSensor;
-import lejos.nxt.LCD;
-import lejos.nxt.Sound;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
 
@@ -37,19 +34,6 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	/** Previous displacement/heading values */
 	private double oldDisp, oldHeading;
 
-	/** Odometer correction variables */
-
-	
-	private boolean leftSensorDetected;
-	private boolean rightSensorDetected;
-
-	private double prevRightTacho;
-	private double prevLeftTacho;
-
-	private double[] positionAtFirstDetection;
-
-	boolean doCorrection = false;
-
 	/**
 	 * Odometer constructor
 	 * 
@@ -70,11 +54,9 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		
 		lock = new Object();
 
-		// start the odometer immediately, if necessary
-		//odometerTimer.start();
+		odometerTimer.start();
 	}
 
-	//boolean tempTiming = true;
 	/**
 	 * Executes every period.
 	 * <p>
@@ -83,14 +65,6 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	 * values based on the delta displacement and heading calculations.
 	 */
 	public void timedOut() {
-
-/*		if(tempTiming){
-			LCD.drawString(" "+ System.currentTimeMillis(), 0, 0);
-		}*/
-		
-		if (doCorrection) {
-			correctOdometer();
-		}
 
 		displacement = getDisplacement();
 		heading = getHeading();
@@ -110,36 +84,8 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		oldDisp += displacement;
 		oldHeading += heading;
 		
-/*		if(tempTiming){
-			LCD.drawString(" "+ System.currentTimeMillis(), 0, 1);
-			tempTiming = false;
-		}*/
 	}
 	
-	public void startOdometer(){
-		odometerTimer.start();
-	}
-
-	public void turnOnCorrection() {
-		
-		leftCS.setFloodlight(true);
-		rightCS.setFloodlight(true);
-
-		leftSensorDetected = false;
-		rightSensorDetected = false;
-
-		doCorrection = true;
-
-	}
-
-	public void turnOffCorrection() {
-		
-		leftCS.setFloodlight(false);
-		rightCS.setFloodlight(false);
-
-		doCorrection = false;
-
-	}
 
 	// accessors
 	/**
@@ -273,161 +219,6 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 				/ WIDTH;
 	}
 
-	
-
-	private void correctOdometer() {
-
-		double distanceTravelledByLaggingWheel = 0;
-		double angleOff = 0;
-
-		if ((!leftSensorDetected) && (!rightSensorDetected)) {
-			if (lineDetected(leftCS)) {
-				Sound.beep();
-				
-				// if left has detected, then this is a new line; take position
-				// and tacho count
-				getPosition(positionAtFirstDetection);
-				prevRightTacho = rightMotor.getTachoCount();
-				
-				leftSensorDetected = true;
-//				Sound.beep();
-			}
-
-			if (lineDetected(rightCS)) {
-				Sound.beep();
-				
-				// if right has detected, then this is a new line; take position
-				// and tacho count
-				getPosition(positionAtFirstDetection);
-				prevLeftTacho = leftMotor.getTachoCount();
-				
-				rightSensorDetected = true;
-				//Sound.beep();
-				
-			}
-			//Sound.beep();
-		}
-		
-		if(leftSensorDetected){
-
-			Sound.beep();
-		}
-		
-		if(rightSensorDetected){
-
-			Sound.beep();
-		}
-
-		/*if (leftSensorDetected && (!rightSensorDetected)) {
-
-			Sound.beep();
-			
-			if (lineDetected(rightCS)) {
-
-				double currentRightTacho = rightMotor.getTachoCount();
-
-				distanceTravelledByLaggingWheel = 2 * Math.PI * RIGHT_RADIUS
-						* ((currentRightTacho - prevRightTacho) / 360);
-
-				angleOff = Math.atan(distanceTravelledByLaggingWheel
-						/ SENSOR_WIDTH);
-				rightSensorDetected = true;
-
-			}
-
-		}
-
-		if ((!leftSensorDetected) && (rightSensorDetected)) {
-
-			Sound.beep();
-			
-			if (lineDetected(leftCS)) {
-
-				double currentLeftTacho = leftMotor.getTachoCount();
-
-				distanceTravelledByLaggingWheel = 2 * Math.PI * LEFT_RADIUS
-						* ((currentLeftTacho - prevLeftTacho) / 360);
-				
-				angleOff = -Math.atan(distanceTravelledByLaggingWheel
-						/ SENSOR_WIDTH);
-
-				leftSensorDetected = true;
-
-			}
-
-		}
-
-		if (leftSensorDetected && rightSensorDetected) {
-
-			//Sound.beep();
-			
-			if (distanceTravelledByLaggingWheel != 0) {
-
-				setX(positionAtFirstDetection[0]
-						+ (distanceTravelledByLaggingWheel)
-						* Math.sin(angleOff));
-				setY(positionAtFirstDetection[1]
-						+ (distanceTravelledByLaggingWheel)
-						* Math.cos(angleOff));
-				setTheta(theta + Math.toDegrees(angleOff));
-
-			}
-
-			rightSensorDetected = false;
-			leftSensorDetected = false;
-
-		}*/
-		
-
-		
-	}
-	
-	
-	private int prevValueL = 0;
-	private int prevValueR = 0;
-	private boolean negativeDiffL = false;
-	private boolean negativeDiffR = false;
-	private static final int LINE_DIFF = 20;
-	
-	public boolean lineDetected(ColorSensor cs) {
-		
-		boolean left = (cs==leftCS);
-		
-		int value = cs.getRawLightValue();
-		int diff = (left) ? (value - prevValueL) : (value - prevValueR);
-		
-//		RConsole.println("Diff: " + diff);
-		if(diff<-LINE_DIFF){
-			if (left) {
-				negativeDiffL = true;
-			} else {
-				negativeDiffR = true;
-			}
-		}
-		
-		if (left) {
-			prevValueL = value;
-		} else {
-			prevValueR = value;
-		}
-		
-		if(diff>LINE_DIFF){
-			if (negativeDiffL && left) {
-//				RConsole.println("Ldetected");
-				//Sound.beep();
-				negativeDiffL = false;
-				return true;
-			} else if (negativeDiffR && !left) {
-//				RConsole.println("Rdetected");
-				//Sound.beep();
-				negativeDiffR = false;
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
 	
 	
 	

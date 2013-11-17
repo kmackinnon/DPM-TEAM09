@@ -27,15 +27,17 @@ public class Explorer extends MobileRobot {
 	 */
 	public void lookForStyrofoamBlocks() {
 
-		//liftClaw();
+		liftClaw();
 
-		corr.turnOnCorrection();
+		corr.start();
 		
 		
 		/*leftCS.setFloodlight(true);
 		rightCS.setFloodlight(true);*/
-
-		travelCoordinate(0,6*Map.TILE_SIZE);
+/*		for(int i = 1; i<6 ; i ++){
+			travelCoordinate(0,i*Map.TILE_SIZE);
+		}*/
+		
 		//travelCoordinate(60.96,60.96);
 		//travelCoordinate(60.96,0);
 		//travelCoordinate(0,0);
@@ -58,7 +60,7 @@ public class Explorer extends MobileRobot {
 		
 		
 		
-/*		if (getXStart() == getYStart()) {
+		if (getXStart() == getYStart()) {
 			rowNumber = getYStart();
 		}
 
@@ -73,7 +75,7 @@ public class Explorer extends MobileRobot {
 			travelTo(endOfCurrentRow());
 			
 			travelTo(nextRow());
-		}*/
+		}
 
 	}
 

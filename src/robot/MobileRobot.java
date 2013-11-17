@@ -15,7 +15,8 @@ public class MobileRobot extends SensorMotorUser {
 	public static Odometer odo = new Odometer();
 	public static OdometeryCorrection corr = new OdometeryCorrection(odo);
 	public static BlockDetector blockDetector = new BlockDetector();
-
+	public static boolean isTurning= false;
+	
 	double[] pos = new double[3];
 	private double forwardSpeed, rotationSpeed;
 	/**
@@ -101,12 +102,12 @@ public class MobileRobot extends SensorMotorUser {
 	 */
 	public void travelCoordinate(double x, double y) {
 		odo.getPosition(pos);
-		while (Math.sqrt(Math.pow((x - pos[0]), 2) + Math.pow((y - pos[1]), 2)) > 3) {
+		while (Math.sqrt(Math.pow((x - pos[0]), 2) + Math.pow((y - pos[1]), 2)) > 1) {
 			odo.getPosition(pos);
 
-			if (Math.abs(y - pos[1]) < 2) {// if you only need to move
+			if (Math.abs(y - pos[1]) < 1) {// if you only need to move
 											// horizontally
-				if (Math.abs(x - pos[0]) > 2) {
+				if (Math.abs(x - pos[0]) > 1) {
 					if (pos[0] > x)
 						turnTo(-90);// position is to left
 					else
@@ -119,7 +120,7 @@ public class MobileRobot extends SensorMotorUser {
 					turnTo(Math.toDegrees(Math
 							.atan((x - pos[0]) / (y - pos[1]))));
 				else {
-					if (Math.abs(x - pos[0]) > 2) {
+					if (Math.abs(x - pos[0]) > 1) {
 						if (pos[0] > x)
 							turnTo(-1
 									* Math.toDegrees(Math.atan((y - pos[1])
@@ -152,6 +153,7 @@ public class MobileRobot extends SensorMotorUser {
 	 *            angle to turn
 	 */
 	public void turnTo(double angle) {
+		isTurning = true;
 		double[] currPos = new double[3];
 		double currSpeed = ROTATION_SPEED;
 		double angDiff;
@@ -178,6 +180,7 @@ public class MobileRobot extends SensorMotorUser {
 			angDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
 		}
 		setSpeeds(0.0, 0.0);
+		isTurning = false;
 	}
 
 	// mutators

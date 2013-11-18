@@ -61,9 +61,8 @@ public class Competitor {
 		SensorMotorUser
 				.setStartCorner(corner.getCooridinates());
 		
-	
-		//localizer.localize();
-		//Sound.beep();
+		localizer.localize();
+		Sound.beep();
 
 		explorer.lookForStyrofoamBlocks();
 
@@ -71,8 +70,6 @@ public class Competitor {
 	}
 	
 	
-	
-
 	/** This sets up the demo by setting starting corner and player type. */
 	private static void connectBT() {
 		BluetoothConnection conn = new BluetoothConnection();
@@ -134,7 +131,5 @@ public class Competitor {
 		Map.setForbiddenZone(testRed);
 		
 	}
-	
-	
 	
 }

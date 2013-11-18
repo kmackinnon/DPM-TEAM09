@@ -4,7 +4,7 @@ import lejos.nxt.Button;
 import lejos.nxt.comm.RConsole;
 import robot.MobileRobot;
 import robot.Odometer;
-import robot.OdometeryCorrection;
+import robot.OdometryCorrection;
 
 /**
  * Test functionality of the Mobile Robot and accuracy of the Odometer.

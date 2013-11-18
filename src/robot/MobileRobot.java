@@ -15,15 +15,15 @@ import lejos.nxt.LCD;
 
 public class MobileRobot extends SensorMotorUser {
 	public static Odometer odo = new Odometer();
-	public static OdometeryCorrection corr = new OdometeryCorrection(odo);
+	public static OdometryCorrection corr = new OdometryCorrection(odo);
 	public static BlockDetector blockDetector = new BlockDetector();
 	public static boolean isTurning = false;
 	
 	private double xPrevTarget;
 	private double yPrevTarget;
 
-	private final int ANGLE_ERROR_THRESHOLD = 2; // measured in degrees
-	private final int POSITION_ERROR_THRESHOLD = 2;
+	private final int ANGLE_ERROR_THRESHOLD = 1; // measured in degrees
+	private final int POSITION_ERROR_THRESHOLD = 1;
 
 	/**
 	 * Default Constructor
@@ -153,6 +153,8 @@ public class MobileRobot extends SensorMotorUser {
 	
 	public void turnToOnPoint(double targetTheta){
 		
+		isTurning = true;
+		
 		double angleToRotateBy = targetTheta - odo.getTheta();
 
 		// turn a minimal angle
@@ -164,6 +166,8 @@ public class MobileRobot extends SensorMotorUser {
 
 		rotateByAngle(angleToRotateBy);
 			
+		isTurning = false;
+		
 	}
 	
 

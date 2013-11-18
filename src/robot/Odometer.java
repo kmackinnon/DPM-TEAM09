@@ -87,21 +87,6 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	}
 	
 
-	// accessors
-	/**
-	 * Return current position
-	 * 
-	 * @param pos
-	 *            double array with 0th element for x, 1st element for y, 2nd
-	 *            element for theta
-	 */
-	public void getPosition(double[] pos) {
-		synchronized (lock) {
-			pos[0] = x;
-			pos[1] = y;
-			pos[2] = theta;
-		}
-	}
 
 
 	public void setX(double input) {

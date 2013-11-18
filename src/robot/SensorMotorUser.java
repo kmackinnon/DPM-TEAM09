@@ -54,13 +54,16 @@ public class SensorMotorUser {
 	 * The speed of the wheel motors when the robot is moving in a straight
 	 * line. The number is how many degrees the motors rotate per second
 	 */
-	public static final int FORWARD_SPEED = 10;
+	public static final int FORWARD_SPEED = 360;
 
 	/**
 	 * The speed of the wheel motors when the robot is rotating on point. The
 	 * number is how many degrees the motors rotate per second
 	 */
-	public static final int ROTATION_SPEED = 45;
+	public static final int ROTATION_SPEED = 180;
+	
+	
+	public static final int TURNING_SPEED = 300;
 
 	/**
 	 * The speed of the lifting motor when the robot is lifting blocks. The
@@ -70,7 +73,9 @@ public class SensorMotorUser {
 
 	public static final double SENSOR_WIDTH = 11.05;
 	
+	public static final int DEFAULT_SLEEP_PERIOD = 25;
 	
+	public static final int US_SENSOR_255 = 255;
 	
 	private static boolean isBuilder;
 

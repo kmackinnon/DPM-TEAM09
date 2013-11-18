@@ -2,7 +2,6 @@ package robot;
 
 import java.util.Arrays;
 
-
 /**
  * Localizer calculates the position and orientation of the robot at the start
  * of the game. This has to be done because the odometer initially assumes a
@@ -13,13 +12,15 @@ public class Localizer extends MobileRobot {
 
 	private double angleA; // angle of right wall (assuming facing away)
 	private double angleB; // angle of left wall
+
+	private int distanceArray[] = new int[5];
+	private int medianDistance;
+
+	private boolean isLatched = false;
+
+	private long correctionStart, correctionEnd;
 	
-	private final int SLEEP_PERIOD = 25;
-	
-	int distanceArray[] = new int[5];
-	int medianDistance;
-	
-	long correctionStart, correctionEnd;
+	private final int LATCH_ANGLE_DISTANCE = 30;
 
 	public Localizer() {
 
@@ -28,12 +29,12 @@ public class Localizer extends MobileRobot {
 	public void localize() {
 
 		liftClaw();
-
+		
 		ultrasonicLocalization();
 		xyUltrasonicCorrection();
-		
-		travelTileCoordinate(0,0);
-		turnTo(0);
+
+		travelTileCoordinate(0, 0);
+		turnToOnPoint(0);
 	}
 
 	private void ultrasonicLocalization() {
@@ -41,16 +42,16 @@ public class Localizer extends MobileRobot {
 		boolean isFacingWall;
 		int countWall = 0;
 		double deltaTheta;
-		
-		Arrays.fill(distanceArray,255);
+
+		Arrays.fill(distanceArray, US_SENSOR_255);
 
 		// determine initial position of looking at or away from wall
 		for (int i = 0; i < 5; i++) {
-			
-			shiftArrayByOne(distanceArray,getUSDistance());
-			
+
+			shiftArrayByOne(distanceArray, getUSDistance());
+
 			medianDistance = getMedian(distanceArray);
-			
+
 			if (medianDistance <= 50) {
 				countWall++;
 			}
@@ -65,27 +66,10 @@ public class Localizer extends MobileRobot {
 		// robot starts by facing the wall
 		// only begin falling edge routine once facing away from wall
 		else {
-
-			int count255 = 0;
-
-			while (count255 < 5) {
-				setRotationSpeed(ROTATION_SPEED);
-				
-				shiftArrayByOne(distanceArray,getUSDistance());
-				
-				medianDistance = getMedian(distanceArray);
-				
-				if (medianDistance == 255) {
-					count255++;
-				}
-			}
+			lookForEmptySpace();
 
 			fallingEdge();
-
 		}
-
-		// to stop the rotation
-		setRotationSpeed(0);
 
 		// calculates the corrected angle
 		if (angleB > angleA) {
@@ -102,43 +86,69 @@ public class Localizer extends MobileRobot {
 	}
 
 	private void fallingEdge() {
-		boolean isLatched = false; // whether angle is recorded
-		int count255 = 0;
-		
-		
-		// head to right wall
-		while (!isLatched) {
-			correctionStart = System.currentTimeMillis();
-			
-			setRotationSpeed(ROTATION_SPEED);
-			
-			shiftArrayByOne(distanceArray,getUSDistance());
-			
-			medianDistance = getMedian(distanceArray);
 
-			// right wall detected
-			if (medianDistance < 30) {
-				angleA = odo.getTheta(); // latch angle
-				isLatched = true;
-				break;
-			}
-			
-			threadSleep();
-			
-		}
+		isLatched = false; // whether angle is recorded
+
+		// head to right wall
+		lookForRightWall();
 
 		// to reset isLatched
+		lookForEmptySpace();
+
+		// head to left wall
+		lookForLeftWall();
+
+		stopMoving();
+	}
+
+	private void xyUltrasonicCorrection() {
+
+		turnToOnPoint(180);
+		odo.setY(getUSDistance() - 28);
+
+		turnToOnPoint(270);
+		odo.setX(getUSDistance() - 28);
+
+		initializePrevTarget(odo.getX(),odo.getY());
+	}
+
+	private void lookForRightWall() {
+
+		lookForWall(true);
+
+	}
+
+	private void lookForLeftWall() {
+
+		lookForWall(false);
+
+	}
+
+	private void lookForEmptySpace() {
+
+		int count255 = 0;
+
+		// isLatched has been set true after finding right wall
+		if (isLatched) {
+			rotateCounterClockwiseOnPoint();
+		}
+
+		// isLatched is not true if we are looking for an empty space
+		// without having latched an angle first
+		else {
+			rotateClockwiseOnPoint();
+			isLatched = true;
+		}
+
 		while (isLatched) {
 			correctionStart = System.currentTimeMillis();
-			
-			setRotationSpeed(-ROTATION_SPEED);
-			
-			shiftArrayByOne(distanceArray,getUSDistance());
-			
+
+			shiftArrayByOne(distanceArray, getUSDistance());
+
 			medianDistance = getMedian(distanceArray);
 
 			// ensure facing away from walls before attempting to detect angles
-			if (medianDistance == 255) {
+			if (medianDistance == US_SENSOR_255) {
 				count255++;
 			} else {
 				count255 = 0;
@@ -148,146 +158,127 @@ public class Localizer extends MobileRobot {
 			if (count255 >= 5) {
 				isLatched = false;
 			}
-			
+
 			threadSleep();
 		}
+	}
 
-		// head to left wall
+	private void lookForWall(boolean rightWall) {
+
+		if (rightWall) {
+
+			rotateClockwiseOnPoint();
+		}
+
+		else {
+
+			rotateCounterClockwiseOnPoint();
+		}
+
 		while (!isLatched) {
 			correctionStart = System.currentTimeMillis();
-			
-			setRotationSpeed(-ROTATION_SPEED);
-			
-			shiftArrayByOne(distanceArray,getUSDistance());
-			
+
+			shiftArrayByOne(distanceArray, getUSDistance());
+
 			medianDistance = getMedian(distanceArray);
 
 			// left wall detected
-			if (medianDistance < 30) {
-				angleB = odo.getTheta(); // latch angle
+			if (medianDistance < LATCH_ANGLE_DISTANCE) {
+
+				if (rightWall) {
+					angleA = odo.getTheta();
+				}
+
+				else {
+					angleB = odo.getTheta();
+				}
+
 				break;
 			}
-			
+
 			threadSleep();
 		}
-	}
-	
-	
-	private void xyUltrasonicCorrection(){
-		
-		turnTo(180);
-        odo.setY(getUSDistance()  - 28);
 
-        turnTo(270);
-        odo.setX(getUSDistance() - 28);
-		
+		isLatched = true;
+
 	}
-	
-	private void threadSleep(){
-		
+
+	private void threadSleep() {
+
 		correctionEnd = System.currentTimeMillis();
-        if (correctionEnd - correctionStart < SLEEP_PERIOD) {
-                try {
-                        Thread.sleep(SLEEP_PERIOD
-                                        - (correctionEnd - correctionStart));
-                } catch (InterruptedException e) {
-                        // there is nothing to be done here because it is not
-                        // expected that the localization will be
-                        // interrupted by another thread
-                }
-        }
-		
+		if (correctionEnd - correctionStart < DEFAULT_SLEEP_PERIOD) {
+			try {
+				Thread.sleep(DEFAULT_SLEEP_PERIOD
+						- (correctionEnd - correctionStart));
+			} catch (InterruptedException e) {
+				// there is nothing to be done here because it is not
+				// expected that the localization will be
+				// interrupted by another thread
+			}
+		}
+
 	}
-	
-	
 
-	/*private void lightLocalization() {
-
-		double rightAngle1 = -1; // initialized to impossible values
-		double rightAngle2 = -1;
-		double rightAngle3 = -1;
-		double rightAngle4 = -1;
-
-		double leftAngle1 = -1; // initialized to impossible values
-		double leftAngle2 = -1;
-		double leftAngle3 = -1;
-		double leftAngle4 = -1;
-
-		double angle1 = -1; // initialized to impossible values
-		double angle2 = -1;
-		double angle3 = -1;
-		double angle4 = -1;
-
-		boolean allLinesDetected = false;
-
-		while (!allLinesDetected) {
-
-			setRotationSpeed(-ROTATION_SPEED);
-
-			if (lineDetected(rightCS)) {
-				Sound.beep(); // to aid in debugging -- to test for lines
-				if (rightAngle1 == -1) {
-					rightAngle1 = odo.getAng();
-				} else if (rightAngle2 == -1) {
-					rightAngle2 = odo.getAng();
-				} else if (rightAngle3 == -1) {
-					rightAngle3 = odo.getAng();
-				} else if (rightAngle4 == -1) {
-					rightAngle4 = odo.getAng();
-				}
-			}
-
-			// if the robot is crossing a line, get respective angles
-			if (lineDetected(leftCS)) {
-				Sound.beep(); // to aid in debugging -- to test for lines
-				if (leftAngle1 == -1) {
-					leftAngle1 = odo.getAng();
-				} else if (leftAngle2 == -1) {
-					leftAngle2 = odo.getAng();
-				} else if (leftAngle3 == -1) {
-					leftAngle3 = odo.getAng();
-				} else if (leftAngle4 == -1) {
-					leftAngle4 = odo.getAng();
-				}
-			}
-
-			if (leftAngle4 != -1 && rightAngle4 != -1) {
-				allLinesDetected = true;
-			}
-
-		}
-
-		setRotationSpeed(0);
-		
-		angle1 = (leftAngle1+rightAngle1)/2;
-		angle2 = (leftAngle2+rightAngle2)/2;
-		angle3 = (leftAngle3+rightAngle3)/2;
-		angle4 = (leftAngle4+rightAngle4)/2;
-
-		double x, y, thetaY, thetaX;
-
-		thetaY = Math.abs(angle1 - angle3);
-		thetaX = 360 - Math.abs(angle4 - angle2);
-
-		if (thetaY > 180) {
-			thetaY = 360 - thetaY;
-		}
-
-		if (thetaX > 180) {
-			thetaX = 360 - thetaX;
-		}
-
-		// calculate correct x and y positions
-		x = -lightSensorToWheel * Math.cos(Math.toRadians(thetaY / 2));
-		y = -lightSensorToWheel * Math.cos(Math.toRadians(thetaX / 2));
-		
-		odo.setPosition(new double[] { x, y, 0},
-				new boolean[] { true, true, false });
-
-		// navigate to point (0,0) and then set heading to 0 degrees
-		travelCoordinate(0, 0);
-		turnTo(0);
-
-	}*/
+	/*
+	 * private void lightLocalization() {
+	 * 
+	 * double rightAngle1 = -1; // initialized to impossible values double
+	 * rightAngle2 = -1; double rightAngle3 = -1; double rightAngle4 = -1;
+	 * 
+	 * double leftAngle1 = -1; // initialized to impossible values double
+	 * leftAngle2 = -1; double leftAngle3 = -1; double leftAngle4 = -1;
+	 * 
+	 * double angle1 = -1; // initialized to impossible values double angle2 =
+	 * -1; double angle3 = -1; double angle4 = -1;
+	 * 
+	 * boolean allLinesDetected = false;
+	 * 
+	 * while (!allLinesDetected) {
+	 * 
+	 * setRotationSpeed(-ROTATION_SPEED);
+	 * 
+	 * if (lineDetected(rightCS)) { Sound.beep(); // to aid in debugging -- to
+	 * test for lines if (rightAngle1 == -1) { rightAngle1 = odo.getAng(); }
+	 * else if (rightAngle2 == -1) { rightAngle2 = odo.getAng(); } else if
+	 * (rightAngle3 == -1) { rightAngle3 = odo.getAng(); } else if (rightAngle4
+	 * == -1) { rightAngle4 = odo.getAng(); } }
+	 * 
+	 * // if the robot is crossing a line, get respective angles if
+	 * (lineDetected(leftCS)) { Sound.beep(); // to aid in debugging -- to test
+	 * for lines if (leftAngle1 == -1) { leftAngle1 = odo.getAng(); } else if
+	 * (leftAngle2 == -1) { leftAngle2 = odo.getAng(); } else if (leftAngle3 ==
+	 * -1) { leftAngle3 = odo.getAng(); } else if (leftAngle4 == -1) {
+	 * leftAngle4 = odo.getAng(); } }
+	 * 
+	 * if (leftAngle4 != -1 && rightAngle4 != -1) { allLinesDetected = true; }
+	 * 
+	 * }
+	 * 
+	 * setRotationSpeed(0);
+	 * 
+	 * angle1 = (leftAngle1+rightAngle1)/2; angle2 = (leftAngle2+rightAngle2)/2;
+	 * angle3 = (leftAngle3+rightAngle3)/2; angle4 = (leftAngle4+rightAngle4)/2;
+	 * 
+	 * double x, y, thetaY, thetaX;
+	 * 
+	 * thetaY = Math.abs(angle1 - angle3); thetaX = 360 - Math.abs(angle4 -
+	 * angle2);
+	 * 
+	 * if (thetaY > 180) { thetaY = 360 - thetaY; }
+	 * 
+	 * if (thetaX > 180) { thetaX = 360 - thetaX; }
+	 * 
+	 * // calculate correct x and y positions x = -lightSensorToWheel *
+	 * Math.cos(Math.toRadians(thetaY / 2)); y = -lightSensorToWheel *
+	 * Math.cos(Math.toRadians(thetaX / 2));
+	 * 
+	 * odo.setPosition(new double[] { x, y, 0}, new boolean[] { true, true,
+	 * false });
+	 * 
+	 * // navigate to point (0,0) and then set heading to 0 degrees
+	 * travelCoordinate(0, 0); turnTo(0);
+	 * 
+	 * }
+	 */
 
 }

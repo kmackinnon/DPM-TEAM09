@@ -2,6 +2,8 @@ package robot;
 
 import java.util.ArrayList;
 
+import lejos.nxt.LCD;
+
 /**
  * MobileRobot contains all the methods needed for the robot to move to a
  * location, and to turn to an angle. This includes traveling to a point while
@@ -15,10 +17,14 @@ public class MobileRobot extends SensorMotorUser {
 	public static Odometer odo = new Odometer();
 	public static OdometeryCorrection corr = new OdometeryCorrection(odo);
 	public static BlockDetector blockDetector = new BlockDetector();
-	public static boolean isTurning= false;
+	public static boolean isTurning = false;
 	
-	double[] pos = new double[3];
-	private double forwardSpeed, rotationSpeed;
+	private double xPrevTarget;
+	private double yPrevTarget;
+
+	private final int ANGLE_ERROR_THRESHOLD = 2; // measured in degrees
+	private final int POSITION_ERROR_THRESHOLD = 2;
+
 	/**
 	 * Default Constructor
 	 * <p>
@@ -54,8 +60,7 @@ public class MobileRobot extends SensorMotorUser {
 		}
 
 	}
-	
-	
+
 	public void travelTileCoordinate(int x, int y) {
 
 		double xInCm = x * Map.TILE_SIZE;
@@ -64,225 +69,217 @@ public class MobileRobot extends SensorMotorUser {
 		travelCoordinate(xInCm, yInCm);
 
 	}
-	
 
-	/**
-	 * Robot travels a certain distance
-	 * 
-	 * @param distance
-	 *            distance to travel
-	 */
-	public void travelMag(double distance) {
-		double[] initPos = new double[3], currPos = new double[3];
-		setRotationSpeed(0.0);
-		odo.getPosition(initPos);
-		odo.getPosition(currPos);
-		if (distance < 0.0)
-			setForwardSpeed(-FORWARD_SPEED);
-		else
-			setForwardSpeed(FORWARD_SPEED);
-		// pythagoras to determine how far left to go
-		while (Math.pow((currPos[0] - initPos[0]), 2)
-				+ Math.pow((currPos[1] - initPos[1]), 2) < distance * distance) {
-			odo.getPosition(currPos);
-		}
-		setForwardSpeed(0.0);
-	}
+	public void travelCoordinate(double xTarget, double yTarget) {
 
+		double xDiff;
+		double yDiff;
+		double targetTheta;
+		double deltaTheta;
 
-	/**
-	 * Move robot to position at (x,y)
-	 * <p>
-	 * Will orient robot to face coordinate before moving in a straight line
-	 * 
-	 * @param x
-	 *            x coordinate to move to
-	 * @param y
-	 *            y coordinate to move to
-	 */
-	public void travelCoordinate(double x, double y) {
-		odo.getPosition(pos);
-		while (Math.sqrt(Math.pow((x - pos[0]), 2) + Math.pow((y - pos[1]), 2)) > 1) {
-			odo.getPosition(pos);
+		// keep looping while the difference between the current position and
+		// target position is greater than the position error threshold
+		while (!isAtPoint(xTarget, yTarget)) {
+			// Determine whether to turn or not
+			xDiff = xTarget - odo.getX();
+			yDiff = yTarget - odo.getY();
+			targetTheta = 90 - Math.toDegrees(Math.atan2(yDiff, xDiff));
 
-			if (Math.abs(y - pos[1]) < 1) {// if you only need to move
-											// horizontally
-				if (Math.abs(x - pos[0]) > 1) {
-					if (pos[0] > x)
-						turnTo(-90);// position is to left
-					else
-						turnTo(90);
-				}
+			// change in theta is target minus current
+			
+			deltaTheta = targetTheta - odo.getTheta();
+			
+			if(deltaTheta>180){
+				
+				deltaTheta -= 360;
+				
 			}
-			// position is to right
-			else {
-				if (y > pos[1])
-					turnTo(Math.toDegrees(Math
-							.atan((x - pos[0]) / (y - pos[1]))));
-				else {
-					if (Math.abs(x - pos[0]) > 1) {
-						if (pos[0] > x)
-							turnTo(-1
-									* Math.toDegrees(Math.atan((y - pos[1])
-											/ (x - pos[0]))) - 90);// counter
-																	// clockwise
-						else
-							turnTo(-1
-									* Math.toDegrees(Math.atan((y - pos[1])
-											/ (x - pos[0]))) + 90);// clockwise
-					}
-				}
+			
+			else if(deltaTheta<-180){
+				
+				deltaTheta +=360;
+				
 			}
 
-			setRotationSpeed(0.0);
+			
+			// if the heading is off by more than acceptable error, we must
+			// correct
+			if (Math.abs(deltaTheta) > ANGLE_ERROR_THRESHOLD) {
+			
+				if(isAtPoint(xPrevTarget,yPrevTarget)){
+					turnToOnPoint(targetTheta);
+				}
+				else{
+					turnToWhileMoving(targetTheta);
+				}
+				
+			} else {
 
-			travelMag(Math.sqrt(Math.pow((x - pos[0]), 2)
-					+ Math.pow((y - pos[1]), 2)));// after orientation travel
-													// there
+				
+				moveForward();
+			}
 		}
-		setSpeeds(0.0, 0.0);
+		
+		stopMoving();
+		
+		xPrevTarget = xTarget;
+		yPrevTarget = yTarget;
+		
 	}
 
-	/**
-	 * Turns robot by specified value.
-	 * <p>
-	 * Negative angle values turn robot counterclockwise. Positive angle values
-	 * turn robot clockwise.
-	 * 
-	 * @param angle
-	 *            angle to turn
-	 */
-	public void turnTo(double angle) {
-		isTurning = true;
-		double[] currPos = new double[3];
-		double currSpeed = ROTATION_SPEED;
-		double angDiff;
-
-		setForwardSpeed(0.0);
-
-		odo.getPosition(currPos);
-
-		// find minimum angle between current angle and where to go
-		angDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
-
-		if (angDiff > 0.0)
-			setRotationSpeed(currSpeed);// clockwise
-		else
-			setRotationSpeed(currSpeed *= -1);// counterclockwise
-
-		while (Math.abs(angDiff) > 0.5) {// move to angle
-			if (currSpeed > 0.0 && angDiff < 0.0)
-				setRotationSpeed(currSpeed *= -0.5);
-			else if (currSpeed < 0.0 && angDiff > 0.0)
-				setRotationSpeed(currSpeed *= -0.5);
-
-			odo.getPosition(currPos);
-			angDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
-		}
-		isTurning = false;
-		setSpeeds(0.0, 0.0);
-	}
-
-	// mutators
-	/**
-	 * Sets linear speed. Calls setSpeeds(double forwardSpeed, double
-	 * rotationalSpeed) with rotationalSpeed equal to 0
-	 * 
-	 * @param speed
-	 */
-	public void setForwardSpeed(double speed) {
-		forwardSpeed = speed;
-		rotationSpeed = 0;
-		setSpeeds(forwardSpeed, rotationSpeed);
-	}
-
-	/**
-	 * Sets rotational speed. Calls setSpeeds(double forwardSpeed, double
-	 * rotationalSpeed) with forwardSpeed equal to 0
-	 * 
-	 * @param speed
-	 *            rotational speed to set motors
-	 */
-	public void setRotationSpeed(double speed) {
-		forwardSpeed = 0;
-		rotationSpeed = speed;
-		setSpeeds(forwardSpeed, rotationSpeed);
-	}
-
-	/**
-	 * Sets forward and rotational speed.
-	 * <p>
-	 * Positive rotational speed designated in clockwise direction. Allows for
-	 * traveling in an arc
-	 * <p>
-	 * For speeds of zero, the speed is actually set to 1. Setting motor speed
-	 * to 0 does not allow for further increases to speed.
-	 * 
-	 * @param forwardSpeed
-	 *            the forward speed to set the motors
-	 * @param rotationalSpeed
-	 *            the rotational speed to set the motors
-	 */
-	public void setSpeeds(double forwardSpeed, double rotationalSpeed) {// clockwise
-		double leftSpeed, rightSpeed;
-
-		this.forwardSpeed = forwardSpeed;
-		this.rotationSpeed = rotationalSpeed;
-
-		leftSpeed = (forwardSpeed + rotationalSpeed * WIDTH * Math.PI / 360.0)
-				* 180.0 / (LEFT_RADIUS * Math.PI);
-		rightSpeed = (forwardSpeed - rotationalSpeed * WIDTH * Math.PI / 360.0)
-				* 180.0 / (RIGHT_RADIUS * Math.PI);
-
-		// set motor directions
-		if (leftSpeed > 0.0)
-			leftMotor.forward();
-		else {
-			leftMotor.backward();
-			leftSpeed = -leftSpeed;
-		}
-
-		if (rightSpeed > 0.0)
-			rightMotor.forward();
-		else {
-			rightMotor.backward();
-			rightSpeed = -rightSpeed;
-		}
-
-		// set motor speeds
-		if (leftSpeed > 900.0)
-			leftMotor.setSpeed(900);
-		if (leftSpeed == 0.0)
-			// If the speed is set to 0 then the Motors come to a complete stop
-			// and can't be restarted
-			// Setting speed to 1 virtually stops motor movement, but allows for
-			// further changes in motor speed
-			leftMotor.setSpeed(1);
-		else
-			leftMotor.setSpeed((int) leftSpeed);
-
-		if (rightSpeed > 900.0)
-			rightMotor.setSpeed(900);
-		else if (rightSpeed == 0.0)
-			rightMotor.setSpeed(1);
-		else
-			rightMotor.setSpeed((int) rightSpeed);
-	}
-
-	/**
-	 * Start both motors. Calls NXTRegulatedMotor.forward()
-	 */
-	public void startMotors() {
-		rightMotor.forward();
-		leftMotor.forward();
-	}
 	
-	
-	
-	public void liftClaw(){
-		clawMotor.setSpeed(120);
-		clawMotor.rotateTo(310);
+	public void initializePrevTarget(double x, double y){
+		
+		xPrevTarget = x;
+		yPrevTarget = y;
 		
 	}
 	
+	
+	public void turnToWhileMoving(double targetTheta) {
+		double rotate = targetTheta - odo.getTheta();
+
+		// turn while travelling by adjusting motor speeds
+		if (rotate > 0) {
+			
+			turnRightWhileMoving();
+
+		} else if (rotate < 0) {
+			
+			turnLeftWhileMoving();
+		}
+	}
+	
+	
+	public void turnToOnPoint(double targetTheta){
+		
+		double angleToRotateBy = targetTheta - odo.getTheta();
+
+		// turn a minimal angle
+		if (angleToRotateBy > 180) {
+			angleToRotateBy -= 360;
+		} else if (angleToRotateBy < -180) {
+			angleToRotateBy += 360;
+		}
+
+		rotateByAngle(angleToRotateBy);
+			
+	}
+	
+
+	
+	
+	
+	public void moveForward() {
+
+		leftMotor.setSpeed(FORWARD_SPEED);
+		rightMotor.setSpeed(FORWARD_SPEED);
+
+		leftMotor.forward();
+		rightMotor.forward();
+
+	}
+
+	public void moveBackward() {
+
+		leftMotor.setSpeed(FORWARD_SPEED);
+		rightMotor.setSpeed(FORWARD_SPEED);
+
+		leftMotor.backward();
+		rightMotor.backward();
+
+	}
+
+	public void rotateClockwiseOnPoint() {
+
+		leftMotor.setSpeed(ROTATION_SPEED);
+		rightMotor.setSpeed(ROTATION_SPEED);
+
+		leftMotor.forward();
+		rightMotor.backward();
+
+	}
+
+	public void rotateCounterClockwiseOnPoint() {
+
+		leftMotor.setSpeed(ROTATION_SPEED);
+		rightMotor.setSpeed(ROTATION_SPEED);
+
+		leftMotor.backward();
+		rightMotor.forward();
+
+	}
+	
+	
+	public void rotateByAngle(double angle){
+		
+		leftMotor.setSpeed(ROTATION_SPEED);
+		rightMotor.setSpeed(ROTATION_SPEED);
+
+		leftMotor.rotate(convertAngle(LEFT_RADIUS, WIDTH, angle), true);
+		rightMotor.rotate(-convertAngle(RIGHT_RADIUS, WIDTH, angle), false);
+		
+	}
+	
+	
+	
+	public void turnLeftWhileMoving(){
+		
+		leftMotor.setSpeed(TURNING_SPEED);
+		rightMotor.setSpeed(FORWARD_SPEED);
+		
+		leftMotor.forward();
+		rightMotor.forward();
+		
+	}
+	
+	public void turnRightWhileMoving(){
+		
+		leftMotor.setSpeed(FORWARD_SPEED);
+		rightMotor.setSpeed(TURNING_SPEED);
+		
+		leftMotor.forward();
+		rightMotor.forward();
+		
+	}
+	
+	
+	
+
+	public void stopMoving() {
+
+		leftMotor.setSpeed(0);
+		rightMotor.setSpeed(0);
+
+	}
+
+	public void liftClaw() {
+		clawMotor.setSpeed(120);
+		clawMotor.rotateTo(310);
+	}
+
+	private boolean isAtPoint(double xTarget, double yTarget) {
+
+		if (Math.abs(xTarget - odo.getX()) < POSITION_ERROR_THRESHOLD
+				&& Math.abs(yTarget - odo.getY()) < POSITION_ERROR_THRESHOLD) {
+			return true;
+		}
+
+		else {
+			return false;
+		}
+
+	}
+	
+	
+	// returns the number of degrees the wheels must turn over a distance
+    private static int convertDistance(double radius, double distance) {
+            return (int) ((180.0 * distance) / (Math.PI * radius));
+    }
+
+    // returns the number of degrees to turn a certain angle
+    private static int convertAngle(double radius, double width, double angle) {
+            return convertDistance(radius, Math.PI * width * angle / 360.0);
+    }
+
 }

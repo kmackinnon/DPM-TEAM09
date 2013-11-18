@@ -1,6 +1,7 @@
 package robot;
 
 import lejos.nxt.Sound;
+import lejos.nxt.comm.RConsole;
 
 
 /**
@@ -26,7 +27,7 @@ public class Explorer extends MobileRobot {
 	 * This contains the searching algorithm
 	 */
 	public void lookForStyrofoamBlocks() {
-
+		RConsole.open();
 		liftClaw();
 
 		corr.start();
@@ -34,9 +35,9 @@ public class Explorer extends MobileRobot {
 		
 		/*leftCS.setFloodlight(true);
 		rightCS.setFloodlight(true);*/
-/*		for(int i = 1; i<6 ; i ++){
+		for(int i = 1; i<6 ; i ++){
 			travelCoordinate(0,i*Map.TILE_SIZE);
-		}*/
+		}
 		
 		//travelCoordinate(60.96,60.96);
 		//travelCoordinate(60.96,0);
@@ -76,7 +77,7 @@ public class Explorer extends MobileRobot {
 			
 			travelTo(nextRow());
 		}
-
+		RConsole.close();
 	}
 
 	

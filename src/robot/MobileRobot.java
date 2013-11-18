@@ -179,8 +179,8 @@ public class MobileRobot extends SensorMotorUser {
 			odo.getPosition(currPos);
 			angDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
 		}
-		setSpeeds(0.0, 0.0);
 		isTurning = false;
+		setSpeeds(0.0, 0.0);
 	}
 
 	// mutators

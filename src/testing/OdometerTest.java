@@ -20,7 +20,7 @@ public class OdometerTest {
 	
 	public static void main(String[] args) {
 		MobileRobot robot = new MobileRobot();
-		//OdometeryCorrection corr = new OdometeryCorrection(MobileRobot.odo);
+//		OdometryCorrection corr = new OdometryCorrection(MobileRobot.odo);
 		int option = 0; // don't bother with button inputs
 		
 		while (option == 0)
@@ -30,11 +30,9 @@ public class OdometerTest {
 		
 		switch(option) {
 		case Button.ID_LEFT:
-			//corr.start();
 			squareTest(robot);
 			break;
 		case Button.ID_RIGHT:
-			//corr.start();
 			//triangleTest(robot);
 			break;
 		default:
@@ -52,7 +50,7 @@ public class OdometerTest {
 		robot.travelCoordinate(60.96,60.96);
 		robot.travelCoordinate(60.96,0);
 		robot.travelCoordinate(0,0);
-		robot.turnTo(0.0);
+		robot.turnToOnPoint(0.0);
 	}
 	
 /*	public static void triangleTest(MobileRobot robot) {

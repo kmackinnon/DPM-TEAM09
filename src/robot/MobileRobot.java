@@ -3,6 +3,7 @@ package robot;
 import java.util.ArrayList;
 
 import lejos.nxt.LCD;
+import lejos.nxt.comm.RConsole;
 
 /**
  * MobileRobot contains all the methods needed for the robot to move to a
@@ -85,38 +86,31 @@ public class MobileRobot extends SensorMotorUser {
 			yDiff = yTarget - odo.getY();
 			targetTheta = 90 - Math.toDegrees(Math.atan2(yDiff, xDiff));
 
+			
+			//RConsole.println("targetTheta" + targetTheta);
+			
 			// change in theta is target minus current
 			
 			deltaTheta = targetTheta - odo.getTheta();
 			
 			if(deltaTheta>180){
-				
 				deltaTheta -= 360;
-				
-			}
-			
-			else if(deltaTheta<-180){
-				
+			} else if(deltaTheta<-180){
 				deltaTheta +=360;
-				
 			}
 
-			
 			// if the heading is off by more than acceptable error, we must
 			// correct
 			if (Math.abs(deltaTheta) > ANGLE_ERROR_THRESHOLD) {
 			
 				if(isAtPoint(xPrevTarget,yPrevTarget)){
 					turnToOnPoint(targetTheta);
-				}
-				else{
+				} else{
 					turnToWhileMoving(targetTheta);
 				}
 				
 			} else {
-
-				
-				moveForward();
+				moveForward(); //the heading is good
 			}
 		}
 		
@@ -129,30 +123,31 @@ public class MobileRobot extends SensorMotorUser {
 
 	
 	public void initializePrevTarget(double x, double y){
-		
 		xPrevTarget = x;
 		yPrevTarget = y;
-		
 	}
 	
 	
 	public void turnToWhileMoving(double targetTheta) {
-		double rotate = targetTheta - odo.getTheta();
+		double angleToRotateBy = targetTheta - odo.getTheta();
+
+		// turn a minimal angle
+		if (angleToRotateBy > 180) {
+			angleToRotateBy -= 360;
+		} else if (angleToRotateBy < -180) {
+			angleToRotateBy += 360;
+		}
 
 		// turn while travelling by adjusting motor speeds
-		if (rotate > 0) {
-			
+		if (angleToRotateBy > 0) {
 			turnRightWhileMoving();
-
-		} else if (rotate < 0) {
-			
+		} else if (angleToRotateBy < 0) {
 			turnLeftWhileMoving();
 		}
 	}
 	
 	
 	public void turnToOnPoint(double targetTheta){
-		
 		isTurning = true;
 		
 		double angleToRotateBy = targetTheta - odo.getTheta();
@@ -167,12 +162,7 @@ public class MobileRobot extends SensorMotorUser {
 		rotateByAngle(angleToRotateBy);
 			
 		isTurning = false;
-		
 	}
-	
-
-	
-	
 	
 	public void moveForward() {
 

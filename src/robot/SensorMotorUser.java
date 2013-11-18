@@ -48,7 +48,7 @@ public class SensorMotorUser {
 	public static final double RIGHT_RADIUS = 2.11;
 
 	/** The distance between the two wheels */
-	public static final double WIDTH = 10.395;
+	public static final double WIDTH = 10.8;
 
 	/**
 	 * The speed of the wheel motors when the robot is moving in a straight
@@ -63,7 +63,7 @@ public class SensorMotorUser {
 	public static final int ROTATION_SPEED = 180;
 	
 	
-	public static final int TURNING_SPEED = 300;
+	public static final int TURNING_SPEED = 270;
 
 	/**
 	 * The speed of the lifting motor when the robot is lifting blocks. The

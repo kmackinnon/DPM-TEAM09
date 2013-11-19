@@ -11,6 +11,8 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	private static final int DEFAULT_PERIOD = 25;
 
+	private final double MIN_DISTANCE_BETWEEN_DETECTIONS = 20;
+
 	private Timer correctionTimer;
 
 	private Odometer odo;
@@ -18,13 +20,14 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private boolean leftSensorDetected;
 	private boolean rightSensorDetected;
 
-	private double prevRightTacho;
-	private double prevLeftTacho;
+	private double rightTachoAtDetection;
+	private double leftTachoAtDetection;
+
+	private double prevRightTachoAtDetection = 0;
+	private double prevLeftTachoAtDetection = 0;
 
 	private double xAtFirstDetection;
 	private double yAtFirstDetection;
-
-	private boolean doCorrection = false;
 
 	public OdometryCorrection(Odometer odo) {
 		this.odo = odo;
@@ -43,15 +46,12 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		correctionTimer.start();
 
-		doCorrection = true;
 	}
 
 	public void turnOffCorrection() {
 
 		leftCS.setFloodlight(false);
 		rightCS.setFloodlight(false);
-
-		doCorrection = false;
 
 		correctionTimer.stop();
 
@@ -76,9 +76,20 @@ public class OdometryCorrection extends SensorMotorUser implements
 					xAtFirstDetection = odo.getX();
 					yAtFirstDetection = odo.getY();
 
-					prevRightTacho = rightMotor.getTachoCount();
+					rightTachoAtDetection = rightMotor.getTachoCount();
+					leftTachoAtDetection = leftMotor.getTachoCount();
 
-					leftSensorDetected = true;
+					/*if ((leftTachoAtDetection - prevLeftTachoAtDetection) > ((MIN_DISTANCE_BETWEEN_DETECTIONS * 360)
+							/ (2 * Math.PI * LEFT_RADIUS))){*/
+						Sound.beep();
+						leftSensorDetected = true;
+					//}
+					
+					/*else{
+						leftSensorDetected = false;
+					}*/
+
+						
 				}
 
 				if (lineDetected(rightCS)) {
@@ -91,26 +102,39 @@ public class OdometryCorrection extends SensorMotorUser implements
 					xAtFirstDetection = odo.getX();
 					yAtFirstDetection = odo.getY();
 
-					prevLeftTacho = leftMotor.getTachoCount();
-
-					rightSensorDetected = true;
-
+					leftTachoAtDetection = leftMotor.getTachoCount();
+					rightTachoAtDetection = rightMotor.getTachoCount();
+					
+				/*	if ((rightTachoAtDetection - prevRightTachoAtDetection) > ((MIN_DISTANCE_BETWEEN_DETECTIONS * 360)
+							/ (2 * Math.PI * RIGHT_RADIUS))){*/
+						Sound.beep();
+						rightSensorDetected = true;
+						//}
+					
+					/*else{
+						rightSensorDetected = false;
+					}*/
+					
 				}
 
 			}
 
 			if (leftSensorDetected && (!rightSensorDetected)) {
 
-				if (lineDetected(rightCS)) {
+				double currentRightTacho = rightMotor.getTachoCount();
 
-					double currentRightTacho = rightMotor.getTachoCount();
+				distanceTravelledByLaggingWheel = 2 * Math.PI * RIGHT_RADIUS
+						* ((currentRightTacho - rightTachoAtDetection) / 360);
 
-					distanceTravelledByLaggingWheel = 2 * Math.PI
-							* RIGHT_RADIUS
-							* ((currentRightTacho - prevRightTacho) / 360);
+				if (distanceTravelledByLaggingWheel > 10) {
+					leftSensorDetected = false;
+				}
+
+				else if (lineDetected(rightCS)) {
 
 					angleOff = Math.atan(distanceTravelledByLaggingWheel
 							/ SENSOR_WIDTH);
+					Sound.beep();
 					rightSensorDetected = true;
 
 				}
@@ -119,16 +143,21 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 			if ((!leftSensorDetected) && (rightSensorDetected)) {
 
-				if (lineDetected(leftCS)) {
+				double currentLeftTacho = leftMotor.getTachoCount();
 
-					double currentLeftTacho = leftMotor.getTachoCount();
+				distanceTravelledByLaggingWheel = 2 * Math.PI * LEFT_RADIUS
+						* ((currentLeftTacho - leftTachoAtDetection) / 360);
 
-					distanceTravelledByLaggingWheel = 2 * Math.PI * LEFT_RADIUS
-							* ((currentLeftTacho - prevLeftTacho) / 360);
+				if (distanceTravelledByLaggingWheel > 10) {
+					rightSensorDetected = false;
+				}
+
+				else if (lineDetected(leftCS)) {
 
 					angleOff = -Math.atan(distanceTravelledByLaggingWheel
 							/ SENSOR_WIDTH);
 
+					Sound.beep();
 					leftSensorDetected = true;
 
 				}
@@ -139,73 +168,9 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 				if (distanceTravelledByLaggingWheel != 0) {
 
-					if (Math.abs(odo.getTheta() - 90) < 20) {
-						odo.setX(xAtFirstDetection
-								+ (distanceTravelledByLaggingWheel)
-								* Math.cos(angleOff));
-						
-						odo.setY(yAtFirstDetection
-								- (distanceTravelledByLaggingWheel)
-								* Math.sin(angleOff));
-					}
+					correctXY(distanceTravelledByLaggingWheel, angleOff);
 
-					else if (Math.abs(odo.getTheta() - 180) < 20) {
-						odo.setX(xAtFirstDetection
-								- (distanceTravelledByLaggingWheel)
-								* Math.sin(angleOff));
-					
-						odo.setY(yAtFirstDetection
-								- (distanceTravelledByLaggingWheel)
-								* Math.cos(angleOff));
-					}
-
-					else if (Math.abs(odo.getTheta() - 270) < 20) {
-						odo.setX(xAtFirstDetection
-								- (distanceTravelledByLaggingWheel)
-								* Math.cos(angleOff));
-						
-						odo.setY(yAtFirstDetection
-								+ (distanceTravelledByLaggingWheel)
-								* Math.sin(angleOff));
-					}
-
-					else if (odo.getTheta() < 20 || odo.getTheta() > 340) {
-						
-						odo.setX(xAtFirstDetection
-								+ (distanceTravelledByLaggingWheel)
-								* Math.sin(angleOff));
-					
-						odo.setY(yAtFirstDetection
-								+ (distanceTravelledByLaggingWheel)
-								* Math.cos(angleOff));
-					}
-
-					double currentAngleOff = 0;
-					double adjustment;
-
-					if (Math.abs(odo.getTheta() - 90) < 20) {
-						currentAngleOff = odo.getTheta() - 90;
-					}
-
-					else if (Math.abs(odo.getTheta() - 180) < 20) {
-						currentAngleOff = odo.getTheta() - 180;
-					}
-
-					else if (Math.abs(odo.getTheta() - 270) < 20) {
-						currentAngleOff = odo.getTheta() - 270;
-					}
-
-					else if (odo.getTheta() < 20) {
-						currentAngleOff = odo.getTheta();
-					}
-
-					else if (odo.getTheta() > 340) {
-						currentAngleOff = odo.getTheta() - 360;
-					}
-
-					adjustment = Math.toDegrees(angleOff) - currentAngleOff;
-
-					odo.setTheta(odo.getTheta() + adjustment);
+					correctAngle(angleOff);
 
 				}
 
@@ -213,6 +178,9 @@ public class OdometryCorrection extends SensorMotorUser implements
 				leftSensorDetected = false;
 
 			}
+
+			prevRightTachoAtDetection = rightMotor.getTachoCount();
+			prevLeftTachoAtDetection = leftMotor.getTachoCount();
 
 		}
 
@@ -253,18 +221,87 @@ public class OdometryCorrection extends SensorMotorUser implements
 		if (diff > LINE_DIFF) {
 			if (negativeDiffL && left) {
 				// RConsole.println("Ldetected");
-				Sound.beep();
+				//Sound.beep();
 				negativeDiffL = false;
 				return true;
 			} else if (negativeDiffR && !left) {
 				// RConsole.println("Rdetected");
-				Sound.beep();
+				//Sound.beep();
 				negativeDiffR = false;
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	private void correctXY(double distanceTravelledByLaggingWheel,
+			double angleOff) {
+
+		if (Math.abs(odo.getTheta() - 90) < 20) {
+			odo.setX(xAtFirstDetection + (distanceTravelledByLaggingWheel)
+					* Math.cos(angleOff));
+
+			odo.setY(yAtFirstDetection - (distanceTravelledByLaggingWheel)
+					* Math.sin(angleOff));
+		}
+
+		else if (Math.abs(odo.getTheta() - 180) < 20) {
+			odo.setX(xAtFirstDetection - (distanceTravelledByLaggingWheel)
+					* Math.sin(angleOff));
+
+			odo.setY(yAtFirstDetection - (distanceTravelledByLaggingWheel)
+					* Math.cos(angleOff));
+		}
+
+		else if (Math.abs(odo.getTheta() - 270) < 20) {
+			odo.setX(xAtFirstDetection - (distanceTravelledByLaggingWheel)
+					* Math.cos(angleOff));
+
+			odo.setY(yAtFirstDetection + (distanceTravelledByLaggingWheel)
+					* Math.sin(angleOff));
+		}
+
+		else if (odo.getTheta() < 20 || odo.getTheta() > 340) {
+
+			odo.setX(xAtFirstDetection + (distanceTravelledByLaggingWheel)
+					* Math.sin(angleOff));
+
+			odo.setY(yAtFirstDetection + (distanceTravelledByLaggingWheel)
+					* Math.cos(angleOff));
+		}
+
+	}
+
+	private void correctAngle(double angleOff) {
+
+		double currentAngleOff = 0;
+		double adjustment;
+
+		if (Math.abs(odo.getTheta() - 90) < 20) {
+			currentAngleOff = odo.getTheta() - 90;
+		}
+
+		else if (Math.abs(odo.getTheta() - 180) < 20) {
+			currentAngleOff = odo.getTheta() - 180;
+		}
+
+		else if (Math.abs(odo.getTheta() - 270) < 20) {
+			currentAngleOff = odo.getTheta() - 270;
+		}
+
+		else if (odo.getTheta() < 20) {
+			currentAngleOff = odo.getTheta();
+		}
+
+		else if (odo.getTheta() > 340) {
+			currentAngleOff = odo.getTheta() - 360;
+		}
+
+		adjustment = Math.toDegrees(angleOff) - currentAngleOff;
+
+		odo.setTheta(odo.getTheta() + adjustment);
+
 	}
 
 }

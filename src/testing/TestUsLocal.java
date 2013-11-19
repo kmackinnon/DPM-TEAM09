@@ -1,7 +1,7 @@
 package testing;
 
 import lejos.nxt.Button;
-import lejos.nxt.LCD;
+import lejos.nxt.comm.RConsole;
 import robot.Localizer;
 import robot.MobileRobot;
 
@@ -15,21 +15,22 @@ import robot.MobileRobot;
 
 public class TestUsLocal {
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) {
 		
-		int option = 0; // don't bother with button inputs
+		int option = 0;
 		
 		while (option == 0)
 			option = Button.waitForAnyPress();
 		
 		switch(option) {
 		case Button.ID_ENTER:
+			RConsole.open();
 			Localizer local = new Localizer();
 			local.localize();
 
-			LCD.drawString("x: " + MobileRobot.odo.getX(), 0, 0);
-			LCD.drawString("y: " + MobileRobot.odo.getY(), 0, 1);
-			LCD.drawString("theta: " + MobileRobot.odo.getAng(), 0, 2);
+			RConsole.println("x: " + MobileRobot.odo.getX());
+			RConsole.println("y: " + MobileRobot.odo.getY());
+			RConsole.println("theta: " + MobileRobot.odo.getTheta());
 			break;
 		default:
 			System.out.println("Error - invalid button");
@@ -37,7 +38,7 @@ public class TestUsLocal {
 			break;
 		}
 		
-		Button.waitForAnyPress();
+		RConsole.close();
 		System.exit(0);
 
 	}

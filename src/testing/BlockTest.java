@@ -1,6 +1,7 @@
 package testing;
 
 import lejos.nxt.Button;
+import lejos.nxt.ColorSensor.Color;
 import lejos.nxt.Sound;
 import lejos.nxt.comm.RConsole;
 import robot.BlockDetector;
@@ -8,11 +9,8 @@ import robot.MobileRobot;
 import robot.SensorMotorUser;
 
 /**
- * 
- * Steps for using RConsole 
- * 1. Using data from ColorRangeTest, apply a method to do block detection 
- * 	a. Ratio of Values 
- * 	b. //TODO
+ * Test for object detection and stopping the robot
+ * Test for object recognition
  *         
  * @author Sidney Ng
  * 
@@ -20,16 +18,16 @@ import robot.SensorMotorUser;
 public class BlockTest /*extends Thread*/ {
 
 	public static void main(String[] args) {
-		//MobileRobot robot = new MobileRobot();
+		MobileRobot robot = new MobileRobot();
 		BlockDetector blockDetector = new BlockDetector();
 		
 		//SensorMotorUser.frontCS.setFloodlight(true);
 		SensorMotorUser.clawMotor.setSpeed(60);
 		SensorMotorUser.clawMotor.rotateTo(320);
 
-		RConsole.open(); // opens a USB connection with no timeout
+//		RConsole.open(); // opens a USB connection with no timeout
 		
-		//robot.setForwardSpeed(SensorMotorUser.FORWARD_SPEED);
+		robot.moveForward();
 		boolean object = false;
 		int buttonChoice;
 		
@@ -42,15 +40,16 @@ public class BlockTest /*extends Thread*/ {
 
 			if (!object) {
 				if (blockDetector.objectDetected()) {
-					//robot.stopMotors();
+					robot.stopMoving();
 					
-					object = true;
+//					object = true; // comment or uncomment this if you want only object detection or detection and recognition
 				}
 			}
 			
 			
 			if (object) {
-				if (blockDetector.blockDetected()) {
+				Color color = SensorMotorUser.frontCS.getColor();
+				if (blockDetector.isStyrofoam(color.getRed(), color.getGreen(), color.getBlue())) {
 					RConsole.println("block");
 					Sound.beep();
 				}
@@ -59,7 +58,7 @@ public class BlockTest /*extends Thread*/ {
 			buttonChoice = Button.readButtons();
 			
 		} while (buttonChoice != Button.ID_ESCAPE);
-		RConsole.close(); // closes the USB connection
+//		RConsole.close(); // closes the USB connection
 	}
 
 }

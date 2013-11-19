@@ -15,7 +15,6 @@ public class MobileRobot extends SensorMotorUser {
 	public static Odometer odo = new Odometer();
 	public static OdometryCorrection corr = new OdometryCorrection(odo);
 	public static BlockDetector blockDetector = new BlockDetector();
-	public static boolean isTurning = false;
 
 	private double xPrevTarget;
 	private double yPrevTarget;
@@ -236,7 +235,7 @@ public class MobileRobot extends SensorMotorUser {
 
 			intersection = listOfWayPoints.get(i);
 
-			if (i == listOfWayPoints.size() - 1 || i == 0) {
+			if (i == listOfWayPoints.size() - 1) {
 				travelCoordinate(intersection.getXInCm(),
 						intersection.getYInCm(), true);
 			}

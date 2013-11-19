@@ -2,6 +2,8 @@ package robot;
 
 import java.util.ArrayList;
 
+import lejos.nxt.Sound;
+
 /**
  * MobileRobot contains all the methods needed for the robot to move to a
  * location, and to turn to an angle. This includes traveling to a point while
@@ -13,7 +15,7 @@ import java.util.ArrayList;
 
 public class MobileRobot extends SensorMotorUser {
 	public static Odometer odo = new Odometer();
-	public static OdometryCorrection corr = new OdometryCorrection(odo);
+	//public static OdometryCorrection corr = new OdometryCorrection(odo);
 	public static BlockDetector blockDetector = new BlockDetector();
 
 	private double xPrevTarget;
@@ -32,12 +34,27 @@ public class MobileRobot extends SensorMotorUser {
 	}
 
 	public void travelTo(Intersection destination) {
+		boolean success = false;
+
 		Intersection source = Map.getIntersection(odo.getX(), odo.getY());
 
 		ArrayList<Intersection> listOfWayPoints = Dijkstra.algorithm(source,
 				destination);
 
-		travelToWaypoints(listOfWayPoints);
+		success = travelToWaypoints(listOfWayPoints);
+
+		if (!success) {
+
+			if (!blockDetector.objectIsStyrofoam()) {
+				moveBackToPreviousIntersection();
+			}
+
+			else {
+				Sound.beep();
+			}
+
+		}
+
 	}
 
 	public void travelToNeighbor(Intersection destination) {
@@ -63,7 +80,7 @@ public class MobileRobot extends SensorMotorUser {
 
 	}
 
-	public void travelCoordinate(double xTarget, double yTarget,
+	public boolean travelCoordinate(double xTarget, double yTarget,
 			boolean stopAtTarget) {
 
 		double xDiff;
@@ -74,6 +91,11 @@ public class MobileRobot extends SensorMotorUser {
 		// keep looping while the difference between the current position and
 		// target position is greater than the position error threshold
 		while (!isAtPoint(xTarget, yTarget)) {
+
+			if (blockDetector.objectInFrontOfRobot()) {
+				return false;
+			}
+
 			// Determine whether to turn or not
 			xDiff = xTarget - odo.getX();
 			yDiff = yTarget - odo.getY();
@@ -103,7 +125,17 @@ public class MobileRobot extends SensorMotorUser {
 				}
 
 			} else {
-				moveForward(); // the heading is good
+
+				// this means there is a wooden block in the way, and we want to
+				// move backwards to the previous intersection.
+				if (xTarget == xPrevTarget && yTarget == yPrevTarget) {
+					moveBackward();
+				}
+
+				else {
+					moveForward(); // the heading is good
+				}
+
 			}
 		}
 
@@ -113,6 +145,8 @@ public class MobileRobot extends SensorMotorUser {
 
 		xPrevTarget = xTarget;
 		yPrevTarget = yTarget;
+
+		return true;
 
 	}
 
@@ -129,7 +163,7 @@ public class MobileRobot extends SensorMotorUser {
 
 		// turn while travelling by adjusting motor speeds
 		whileMovingTurnBy(angleToRotateBy);
-		
+
 	}
 
 	public void turnToOnPoint(double targetTheta) {
@@ -142,9 +176,6 @@ public class MobileRobot extends SensorMotorUser {
 		onPointTurnBy(angleToRotateBy);
 	}
 
-	
-
-	
 	public void moveForward() {
 
 		leftMotor.setSpeed(FORWARD_SPEED);
@@ -227,60 +258,74 @@ public class MobileRobot extends SensorMotorUser {
 		clawMotor.rotateTo(310);
 	}
 
-	private void travelToWaypoints(ArrayList<Intersection> listOfWayPoints) {
+	private boolean travelToWaypoints(ArrayList<Intersection> listOfWayPoints) {
 
 		Intersection intersection;
+		boolean success = false;
 
 		for (int i = 0; i < listOfWayPoints.size(); i++) {
 
 			intersection = listOfWayPoints.get(i);
 
 			if (i == listOfWayPoints.size() - 1) {
-				travelCoordinate(intersection.getXInCm(),
+				success = travelCoordinate(intersection.getXInCm(),
 						intersection.getYInCm(), true);
 			}
 
 			else {
-				travelCoordinate(intersection.getXInCm(),
+				success = travelCoordinate(intersection.getXInCm(),
 						intersection.getYInCm(), false);
+			}
+
+			if (!success) {
+				return success;
 			}
 		}
 
+		return success;
+
 	}
-	
-	private void whileMovingTurnBy(double minimumAngle){
-		
+
+	private void whileMovingTurnBy(double minimumAngle) {
+
 		if (minimumAngle > 0) {
 			turnRightWhileMoving();
 		} else if (minimumAngle < 0) {
 			turnLeftWhileMoving();
 		}
-		
-	}
-	
-	private void onPointTurnBy(double minimumAngle){
-		corr.doRotationalCorrection();
-		
-		rotateByAngle(minimumAngle);
-		
-		corr.doStraightLineCorrection();
+
 	}
 
-	
-	private double getMinAngle(double input){
-		
+	private void onPointTurnBy(double minimumAngle) {
+		//corr.doRotationalCorrection();
+
+		rotateByAngle(minimumAngle);
+
+		//corr.doStraightLineCorrection();
+	}
+
+	private void moveBackToPreviousIntersection() {
+		//corr.turnOffCorrection();
+
+		travelCoordinate(xPrevTarget, yPrevTarget, true);
+
+		//corr.turnOnCorrection();
+	}
+
+	private double getMinAngle(double input) {
+
 		double output = input;
-		
+
 		if (output > 180) {
 			output -= 360;
 		} else if (output < -180) {
 			output += 360;
 		}
-		
+
 		return output;
-		
+
 	}
-	
+
 	private boolean isAtPoint(double xTarget, double yTarget) {
 
 		if (Math.abs(xTarget - odo.getX()) < POSITION_ERROR_THRESHOLD

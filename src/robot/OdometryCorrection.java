@@ -9,6 +9,8 @@ import lejos.util.TimerListener;
 public class OdometryCorrection extends SensorMotorUser implements
 		TimerListener {
 
+	private static final int DEFAULT_PERIOD = 25;
+
 	private final double MIN_DISTANCE_BETWEEN_DETECTIONS = 25;
 
 	private Timer correctionTimer;
@@ -25,12 +27,11 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private double rightTachoAtDetection;
 	private double leftTachoAtDetection;
 
-	private double prevRightTachoAtDetection;
-	private double prevLeftTachoAtDetection;
+	private double prevRightTachoAtDetection = 0;
+	private double prevLeftTachoAtDetection = 0;
 
-	private double laggingWheelDistTravelled;
-	private double firstWheelDistTravelled;
-	private double angleOff;
+	private double distanceTravelledByLaggingWheel = 0;
+	private double angleOff = 0;
 
 	private double xAtFirstDetection;
 	private double yAtFirstDetection;
@@ -38,7 +39,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 	public OdometryCorrection(Odometer odo) {
 		this.odo = odo;
 
-		correctionTimer = new Timer(DEFAULT_TIMER_PERIOD, this);
+		correctionTimer = new Timer(DEFAULT_PERIOD, this);
 
 	}
 
@@ -46,6 +47,9 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		leftCS.setFloodlight(true);
 		rightCS.setFloodlight(true);
+
+		leftSensorDetected = false;
+		rightSensorDetected = false;
 
 		// straight line correction is the default
 		doStraightLineCorrection();
@@ -65,8 +69,11 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	public void doStraightLineCorrection() {
 
-		resetCorrectionVariables();
-		
+		// set the prevTacho counts to values that guarantee that the next line
+		// will be considered.
+		prevLeftTachoAtDetection = -Double.MAX_VALUE;
+		prevRightTachoAtDetection = -Double.MAX_VALUE;
+
 		doStraightLineCorrection = true;
 		doDiagonalCorrection = false;
 		doRotationalCorrection = false;
@@ -75,8 +82,6 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	public void doDiagonalCorrection() {
 
-		resetCorrectionVariables();
-		
 		doDiagonalCorrection = true;
 		doStraightLineCorrection = false;
 		doRotationalCorrection = false;
@@ -84,8 +89,6 @@ public class OdometryCorrection extends SensorMotorUser implements
 	}
 
 	public void doRotationalCorrection() {
-		
-		resetCorrectionVariables();
 
 		doRotationalCorrection = true;
 		doStraightLineCorrection = false;
@@ -94,26 +97,24 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	public void timedOut() {
 
-		// long start = System.currentTimeMillis();
-
+		//long start = System.currentTimeMillis();
+		
 		if (doStraightLineCorrection) {
 
 			straightLineCorrection();
-
+			
 		}
-
-		else if (doDiagonalCorrection) {
-
+		
+		else if(doDiagonalCorrection){
+			
 		}
-
-		else if (doRotationalCorrection) {
-			rotationalCorrection();
+		
+		else if(doRotationalCorrection){
+			//rotationalCorrection();
 		}
-
-		/*
-		 * LCD.clear(); LCD.drawInt((int)(System.currentTimeMillis() - start),
-		 * 0, 4);
-		 */
+		
+		/*LCD.clear();
+		LCD.drawInt((int)(System.currentTimeMillis() - start), 0, 4);*/
 
 	}
 
@@ -124,14 +125,14 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 			if (lineDetected(leftCS) && isOneTileFromPreviousDetection(leftCS)) {
 
-				firstDetectionStraightLine(leftCS);
+				firstDetection(leftCS);
 
 			}
 
 			if (lineDetected(rightCS)
 					&& isOneTileFromPreviousDetection(rightCS)) {
 
-				firstDetectionStraightLine(rightCS);
+				firstDetection(rightCS);
 
 			}
 
@@ -140,18 +141,18 @@ public class OdometryCorrection extends SensorMotorUser implements
 		// left sensor has detected, but not the right
 		if (leftSensorDetected && (!rightSensorDetected)) {
 
-			secondDetectionStraightLine(rightCS);
+			secondDetection(rightCS);
 		}
 
 		// right sensor has detected, but not the left
 		if ((!leftSensorDetected) && (rightSensorDetected)) {
-			secondDetectionStraightLine(leftCS);
+			secondDetection(leftCS);
 		}
 
 		// both sensors have detected the line
 		if (leftSensorDetected && rightSensorDetected) {
 
-			if (laggingWheelDistTravelled != 0) {
+			if (distanceTravelledByLaggingWheel != 0) {
 
 				correctXY();
 
@@ -162,79 +163,12 @@ public class OdometryCorrection extends SensorMotorUser implements
 			rightSensorDetected = false;
 			leftSensorDetected = false;
 
-			laggingWheelDistTravelled = 0;
+			distanceTravelledByLaggingWheel = 0;
 			angleOff = 0;
-			firstWheelDistTravelled = 0;
 
 			prevRightTachoAtDetection = rightMotor.getTachoCount();
 			prevLeftTachoAtDetection = leftMotor.getTachoCount();
 		}
-
-	}
-
-	private void rotationalCorrection() {
-
-		/*if(!MobileRobot.rotatingClockwise){
-			
-			if(lineDetected(rightCS)){
-				
-				double theta = odo.getTheta();
-				
-				double phi = 90 - theta;
-				
-				double d = (SENSOR_WIDTH / 2) / Math.tan(phi);
-				
-				double alpha = d - SENSOR_TO_WHEEL_DISTANCE;
-				
-				double yDistFromIntersection;
-				
-				if(alpha < 0){
-					
-					alpha = SENSOR_TO_WHEEL_DISTANCE - d;
-					
-					yDistFromIntersection = alpha * Math.sin(phi);
-					
-					ADD the distance to Y
-					
-				}
-				
-				else{
-					
-					distance from origin = alpha * Math.sin(phi);
-					
-					SUBTRACT the distance to Y
-					
-				}
-				
-			}
-			
-			if(lineDetected(leftCS)){
-				
-				d = (SENSOR_WIDTH / 2) * Math.tan(phi);
-				
-				alpha = d - SENSOR_TO_WHEEL_DISTANCE;
-				
-				if(alpha < 0){
-					
-					alpha = SENSOR_TO_WHEEL_DISTANCE - d;
-					
-					distance from origin = alpha * Math.sin(theta);
-					
-					SUBTRACT the distance to Y
-					
-				}
-				
-				else{
-					
-					distance from origin = alpha * Math.sin(theta);
-					
-					ADD the distance to X
-					
-				}
-				
-			}
-		}*/
-			
 
 	}
 
@@ -291,38 +225,36 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		double currentTheta = odo.getTheta();
 
-		double distanceTravelled = (laggingWheelDistTravelled + firstWheelDistTravelled) / 2;
-
 		if (Math.abs(currentTheta - 90) < 20) {
-			odo.setX(xAtFirstDetection + (distanceTravelled)
+			odo.setX(xAtFirstDetection + (distanceTravelledByLaggingWheel)
 					* Math.cos(angleOff));
 
-			odo.setY(yAtFirstDetection - (distanceTravelled)
+			odo.setY(yAtFirstDetection - (distanceTravelledByLaggingWheel)
 					* Math.sin(angleOff));
 		}
 
 		else if (Math.abs(currentTheta - 180) < 20) {
-			odo.setX(xAtFirstDetection - (distanceTravelled)
+			odo.setX(xAtFirstDetection - (distanceTravelledByLaggingWheel)
 					* Math.sin(angleOff));
 
-			odo.setY(yAtFirstDetection - (distanceTravelled)
+			odo.setY(yAtFirstDetection - (distanceTravelledByLaggingWheel)
 					* Math.cos(angleOff));
 		}
 
 		else if (Math.abs(currentTheta - 270) < 20) {
-			odo.setX(xAtFirstDetection - (distanceTravelled)
+			odo.setX(xAtFirstDetection - (distanceTravelledByLaggingWheel)
 					* Math.cos(angleOff));
 
-			odo.setY(yAtFirstDetection + (distanceTravelled)
+			odo.setY(yAtFirstDetection + (distanceTravelledByLaggingWheel)
 					* Math.sin(angleOff));
 		}
 
 		else if (currentTheta < 20 || currentTheta > 340) {
 
-			odo.setX(xAtFirstDetection + (distanceTravelled)
+			odo.setX(xAtFirstDetection + (distanceTravelledByLaggingWheel)
 					* Math.sin(angleOff));
 
-			odo.setY(yAtFirstDetection + (distanceTravelled)
+			odo.setY(yAtFirstDetection + (distanceTravelledByLaggingWheel)
 					* Math.cos(angleOff));
 		}
 
@@ -362,7 +294,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 	}
 
 	// This is for the first light sensor that detects the line.
-	private void firstDetectionStraightLine(ColorSensor cs) {
+	private void firstDetection(ColorSensor cs) {
 
 		xAtFirstDetection = odo.getX();
 		yAtFirstDetection = odo.getY();
@@ -370,7 +302,6 @@ public class OdometryCorrection extends SensorMotorUser implements
 		if (cs == leftCS) {
 
 			rightTachoAtDetection = rightMotor.getTachoCount();
-			leftTachoAtDetection = leftMotor.getTachoCount();
 
 			Sound.beep();
 			leftSensorDetected = true;
@@ -378,7 +309,6 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		else {
 			leftTachoAtDetection = leftMotor.getTachoCount();
-			rightTachoAtDetection = rightMotor.getTachoCount();
 
 			Sound.beep();
 			rightSensorDetected = true;
@@ -388,25 +318,22 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	// This is when the light sensor detects the line after the other light
 	// sensor.
-	private void secondDetectionStraightLine(ColorSensor cs) {
+	private void secondDetection(ColorSensor cs) {
 
 		if (cs == rightCS) {
 			double currentRightTacho = rightMotor.getTachoCount();
-			double currentLeftTacho = rightMotor.getTachoCount();
 
-			laggingWheelDistTravelled = 2 * Math.PI * RIGHT_RADIUS
+			distanceTravelledByLaggingWheel = 2 * Math.PI * RIGHT_RADIUS
 					* ((currentRightTacho - rightTachoAtDetection) / 360);
 
-			firstWheelDistTravelled = 2 * Math.PI * LEFT_RADIUS
-					* ((currentLeftTacho - leftTachoAtDetection) / 360);
-
-			if (laggingWheelDistTravelled > 10) {
+			if (distanceTravelledByLaggingWheel > 10) {
 				leftSensorDetected = false;
 			}
 
 			else if (lineDetected(rightCS)) {
 
-				angleOff = Math.atan(laggingWheelDistTravelled / SENSOR_WIDTH);
+				angleOff = Math.atan(distanceTravelledByLaggingWheel
+						/ SENSOR_WIDTH);
 				Sound.beep();
 				rightSensorDetected = true;
 
@@ -416,21 +343,18 @@ public class OdometryCorrection extends SensorMotorUser implements
 		else {
 
 			double currentLeftTacho = leftMotor.getTachoCount();
-			double currentRightTacho = rightMotor.getTachoCount();
 
-			laggingWheelDistTravelled = 2 * Math.PI * LEFT_RADIUS
+			distanceTravelledByLaggingWheel = 2 * Math.PI * LEFT_RADIUS
 					* ((currentLeftTacho - leftTachoAtDetection) / 360);
 
-			firstWheelDistTravelled = 2 * Math.PI * RIGHT_RADIUS
-					* ((currentRightTacho - rightTachoAtDetection) / 360);
-
-			if (laggingWheelDistTravelled > 10) {
+			if (distanceTravelledByLaggingWheel > 10) {
 				rightSensorDetected = false;
 			}
 
 			else if (lineDetected(leftCS)) {
 
-				angleOff = -Math.atan(laggingWheelDistTravelled / SENSOR_WIDTH);
+				angleOff = -Math.atan(distanceTravelledByLaggingWheel
+						/ SENSOR_WIDTH);
 
 				Sound.beep();
 				leftSensorDetected = true;
@@ -451,17 +375,6 @@ public class OdometryCorrection extends SensorMotorUser implements
 			return ((rightMotor.getTachoCount() - prevRightTachoAtDetection) > ((MIN_DISTANCE_BETWEEN_DETECTIONS * 360) / (2 * Math.PI * RIGHT_RADIUS)));
 		}
 
-	}
-	
-	private void resetCorrectionVariables(){
-		
-		leftSensorDetected = false;
-		rightSensorDetected = false;
-		
-		prevLeftTachoAtDetection = -Double.MAX_VALUE;
-		prevRightTachoAtDetection = -Double.MAX_VALUE;
-		
-		
 	}
 
 }

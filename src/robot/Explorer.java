@@ -22,9 +22,11 @@ public class Explorer extends MobileRobot {
 	 */
 	public void lookForStyrofoamBlocks() {
 		//RConsole.open();
-		//liftClaw();
 		
-		corr.turnOnCorrection();
+		liftClaw();
+		
+		//corr.turnOnCorrection();
+		blockDetector.turnOnBlockDetection();
 
 		/*travelCoordinate(0,60.96);
 		travelCoordinate(60.96,60.96);

@@ -61,8 +61,8 @@ public class Competitor {
 		SensorMotorUser
 				.setStartCorner(corner.getCooridinates());
 		
-		localizer.localize();
-		Sound.beep();
+		//localizer.localize();
+		//Sound.beep();
 
 		explorer.lookForStyrofoamBlocks();
 

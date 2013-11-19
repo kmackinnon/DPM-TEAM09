@@ -164,23 +164,6 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		return angle % 360.0;
 	}
 
-	/**
-	 * Calculates the minimum angle between two angles
-	 * 
-	 * @param a
-	 *            The first angle
-	 * @param b
-	 *            The second angle
-	 * @return The minimum angle
-	 */
-	public static double minimumAngleFromTo(double a, double b) {
-		double d = fixDegAngle(b - a);
-
-		if (d < 180.0)
-			return d;
-		else
-			return d - 360.0;
-	}
 
 	/**
 	 * Calculates the total change in displacement

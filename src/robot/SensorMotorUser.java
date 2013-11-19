@@ -48,7 +48,7 @@ public class SensorMotorUser {
 	public static final double RIGHT_RADIUS = 2.11;
 
 	/** The distance between the two wheels */
-	public static final double WIDTH = 10.8;
+	public static final double WIDTH = 10.97;
 
 	/**
 	 * The speed of the wheel motors when the robot is moving in a straight

@@ -1,5 +1,7 @@
 package robot;
 
+import lejos.nxt.comm.RConsole;
+
 
 /**
  * BlockDetector uses the ultrasonic sensor and light sensor to detect blocks
@@ -34,7 +36,7 @@ public class BlockDetector extends SensorMotorUser {
 		// stopping by ultrasonic sensor
 		shiftArrayByOne(window, ultrasonicSensor.getDistance());
 		int median = getMedian(window);
-		//RConsole.println("Distance: " + median);
+//		RConsole.println("Distance: " + median);
 		if (median <= DIST_TO_STOP) {
 			return true;
 		}
@@ -43,6 +45,7 @@ public class BlockDetector extends SensorMotorUser {
 		boolean latch = false;
 		int value = frontCS.getRawLightValue();
 		int diff = value - prevValue;
+//		RConsole.println("diff: " + diff);
 		if (diff > LIGHT_DIFF) {
 			latch = true;
 		}
@@ -51,6 +54,7 @@ public class BlockDetector extends SensorMotorUser {
 			return true;
 		}
 		prevValue = value;
+		prevLatch = latch;
 		return false;
 	}
 

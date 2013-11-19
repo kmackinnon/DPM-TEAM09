@@ -75,7 +75,7 @@ public class SensorMotorUser {
 	
 	public static final double SENSOR_TO_WHEEL_DISTANCE = 10.6;
 	
-	public static final int DEFAULT_SLEEP_PERIOD = 25;
+	public static final int DEFAULT_TIMER_PERIOD = 25;
 	
 	public static final int US_SENSOR_255 = 255;
 	

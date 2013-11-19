@@ -206,9 +206,9 @@ public class Localizer extends MobileRobot {
 	private void threadSleep() {
 
 		correctionEnd = System.currentTimeMillis();
-		if (correctionEnd - correctionStart < DEFAULT_SLEEP_PERIOD) {
+		if (correctionEnd - correctionStart < DEFAULT_TIMER_PERIOD) {
 			try {
-				Thread.sleep(DEFAULT_SLEEP_PERIOD
+				Thread.sleep(DEFAULT_TIMER_PERIOD
 						- (correctionEnd - correctionStart));
 			} catch (InterruptedException e) {
 				// there is nothing to be done here because it is not

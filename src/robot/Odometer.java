@@ -10,8 +10,6 @@ import lejos.util.Timer;
 import lejos.util.TimerListener;
 
 public class Odometer extends SensorMotorUser implements TimerListener {
-	/** Default period for the Timer object */
-	private static final int DEFAULT_PERIOD = 25;
 
 	/** Timer to execute timedOut method every period */
 	private Timer odometerTimer;
@@ -45,7 +43,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	 */
 	public Odometer() {
 		// initialise variables
-		odometerTimer = new Timer(DEFAULT_PERIOD, this);
+		odometerTimer = new Timer(DEFAULT_TIMER_PERIOD, this);
 		x = 0.0;
 		y = 0.0;
 		theta = 0.0;

@@ -12,10 +12,6 @@ public class Explorer extends MobileRobot {
 	int rowNumber;
 	int columnNumber;
 	int rowCounter;
-	
-	private final int SLEEP_PERIOD = 25;
-
-	long correctionStart, correctionEnd;
 
 	public Explorer() {
 
@@ -207,21 +203,6 @@ public class Explorer extends MobileRobot {
 		rowCounter++;
 
 	}
-	
-	private void threadSleep(){
-		
-		correctionEnd = System.currentTimeMillis();
-        if (correctionEnd - correctionStart < SLEEP_PERIOD) {
-                try {
-                        Thread.sleep(SLEEP_PERIOD
-                                        - (correctionEnd - correctionStart));
-                } catch (InterruptedException e) {
-                        // there is nothing to be done here because it is not
-                        // expected that the localization will be
-                        // interrupted by another thread
-                }
-        }
-		
-	}
+
 
 }

@@ -1,12 +1,18 @@
 package testing;
 
 import lejos.nxt.Button;
-import lejos.nxt.LCD;
 import lejos.nxt.comm.RConsole;
 import robot.MobileRobot;
 import robot.SensorMotorUser;
 
 /**
+ * NEW PURPOSE
+ * Make sure that the ultrasonic sensor still works
+ * Shouldn't be necessary to run this test
+ * 
+ * 
+ * 
+ * OLD
  * Test accuracy of the ultrasonic sensor.
  * 
  * 1. Start motors forward and poll ultrasonic sensor until the robot is a
@@ -27,14 +33,14 @@ public class TestUltrasonic extends Thread {
 		int distToStop = 20; // change this variable
 		int sleepTime = 250; // in milliseconds, may have to change
 
-		RConsole.openBluetooth(10000); // opens a Bluetooth connection
+		RConsole.open(); // opens a Bluetooth connection
 
 		SensorMotorUser.clawMotor.setSpeed(60);
 		SensorMotorUser.clawMotor.rotateTo(320);
 
 		int buttonChoice;
 		MobileRobot robot = new MobileRobot();
-		robot.startMotors();
+		robot.moveForward();
 
 		do {
 			try {
@@ -45,11 +51,9 @@ public class TestUltrasonic extends Thread {
 
 			int distValue = robot.getUSDistance();
 			RConsole.println(Integer.toString(distValue));
-			LCD.clear();
-			LCD.drawInt(distValue, 0, 0);
 
 			if (distValue <= distToStop) {
-				robot.setSpeeds(0, 0);
+				robot.moveForward();
 			}
 
 			buttonChoice = Button.readButtons();

@@ -9,7 +9,11 @@ import robot.MobileRobot;
 import robot.SensorMotorUser;
 
 /**
+ * NEW PURPOSE
+ * make sure the color sensor works
+ * should not have to run this test anymore
  * 
+ * OLD
  * Prints varying color values to observe trends and light levels in different
  * areas.
  * 
@@ -27,7 +31,7 @@ public class TestLight {
 		Color color;
 
 		RConsole.open(); // opens a USB connection with no timeout
-		robot.startMotors();
+		robot.moveForward();
 
 		int buttonChoice;
 		do {
@@ -51,7 +55,7 @@ public class TestLight {
 			buttonChoice = Button.readButtons();
 
 		} while (buttonChoice != Button.ID_ESCAPE);
-		robot.setSpeeds(0.0, 0.0);
+		robot.stopMoving();
 		RConsole.close(); // closes the USB connection
 	}
 

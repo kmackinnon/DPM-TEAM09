@@ -37,6 +37,13 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private double xAtFirstDetection;
 	private double yAtFirstDetection;
 
+	/**
+	 * Default Constructor
+	 */
+	public OdometryCorrection() {
+		
+	}
+	
 	public OdometryCorrection(Odometer odo) {
 		this.odo = odo;
 
@@ -197,7 +204,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private boolean negativeDiffR = false;
 	private static final int LINE_DIFF = 20;
 
-	private boolean lineDetected(ColorSensor cs) {
+	protected boolean lineDetected(ColorSensor cs) {
 
 		boolean left = (cs == leftCS);
 

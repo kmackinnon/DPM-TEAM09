@@ -1,13 +1,11 @@
 package testing;
 
 import lejos.nxt.Button;
-import lejos.nxt.ColorSensor;
 import lejos.nxt.Sound;
-import lejos.nxt.ColorSensor.Color;
-import lejos.nxt.SensorPort;
 import lejos.nxt.comm.RConsole;
 import robot.MobileRobot;
 import robot.SensorMotorUser;
+import robot.OdometryCorrection;
 
 /**
  * 
@@ -24,16 +22,22 @@ import robot.SensorMotorUser;
  * @author Keith MacKinnon and Sidney Ng
  * 
  */
-public class TestLineColor /*extends Thread*/ {
+public class TestLineColor extends OdometryCorrection {
+	
+	
+	public TestLineColor() {
+		super();
+	}
 
 	public static void main(String[] args) {
 		
 		MobileRobot robot = new MobileRobot();
+		TestLineColor tester = new TestLineColor();
 
 		//Color color;
 
-		RConsole.open(); // opens a USB connection with no timeout
-		robot.setForwardSpeed(SensorMotorUser.FORWARD_SPEED);
+//		RConsole.open(); // opens a USB connection with no timeout
+		robot.moveForward();
 		SensorMotorUser.leftCS.setFloodlight(true);
 		SensorMotorUser.rightCS.setFloodlight(true);
 		int buttonChoice;
@@ -46,33 +50,34 @@ public class TestLineColor /*extends Thread*/ {
 //				e.printStackTrace();
 //			}
 
+			// Tested line color
 //			color = SensorMotorUser.leftCS.getColor();
 //			int colorValue = color.getBlue();
 //			color = SensorMotorUser.rightCS.getColor();
 //			int colorValue2 = color.getBlue();
 //			RConsole.println(colorValue + " " + colorValue2); // first is left, second is right
 			
-			//TODO: add line detection method
-			if (robot.lineDetected(SensorMotorUser.leftCS, true)) {
-//				RConsole.println("left");
+			if (tester.lineDetected(SensorMotorUser.leftCS)) {
+//				RConsole.println("left"); // for debugging
 				left = true;
+				//Sound.beep();
 			}
-			if (robot.lineDetected(SensorMotorUser.rightCS, false)) {
-//				RConsole.println("right");
+			if (tester.lineDetected(SensorMotorUser.rightCS)) {
+//				RConsole.println("right"); // for debugging
 				right = true;
-				//Sound.twoBeeps();
+				//Sound.beep();
 			}
-//			if (left && right) {
-//				RConsole.println("both");
-//				Sound.beep();
-//				left = false;
-//				right = false;
-//			}
+			if (left && right) {
+				RConsole.println("both");
+				Sound.beep();
+				left = false;
+				right = false;
+			}
 			
 			buttonChoice = Button.readButtons();
 
 		} while (buttonChoice != Button.ID_ESCAPE);
-		robot.setSpeeds(0.0, 0.0);
+		robot.stopMoving();
 		RConsole.close(); // closes the USB connection
 	}
 

@@ -7,10 +7,7 @@ import robot.Odometer;
 import robot.OdometryCorrection;
 
 /**
- * Test functionality of the Mobile Robot and accuracy of the Odometer.
- * 1. Drive Robot in a square - measure x and y from actual position and theta from actual heading
- * 	  Use the travelMag methods
- * 2. Do the same as (1) but use the travelCoordinate method and travel in a triangle
+ * Test accuracy of Odometer by itself, and test Odometer with correction
  * 
  * @author Sidney Ng
  *
@@ -20,8 +17,7 @@ public class OdometerTest {
 	
 	public static void main(String[] args) {
 		MobileRobot robot = new MobileRobot();
-//		OdometryCorrection corr = new OdometryCorrection(MobileRobot.odo);
-		int option = 0; // don't bother with button inputs
+		int option = 0;
 		
 		while (option == 0)
 			option = Button.waitForAnyPress();
@@ -30,10 +26,12 @@ public class OdometerTest {
 		
 		switch(option) {
 		case Button.ID_LEFT:
+			OdometryCorrection corr = new OdometryCorrection(MobileRobot.odo);
+			corr.turnOnCorrection();
 			squareTest(robot);
 			break;
 		case Button.ID_RIGHT:
-			//triangleTest(robot);
+			squareTest(robot);
 			break;
 		default:
 			System.out.println("Error - invalid button");
@@ -46,17 +44,10 @@ public class OdometerTest {
 	}
 	
 	public static void squareTest(MobileRobot robot) {
-		robot.travelCoordinate(0,60.96);
-		robot.travelCoordinate(60.96,60.96);
-		robot.travelCoordinate(60.96,0);
-		robot.travelCoordinate(0,0);
+		robot.travelCoordinate(0,60.96, true);
+		robot.travelCoordinate(60.96,60.96, true);
+		robot.travelCoordinate(60.96,0, true);
+		robot.travelCoordinate(0,0, true);
 		robot.turnToOnPoint(0.0);
 	}
-	
-/*	public static void triangleTest(MobileRobot robot) {
-		robot.travelCoordinate(60.0, 30.0);
-		robot.travelCoordinate(30.0, 30.0);
-		robot.travelCoordinate(30.0, 60.0);
-		robot.travelCoordinate(60.0, 0.0);
-	}*/
 }

@@ -9,7 +9,9 @@ import robot.OdometryCorrection;
 
 /**
  * 
- * The purpose of the test is to find a common light pattern when crossing black lines.
+ * The test now is a checkpoint for line detection
+ * 
+ * The original purpose of the test is to find a common light pattern when crossing black lines.
  * 
  * Steps for using RConsole
  * 1. Turn on the robot

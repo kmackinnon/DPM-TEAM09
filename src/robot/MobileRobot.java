@@ -260,11 +260,11 @@ public class MobileRobot extends SensorMotorUser {
 	}
 	
 	private void onPointTurnBy(double minimumAngle){
-		isTurning = true;
+		corr.doRotationalCorrection();
 		
 		rotateByAngle(minimumAngle);
 		
-		isTurning = false;
+		corr.doStraightLineCorrection();
 	}
 
 	

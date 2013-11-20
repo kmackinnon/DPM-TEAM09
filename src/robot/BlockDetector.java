@@ -50,6 +50,15 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 				}
 			}
 		}
+		
+		else{
+			
+			synchronized (lock) {
+				objectDetected = false;
+				isStyrofoam = false;
+			}
+			
+		}
 
 	}
 

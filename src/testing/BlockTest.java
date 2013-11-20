@@ -30,7 +30,7 @@ public class BlockTest /*extends Thread*/ {
 		robot.moveForward();
 		boolean object = false;
 		int buttonChoice;
-		
+		blockDetector.turnOnBlockDetection();
 		do {
 //			try {
 //				Thread.sleep(25); // 20 polls per second
@@ -39,7 +39,7 @@ public class BlockTest /*extends Thread*/ {
 //			}
 
 			if (!object) {
-				if (blockDetector.objectDetected()) {
+				if (blockDetector.objectInFrontOfRobot()) {
 					robot.stopMoving();
 					
 //					object = true; // comment or uncomment this if you want only object detection or detection and recognition
@@ -48,8 +48,7 @@ public class BlockTest /*extends Thread*/ {
 			
 			
 			if (object) {
-				Color color = SensorMotorUser.frontCS.getColor();
-				if (blockDetector.isStyrofoam(color.getRed(), color.getGreen(), color.getBlue())) {
+				if (blockDetector.objectIsStyrofoam()) {
 					RConsole.println("block");
 					Sound.beep();
 				}

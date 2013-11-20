@@ -15,7 +15,7 @@ import lejos.nxt.Sound;
 
 public class MobileRobot extends SensorMotorUser {
 	public static Odometer odo = new Odometer();
-	//public static OdometryCorrection corr = new OdometryCorrection(odo);
+	public static OdometryCorrection corr = new OdometryCorrection(odo);
 	public static BlockDetector blockDetector = new BlockDetector();
 
 	private double xPrevTarget;
@@ -34,25 +34,36 @@ public class MobileRobot extends SensorMotorUser {
 	}
 
 	public void travelTo(Intersection destination) {
-		boolean success = false;
+		boolean isSuccess = false;
 
-		Intersection source = Map.getIntersection(odo.getX(), odo.getY());
-
-		ArrayList<Intersection> listOfWayPoints = Dijkstra.algorithm(source,
-				destination);
-
-		success = travelToWaypoints(listOfWayPoints);
-
-		if (!success) {
-
-			if (!blockDetector.objectIsStyrofoam()) {
-				moveBackToPreviousIntersection();
+		while(!isSuccess){
+		
+			Intersection source = Map.getIntersection(odo.getX(), odo.getY());
+	
+			ArrayList<Intersection> listOfWayPoints = Dijkstra.algorithm(source,
+					destination);
+	
+			isSuccess = travelToWaypoints(listOfWayPoints);
+	
+			if (!isSuccess) {
+	
+				if(!blockDetector.objectIsStyrofoam()){
+					moveBackToPreviousIntersection();
+					
+					Intersection prevIntersection = Map.getIntersection(xPrevTarget,yPrevTarget);
+					
+					int indexOfNextIntersection = listOfWayPoints.indexOf(prevIntersection)+1;
+					
+					Intersection nextIntersection = listOfWayPoints.get(indexOfNextIntersection);
+					
+					Map.removeEdge(prevIntersection, nextIntersection);
+				}
+				
+				else{
+					
+				}
+	
 			}
-
-			else {
-				Sound.beep();
-			}
-
 		}
 
 	}
@@ -92,47 +103,49 @@ public class MobileRobot extends SensorMotorUser {
 		// target position is greater than the position error threshold
 		while (!isAtPoint(xTarget, yTarget)) {
 
-			if (blockDetector.objectInFrontOfRobot()) {
+			if (blockDetector.objectInFrontOfRobot()
+					&& !(xTarget == xPrevTarget && yTarget == yPrevTarget)) {
 				return false;
 			}
 
-			// Determine whether to turn or not
-			xDiff = xTarget - odo.getX();
-			yDiff = yTarget - odo.getY();
-			targetTheta = 90 - Math.toDegrees(Math.atan2(yDiff, xDiff));
-
-			// RConsole.println("targetTheta" + targetTheta);
-
-			// change in theta is target minus current
-
-			deltaTheta = targetTheta - odo.getTheta();
-
-			if (deltaTheta > 180) {
-				deltaTheta -= 360;
-			} else if (deltaTheta < -180) {
-				deltaTheta += 360;
+			// this means there is a wooden block in the way, and we want to
+			// move backwards to the previous intersection.
+			if (xTarget == xPrevTarget && yTarget == yPrevTarget) {
+				moveBackward();
 			}
 
-			// if the heading is off by more than acceptable error, we must
-			// correct
-			if (Math.abs(deltaTheta) > ANGLE_ERROR_THRESHOLD) {
+			else {
 
-				if (isAtPoint(xPrevTarget, yPrevTarget)
-						&& (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD)) {
-					onPointTurnBy(deltaTheta);
+				// Determine whether to turn or not
+				xDiff = xTarget - odo.getX();
+				yDiff = yTarget - odo.getY();
+				targetTheta = 90 - Math.toDegrees(Math.atan2(yDiff, xDiff));
+
+				// RConsole.println("targetTheta" + targetTheta);
+
+				// change in theta is target minus current
+
+				deltaTheta = targetTheta - odo.getTheta();
+
+				if (deltaTheta > 180) {
+					deltaTheta -= 360;
+				} else if (deltaTheta < -180) {
+					deltaTheta += 360;
+				}
+
+				// if the heading is off by more than acceptable error, we must
+				// correct
+				if (Math.abs(deltaTheta) > ANGLE_ERROR_THRESHOLD) {
+
+					if (isAtPoint(xPrevTarget, yPrevTarget)
+							&& (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD)) {
+						onPointTurnBy(deltaTheta);
+					} else {
+						whileMovingTurnBy(deltaTheta);
+					}
+
 				} else {
-					whileMovingTurnBy(deltaTheta);
-				}
 
-			} else {
-
-				// this means there is a wooden block in the way, and we want to
-				// move backwards to the previous intersection.
-				if (xTarget == xPrevTarget && yTarget == yPrevTarget) {
-					moveBackward();
-				}
-
-				else {
 					moveForward(); // the heading is good
 				}
 
@@ -261,28 +274,31 @@ public class MobileRobot extends SensorMotorUser {
 	private boolean travelToWaypoints(ArrayList<Intersection> listOfWayPoints) {
 
 		Intersection intersection;
-		boolean success = false;
+		boolean isSuccess = false;
 
 		for (int i = 0; i < listOfWayPoints.size(); i++) {
 
 			intersection = listOfWayPoints.get(i);
 
 			if (i == listOfWayPoints.size() - 1) {
-				success = travelCoordinate(intersection.getXInCm(),
+				isSuccess = travelCoordinate(intersection.getXInCm(),
 						intersection.getYInCm(), true);
 			}
 
 			else {
-				success = travelCoordinate(intersection.getXInCm(),
+				isSuccess = travelCoordinate(intersection.getXInCm(),
 						intersection.getYInCm(), false);
 			}
 
-			if (!success) {
-				return success;
+			if (!isSuccess) {
+				
+				stopMoving();
+
+				return isSuccess;
 			}
 		}
 
-		return success;
+		return isSuccess;
 
 	}
 
@@ -297,19 +313,19 @@ public class MobileRobot extends SensorMotorUser {
 	}
 
 	private void onPointTurnBy(double minimumAngle) {
-		//corr.doRotationalCorrection();
+		corr.doRotationalCorrection();
 
 		rotateByAngle(minimumAngle);
 
-		//corr.doStraightLineCorrection();
+		corr.doStraightLineCorrection();
 	}
 
 	private void moveBackToPreviousIntersection() {
-		//corr.turnOffCorrection();
+		corr.turnOffCorrection();
 
 		travelCoordinate(xPrevTarget, yPrevTarget, true);
 
-		//corr.turnOnCorrection();
+		corr.turnOnCorrection();
 	}
 
 	private double getMinAngle(double input) {

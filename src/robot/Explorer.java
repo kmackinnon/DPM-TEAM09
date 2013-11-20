@@ -25,7 +25,7 @@ public class Explorer extends MobileRobot {
 		
 		liftClaw();
 		
-		//corr.turnOnCorrection();
+		corr.turnOnCorrection();
 		blockDetector.turnOnBlockDetection();
 
 		/*travelCoordinate(0,60.96);

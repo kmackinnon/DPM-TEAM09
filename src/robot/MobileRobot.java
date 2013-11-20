@@ -33,38 +33,53 @@ public class MobileRobot extends SensorMotorUser {
 	public MobileRobot() {
 	}
 
-	public void travelTo(Intersection destination) {
+	// returns false when it stops trying to get to the destination. This may be
+	// because the destination is impossible to get to, or because it has
+	// detected a styrofoam block and does not know whether to pick it up or
+	// plow through it (i.e. 
+	public boolean travelTo(Intersection destination) {
 		boolean isSuccess = false;
 
-		while(!isSuccess){
-		
+		while (!isSuccess) {
+
 			Intersection source = Map.getIntersection(odo.getX(), odo.getY());
-	
-			ArrayList<Intersection> listOfWayPoints = Dijkstra.algorithm(source,
-					destination);
-	
+
+			if (destination.getAdjacencyList().isEmpty()) {
+				return false;
+			}
+
+			ArrayList<Intersection> listOfWayPoints = Dijkstra.algorithm(
+					source, destination);
+
 			isSuccess = travelToWaypoints(listOfWayPoints);
-	
+
 			if (!isSuccess) {
-	
-				if(!blockDetector.objectIsStyrofoam()){
+
+				if (!blockDetector.objectIsStyrofoam()) {
 					moveBackToPreviousIntersection();
-					
-					Intersection prevIntersection = Map.getIntersection(xPrevTarget,yPrevTarget);
-					
-					int indexOfNextIntersection = listOfWayPoints.indexOf(prevIntersection)+1;
-					
-					Intersection nextIntersection = listOfWayPoints.get(indexOfNextIntersection);
-					
+
+					Intersection prevIntersection = Map.getIntersection(
+							xPrevTarget, yPrevTarget);
+
+					int indexOfNextIntersection = listOfWayPoints
+							.indexOf(prevIntersection) + 1;
+
+					Intersection nextIntersection = listOfWayPoints
+							.get(indexOfNextIntersection);
+
 					Map.removeEdge(prevIntersection, nextIntersection);
 				}
-				
-				else{
+
+				else {
 					
+					styrofoamBlockDecision();
+
 				}
-	
+
 			}
 		}
+
+		return isSuccess;
 
 	}
 
@@ -270,6 +285,11 @@ public class MobileRobot extends SensorMotorUser {
 		clawMotor.setSpeed(120);
 		clawMotor.rotateTo(310);
 	}
+	
+	//override this
+	public void styrofoamBlockDecision(){
+		
+	}
 
 	private boolean travelToWaypoints(ArrayList<Intersection> listOfWayPoints) {
 
@@ -291,7 +311,7 @@ public class MobileRobot extends SensorMotorUser {
 			}
 
 			if (!isSuccess) {
-				
+
 				stopMoving();
 
 				return isSuccess;

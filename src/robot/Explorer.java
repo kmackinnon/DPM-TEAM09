@@ -21,46 +21,13 @@ public class Explorer extends MobileRobot {
 	 * This contains the searching algorithm
 	 */
 	public void lookForStyrofoamBlocks() {
-		//RConsole.open();
 		
 		liftClaw();
 		
 		corr.turnOnCorrection();
 		blockDetector.turnOnBlockDetection();
 
-		/*travelCoordinate(0,60.96);
-		travelCoordinate(60.96,60.96);
-		travelCoordinate(60.96,0);
-		travelCoordinate(0,0);*/
-		
-		
-		
-		
-		/*leftCS.setFloodlight(true);
-		rightCS.setFloodlight(true);*/
-		/*for(int i = 1; i<6 ; i ++){
-			travelCoordinate(0,i*Map.TILE_SIZE);
-		}*/
-		
 
-		
-		/*while(true){
-			
-			correctionStart = System.currentTimeMillis();
-			
-			if(lineDetected(leftCS,true)){
-				Sound.beep();
-			}
-			
-			if(lineDetected(rightCS,false)){
-				Sound.beep();
-			}
-			
-			threadSleep();
-			
-		}*/
-		
-		
 		
 		if (getXStart() == getYStart()) {
 			rowNumber = getYStart();
@@ -78,7 +45,7 @@ public class Explorer extends MobileRobot {
 			
 			travelTo(nextRow());
 		}
-		//RConsole.close();
+
 	}
 
 	
@@ -204,6 +171,11 @@ public class Explorer extends MobileRobot {
 
 		rowCounter++;
 
+	}
+	
+	public void styrofoamBlockDecision(){
+		
+		
 	}
 
 

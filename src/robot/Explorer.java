@@ -9,25 +9,15 @@ package robot;
 
 public class Explorer extends MobileRobot {
 
-	int rowNumber;
-	int columnNumber;
-	int rowCounter;
+	private boolean isFinishedLooking;
+	private boolean giveControlToBlockMover;
+	
+	private int rowNumber;
+	private int rowCounter;
 
 	public Explorer() {
-
-	}
-
-	/**
-	 * This contains the searching algorithm
-	 */
-	public void lookForStyrofoamBlocks() {
-		
-		liftClaw();
-		
-		corr.turnOnCorrection();
-		blockDetector.turnOnBlockDetection();
-
-
+		isFinishedLooking = false;
+		giveControlToBlockMover = false;
 		
 		if (getXStart() == getYStart()) {
 			rowNumber = getYStart();
@@ -39,12 +29,34 @@ public class Explorer extends MobileRobot {
 
 		rowCounter = 0;
 
+	}
+
+	
+	/**
+	 * This contains the searching algorithm
+	 */
+	public boolean lookForStyrofoamBlocks() {
+		
+		liftClaw();
+		
+
 		for (int initialRow = rowNumber; loopCondition(rowNumber, initialRow); loopAfterthought(initialRow)) {
 			
 			travelTo(endOfCurrentRow());
 			
+			if(giveControlToBlockMover){
+				return true;
+			}
+			
 			travelTo(nextRow());
+			
+			if(giveControlToBlockMover){
+				return true;
+			}
 		}
+		
+		isFinishedLooking = true;
+		return false;
 
 	}
 
@@ -173,8 +185,16 @@ public class Explorer extends MobileRobot {
 
 	}
 	
-	public void styrofoamBlockDecision(){
+	
+	public boolean isFinishedLooking(){
+		return isFinishedLooking;
+	}
+	
+	public boolean avoidStyrofoamBlock(){
 		
+		giveControlToBlockMover = true;
+		
+		return true;
 		
 	}
 

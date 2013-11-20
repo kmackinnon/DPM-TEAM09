@@ -80,5 +80,11 @@ public class BlockMover extends MobileRobot {
 		
 		
 	}
+	
+	
+	
+	public boolean avoidStyrofoamBlock(){
+		return false;
+	}
 
 }

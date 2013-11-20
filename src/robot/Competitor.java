@@ -29,10 +29,6 @@ public class Competitor {
 		
 		Map.initializeMap();
 
-		Localizer localizer = new Localizer();
-		Explorer explorer = new Explorer();
-		// BlockMover blockMover = new BlockMover();
-
 		int buttonChoice;
 
 		// Left or Right buttons must be pressed for the robot to begin
@@ -61,10 +57,30 @@ public class Competitor {
 		SensorMotorUser
 				.setStartCorner(corner.getCooridinates());
 		
+		
+		Localizer localizer = new Localizer();
+		Explorer explorer = new Explorer();
+		BlockMover blockMover = new BlockMover();
+		
+		
 		//localizer.localize();
 		//Sound.beep();
-
-		explorer.lookForStyrofoamBlocks();
+		
+		MobileRobot.corr.turnOnCorrection();
+		MobileRobot.blockDetector.turnOnBlockDetection();
+		
+		while(!explorer.isFinishedLooking()){
+			
+			if(explorer.lookForStyrofoamBlocks()){
+				
+				blockMover.moveBlockToZone();
+				
+			}
+			
+		}
+		
+		
+		
 
 		System.exit(0);
 	}

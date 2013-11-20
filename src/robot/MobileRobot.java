@@ -9,7 +9,7 @@ import lejos.nxt.Sound;
  * location, and to turn to an angle. This includes traveling to a point while
  * navigating around obstacles.
  * 
- * @author Simon Lee, Sidney Ng
+ * @author Kevin Musgrave
  * 
  */
 
@@ -36,8 +36,8 @@ public class MobileRobot extends SensorMotorUser {
 	// returns false when it stops trying to get to the destination. This may be
 	// because the destination is impossible to get to, or because it has
 	// detected a styrofoam block and does not know whether to pick it up or
-	// plow through it (i.e. 
-	public boolean travelTo(Intersection destination) {
+	// avoid it 
+	public void travelTo(Intersection destination) {
 		boolean isSuccess = false;
 
 		while (!isSuccess) {
@@ -45,7 +45,7 @@ public class MobileRobot extends SensorMotorUser {
 			Intersection source = Map.getIntersection(odo.getX(), odo.getY());
 
 			if (destination.getAdjacencyList().isEmpty()) {
-				return false;
+				return;
 			}
 
 			ArrayList<Intersection> listOfWayPoints = Dijkstra.algorithm(
@@ -72,19 +72,15 @@ public class MobileRobot extends SensorMotorUser {
 
 				else {
 					
-					styrofoamBlockDecision();
+					if(avoidStyrofoamBlock()){
+						return;
+					}
 
 				}
 
 			}
 		}
 
-		return isSuccess;
-
-	}
-
-	public void travelToNeighbor(Intersection destination) {
-		travelCoordinate(destination.getXInCm(), destination.getYInCm(), true);
 	}
 
 	public void travelToTargetZone() {
@@ -287,8 +283,9 @@ public class MobileRobot extends SensorMotorUser {
 	}
 	
 	//override this
-	public void styrofoamBlockDecision(){
+	public boolean avoidStyrofoamBlock(){
 		
+		return true;
 	}
 
 	private boolean travelToWaypoints(ArrayList<Intersection> listOfWayPoints) {

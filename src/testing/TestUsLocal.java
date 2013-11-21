@@ -24,13 +24,13 @@ public class TestUsLocal {
 		
 		switch(option) {
 		case Button.ID_ENTER:
-			RConsole.open();
+//			RConsole.open();
 			Localizer local = new Localizer();
 			local.localize();
 
-			RConsole.println("x: " + MobileRobot.odo.getX());
-			RConsole.println("y: " + MobileRobot.odo.getY());
-			RConsole.println("theta: " + MobileRobot.odo.getTheta());
+//			RConsole.println("x: " + MobileRobot.odo.getX());
+//			RConsole.println("y: " + MobileRobot.odo.getY());
+//			RConsole.println("theta: " + MobileRobot.odo.getTheta());
 			break;
 		default:
 			System.out.println("Error - invalid button");
@@ -38,7 +38,7 @@ public class TestUsLocal {
 			break;
 		}
 		
-		RConsole.close();
+//		RConsole.close();
 		System.exit(0);
 
 	}

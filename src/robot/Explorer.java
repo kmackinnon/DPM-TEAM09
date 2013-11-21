@@ -38,7 +38,7 @@ public class Explorer extends MobileRobot {
 	public boolean lookForStyrofoamBlocks() {
 		
 		liftClaw();
-		
+		blockDetector.turnOnBlockDetection();
 
 		for (int initialRow = rowNumber; loopCondition(rowNumber, initialRow); loopAfterthought(initialRow)) {
 			

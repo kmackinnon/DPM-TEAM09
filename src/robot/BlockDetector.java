@@ -21,6 +21,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	private boolean isObjectDetected = false;
 	private boolean isStyrofoam = false;
+	private boolean doBlockDetection = false;
 	
 	// variables for object detection
 	private int[] window = { 255, 255, 255, 255, 255 };
@@ -35,36 +36,44 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		blockDetectorTimer = new Timer(DEFAULT_TIMER_PERIOD, this);
 	}
 
-	public void turnOnBlockDetection() {
+	public void startBlockDetectorTimer(){
 		blockDetectorTimer.start();
+	}
+	
+	public void turnOnBlockDetection() {
+		doBlockDetection = true;
 	}
 
 	public void turnOffBlockDetection() {
-		blockDetectorTimer.stop();
+		doBlockDetection = false;
 	}
 
 	public void timedOut() {
 
-		if (isObjectDetected()) {
-			Sound.beep();
+		if(doBlockDetection){
+			if (isObjectDetected()) {
+				Sound.beep();
 
-			synchronized (lock) {
-				isObjectDetected = true;
-			}
-
-			if (isStyrofoam()) {
 				synchronized (lock) {
-					isStyrofoam = true;
+					isObjectDetected = true;
+				}
+
+				if (isStyrofoam()) {
+					synchronized (lock) {
+						isStyrofoam = true;
+					}
+				}
+				
+			} else {
+
+				synchronized (lock) {
+					isObjectDetected = false;
+					isStyrofoam = false;
 				}
 			}
-			
-		} else {
-
-			synchronized (lock) {
-				isObjectDetected = false;
-				isStyrofoam = false;
-			}
 		}
+		
+		
 	}
 	
 	// returns the isStyrofoam boolean

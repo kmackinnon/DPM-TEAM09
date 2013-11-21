@@ -54,20 +54,18 @@ public class Competitor {
 		}
 
 		// sets the start corner from the test data or from the BT connection
-		SensorMotorUser
-				.setStartCorner(corner.getCooridinates());
-		
+
 		
 		Localizer localizer = new Localizer();
 		Explorer explorer = new Explorer();
 		BlockMover blockMover = new BlockMover();
 		
 		
-		//localizer.localize();
-		//Sound.beep();
+		localizer.localize();
+		Sound.beep();
 		
 		MobileRobot.corr.startCorrectionTimer();
-		MobileRobot.blockDetector.turnOnBlockDetection();
+		MobileRobot.blockDetector.startBlockDetectorTimer();
 		
 		while(!explorer.isFinishedLooking()){
 			
@@ -129,6 +127,10 @@ public class Competitor {
 			Map.setTargetZone(redZone);
 			Map.setForbiddenZone(greenZone);
 		}
+		
+		SensorMotorUser.setStartCorner(corner.getCooridinates());
+		
+		
 	}
 	
 	private static void testWithoutBluetooth(){
@@ -136,8 +138,6 @@ public class Competitor {
 		int[] testGreen = { 0, 3, 2, 4 };
 		int[] testRed = {4, 3, 5, 4 };
 
-		// set corner
-		corner = StartCorner.BOTTOM_LEFT;
 
 		// set role. For now, assume the robot will be a builder.
 		SensorMotorUser.becomeBuilder(true);
@@ -145,6 +145,9 @@ public class Competitor {
 		// ensure that map size is big enough for test data
 		Map.setTargetZone(testGreen);
 		Map.setForbiddenZone(testRed);
+
+		SensorMotorUser
+		.setStartCorner(new int[] {6,0});
 		
 	}
 	

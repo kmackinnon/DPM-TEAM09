@@ -167,6 +167,17 @@ public class MobileRobot extends SensorMotorUser {
 		return true;
 
 	}
+	
+	
+	public void travelMagnitude(double magnitudeInCm){
+		
+		int leftAmount = convertDistance(LEFT_RADIUS, magnitudeInCm);
+		
+		int rightAmount = convertDistance(RIGHT_RADIUS, magnitudeInCm);
+		
+		leftMotor.rotate(leftAmount, true);
+		rightMotor.rotate(rightAmount, false);
+	}
 
 	public void initializePrevTarget(double x, double y) {
 		xPrevTarget = x;

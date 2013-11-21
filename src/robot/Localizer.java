@@ -21,6 +21,7 @@ public class Localizer extends MobileRobot {
 	private long correctionStart, correctionEnd;
 	
 	private final int LATCH_ANGLE_DISTANCE = 30;
+	private final int US_OFFSET = 2;
 
 	public Localizer() {
 
@@ -33,8 +34,24 @@ public class Localizer extends MobileRobot {
 		ultrasonicLocalization();
 		xyUltrasonicCorrection();
 
-		travelTileCoordinate(0, 0);
-		turnToOnPoint(0);
+		travelTileCoordinate(getXStart(), getYStart());
+		
+		if(getXStart()==0 && getYStart()==0){
+			turnToOnPoint(0);
+		}
+		
+		else if(getXStart() == (Map.NUM_OF_INTERSECTIONS-1) && getYStart() == 0){
+			turnToOnPoint(270);
+		}
+		
+		else if(getXStart() == (Map.NUM_OF_INTERSECTIONS-1) && getYStart() == (Map.NUM_OF_INTERSECTIONS-1)){
+			turnToOnPoint(180);
+		}
+		
+		else if(getXStart() == 0 && getYStart() == (Map.NUM_OF_INTERSECTIONS-1)){
+			turnToOnPoint(90);
+		}
+		
 	}
 
 	private void ultrasonicLocalization() {
@@ -81,7 +98,23 @@ public class Localizer extends MobileRobot {
 		// update the odometer position
 		odo.setX(0);
 		odo.setY(0);
-		odo.setTheta(deltaTheta + angleB);
+		
+		if(getXStart()==0 && getYStart()==0){
+			odo.setTheta(deltaTheta + angleB);
+		}
+		
+		else if(getXStart() == (Map.NUM_OF_INTERSECTIONS-1) && getYStart() == 0){
+			odo.setTheta(deltaTheta + angleB - 90);
+		}
+		
+		else if(getXStart() == (Map.NUM_OF_INTERSECTIONS-1) && getYStart() == (Map.NUM_OF_INTERSECTIONS-1)){
+			odo.setTheta(deltaTheta + angleB - 180);
+		}
+		
+		else if(getXStart() == 0 && getYStart() == (Map.NUM_OF_INTERSECTIONS-1)){
+			odo.setTheta(deltaTheta + angleB - 270);
+		}
+
 
 	}
 
@@ -103,11 +136,50 @@ public class Localizer extends MobileRobot {
 
 	private void xyUltrasonicCorrection() {
 
-		turnToOnPoint(180);
-		odo.setY(getUSDistance() - 28);
-
-		turnToOnPoint(270);
-		odo.setX(getUSDistance() - 28);
+		//face first wall
+		if(getXStart() == 0 && getYStart() == 0){
+			turnToOnPoint(180);
+			odo.setY(getUSDistance() - Map.TILE_SIZE + US_OFFSET);
+		}
+		
+		else if(getXStart() == (Map.NUM_OF_INTERSECTIONS-1) && getYStart() == 0){
+			turnToOnPoint(90);
+			odo.setX(Map.NUM_OF_INTERSECTIONS * Map.TILE_SIZE - getUSDistance() - US_OFFSET);
+		}
+		
+		else if(getXStart() == (Map.NUM_OF_INTERSECTIONS-1) && getYStart() == (Map.NUM_OF_INTERSECTIONS-1)){
+			turnToOnPoint(0);
+			odo.setY(Map.NUM_OF_INTERSECTIONS * Map.TILE_SIZE - getUSDistance() - US_OFFSET);
+		}
+		
+		else if(getXStart() == 0 && getYStart() == (Map.NUM_OF_INTERSECTIONS-1)){
+			turnToOnPoint(270);
+			odo.setX(getUSDistance() - Map.TILE_SIZE + US_OFFSET);
+		}
+		
+		
+		//face second wall
+		if(getXStart() == 0 && getYStart() == 0){
+			turnToOnPoint(270);
+			odo.setX(getUSDistance() - Map.TILE_SIZE + US_OFFSET);
+		}
+		
+		else if(getXStart() == (Map.NUM_OF_INTERSECTIONS-1) && getYStart() == 0){
+			turnToOnPoint(180);
+			odo.setY(getUSDistance() - Map.TILE_SIZE + US_OFFSET);
+			
+		}
+		
+		else if(getXStart() == (Map.NUM_OF_INTERSECTIONS-1) && getYStart() == (Map.NUM_OF_INTERSECTIONS-1)){
+			turnToOnPoint(90);
+			odo.setX(Map.NUM_OF_INTERSECTIONS * Map.TILE_SIZE - getUSDistance() - US_OFFSET);
+		}
+		
+		else if(getXStart() == 0 && getYStart() == (Map.NUM_OF_INTERSECTIONS-1)){
+			turnToOnPoint(0);
+			odo.setY(Map.NUM_OF_INTERSECTIONS * Map.TILE_SIZE - getUSDistance() - US_OFFSET);
+		}
+		
 
 		initializePrevTarget(odo.getX(),odo.getY());
 	}

@@ -3,8 +3,6 @@ package testing;
 import lejos.nxt.Button;
 import lejos.nxt.comm.RConsole;
 import robot.MobileRobot;
-import robot.Odometer;
-import robot.OdometryCorrection;
 
 /**
  * Test accuracy of Odometer by itself, and test Odometer with correction
@@ -26,11 +24,11 @@ public class OdometerTest {
 		
 		switch(option) {
 		case Button.ID_LEFT:
-			OdometryCorrection corr = new OdometryCorrection(MobileRobot.odo);
-			corr.turnOnCorrection();
+			MobileRobot.corr.turnOnCorrection();
 			squareTest(robot);
 			break;
 		case Button.ID_RIGHT:
+			MobileRobot.corr.turnOffCorrection();
 			squareTest(robot);
 			break;
 		default:

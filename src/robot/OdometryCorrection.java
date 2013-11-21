@@ -60,8 +60,8 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	public void turnOffCorrection() {
 
-		leftCS.setFloodlight(false);
-		rightCS.setFloodlight(false);
+//		leftCS.setFloodlight(false);
+//		rightCS.setFloodlight(false);
 
 		correctionTimer.stop();
 

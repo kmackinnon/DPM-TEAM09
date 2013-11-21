@@ -32,6 +32,10 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	public void turnOnBlockDetection() {
 		blockDetectorTimer.start();
 	}
+	
+	public void turnOffBlockDetection() {
+		blockDetectorTimer.stop();
+	}
 
 	public void timedOut() {
 

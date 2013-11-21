@@ -89,10 +89,11 @@ public class OdometryCorrection extends SensorMotorUser implements
 	}
 
 	public void doRotationalCorrection() {
-
+		
 		doRotationalCorrection = true;
 		doStraightLineCorrection = false;
 		doDiagonalCorrection = false;
+
 	}
 
 	public void timedOut() {
@@ -173,7 +174,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 	}
 	
 	
-	private double leftCSAngle1;
+	/*private double leftCSAngle1;
 	private double leftCSAngle2;
 	private double leftCSAngle3;
 	private double leftCSAngle4;
@@ -186,15 +187,17 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private double rightCSAngle3;
 	private double rightCSAngle4;
 	
-	private double xLeft;
-	private double yLeft;
-	private double xRight;
-	private double yRight;
+	private double horizontalDistanceLeftCS;
+	private double verticalDistanceLeftCS;
+	private double horizontalDistanceRightCS;
+	private double verticalDistanceRightCS;
 	
-	private double leftCSDeltaThetaX;
-	private double leftCSDeltaThetaY;
-	private double rightCSDeltaThetaX;
-	private double rightCSDeltaThetaY;
+	private double leftCSDeltaThetaHorizontal;
+	private double leftCSDeltaThetaVertical;
+	private double rightCSDeltaThetaHorizontal;
+	private double rightCSDeltaThetaVertical;
+	
+	private double initialTheta;
 	
 	private void rotationalCorrection(){
 
@@ -244,8 +247,8 @@ public class OdometryCorrection extends SensorMotorUser implements
 
     	
     	if(leftCSLineCount>=4){
-    		leftCSDeltaThetaY = Math.abs(leftCSAngle1 - leftCSAngle3);
-    		leftCSDeltaThetaX = 360 - Math.abs(leftCSAngle4 - leftCSAngle2);
+    		leftCSDeltaThetaVertical = leftCSAngle1 - leftCSAngle3;
+    		leftCSDeltaThetaHorizontal = 360 - Math.abs(leftCSAngle2 - leftCSAngle4);
     		
             if (leftCSDeltaThetaY > 180) {
             	leftCSDeltaThetaY = 360 - leftCSDeltaThetaY;
@@ -262,7 +265,7 @@ public class OdometryCorrection extends SensorMotorUser implements
     	
       	if(rightCSLineCount>=4){
     		rightCSDeltaThetaY = Math.abs(rightCSAngle1 - rightCSAngle3);
-    		rightCSDeltaThetaX = 360 - Math.abs(rightCSAngle4 - rightCSAngle2);
+    		rightCSDeltaThetaX = 360 - Math.abs(rightCSAngle2 - rightCSAngle4);
     		
             if (rightCSDeltaThetaY > 180) {
             	rightCSDeltaThetaY = 360 - rightCSDeltaThetaY;
@@ -277,7 +280,7 @@ public class OdometryCorrection extends SensorMotorUser implements
     	}
 			  
 		
-	}
+	}*/
 	
 
 	private int prevValueL = 0;
@@ -328,6 +331,42 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		return false;
 	}
+	
+	
+	/*int leftOnTopOfLineCounter = 0;
+	int rightOnTopOfLineCounter = 0;
+	
+	private boolean sustainedLineDetected(ColorSensor cs){
+		
+		boolean left = (cs == leftCS);
+		
+		if(left&&negativeDiffL){
+			
+			leftOnTopOfLineCounter++;
+			
+		}
+		
+		if((!left) && negativeDiffR){
+			rightOnTopOfLineCounter++;
+		}
+		
+		if(left&&leftOnTopOfLineCounter>=25){
+			leftOnTopOfLineCounter = 0;
+			Sound.beep();
+			return true;
+		}
+		
+		if((!left)&&rightOnTopOfLineCounter>=25){
+			rightOnTopOfLineCounter = 0;
+			Sound.beep();
+			return true;
+		}
+		
+		return false;
+		
+		
+	}*/
+	
 
 	private void correctXY() {
 

@@ -276,6 +276,11 @@ public class MobileRobot extends SensorMotorUser {
 		clawMotor.rotateTo(310);
 	}
 	
+	public void dropClaw() {
+		clawMotor.setSpeed(120);
+		clawMotor.rotateTo(0);
+	}
+	
 	//override this
 	public boolean avoidStyrofoamBlock(){
 		

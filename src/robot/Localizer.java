@@ -218,67 +218,6 @@ public class Localizer extends MobileRobot {
 		}
 
 	}
-
-	/*
-	 * private void lightLocalization() {
-	 * 
-	 * double rightAngle1 = -1; // initialized to impossible values double
-	 * rightAngle2 = -1; double rightAngle3 = -1; double rightAngle4 = -1;
-	 * 
-	 * double leftAngle1 = -1; // initialized to impossible values double
-	 * leftAngle2 = -1; double leftAngle3 = -1; double leftAngle4 = -1;
-	 * 
-	 * double angle1 = -1; // initialized to impossible values double angle2 =
-	 * -1; double angle3 = -1; double angle4 = -1;
-	 * 
-	 * boolean allLinesDetected = false;
-	 * 
-	 * while (!allLinesDetected) {
-	 * 
-	 * setRotationSpeed(-ROTATION_SPEED);
-	 * 
-	 * if (lineDetected(rightCS)) { Sound.beep(); // to aid in debugging -- to
-	 * test for lines if (rightAngle1 == -1) { rightAngle1 = odo.getAng(); }
-	 * else if (rightAngle2 == -1) { rightAngle2 = odo.getAng(); } else if
-	 * (rightAngle3 == -1) { rightAngle3 = odo.getAng(); } else if (rightAngle4
-	 * == -1) { rightAngle4 = odo.getAng(); } }
-	 * 
-	 * // if the robot is crossing a line, get respective angles if
-	 * (lineDetected(leftCS)) { Sound.beep(); // to aid in debugging -- to test
-	 * for lines if (leftAngle1 == -1) { leftAngle1 = odo.getAng(); } else if
-	 * (leftAngle2 == -1) { leftAngle2 = odo.getAng(); } else if (leftAngle3 ==
-	 * -1) { leftAngle3 = odo.getAng(); } else if (leftAngle4 == -1) {
-	 * leftAngle4 = odo.getAng(); } }
-	 * 
-	 * if (leftAngle4 != -1 && rightAngle4 != -1) { allLinesDetected = true; }
-	 * 
-	 * }
-	 * 
-	 * setRotationSpeed(0);
-	 * 
-	 * angle1 = (leftAngle1+rightAngle1)/2; angle2 = (leftAngle2+rightAngle2)/2;
-	 * angle3 = (leftAngle3+rightAngle3)/2; angle4 = (leftAngle4+rightAngle4)/2;
-	 * 
-	 * double x, y, thetaY, thetaX;
-	 * 
-	 * thetaY = Math.abs(angle1 - angle3); thetaX = 360 - Math.abs(angle4 -
-	 * angle2);
-	 * 
-	 * if (thetaY > 180) { thetaY = 360 - thetaY; }
-	 * 
-	 * if (thetaX > 180) { thetaX = 360 - thetaX; }
-	 * 
-	 * // calculate correct x and y positions x = -lightSensorToWheel *
-	 * Math.cos(Math.toRadians(thetaY / 2)); y = -lightSensorToWheel *
-	 * Math.cos(Math.toRadians(thetaX / 2));
-	 * 
-	 * odo.setPosition(new double[] { x, y, 0}, new boolean[] { true, true,
-	 * false });
-	 * 
-	 * // navigate to point (0,0) and then set heading to 0 degrees
-	 * travelCoordinate(0, 0); turnTo(0);
-	 * 
-	 * }
-	 */
+	 
 
 }

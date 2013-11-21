@@ -2,8 +2,6 @@ package robot;
 
 import java.util.ArrayList;
 
-import lejos.nxt.Sound;
-
 /**
  * MobileRobot contains all the methods needed for the robot to move to a
  * location, and to turn to an angle. This includes traveling to a point while
@@ -138,11 +136,7 @@ public class MobileRobot extends SensorMotorUser {
 
 				deltaTheta = targetTheta - odo.getTheta();
 
-				if (deltaTheta > 180) {
-					deltaTheta -= 360;
-				} else if (deltaTheta < -180) {
-					deltaTheta += 360;
-				}
+				deltaTheta = getMinAngle(deltaTheta);
 
 				// if the heading is off by more than acceptable error, we must
 				// correct
@@ -330,11 +324,11 @@ public class MobileRobot extends SensorMotorUser {
 	}
 
 	private void onPointTurnBy(double minimumAngle) {
-		corr.doRotationalCorrection();
+		corr.turnOffCorrection();
 
 		rotateByAngle(minimumAngle);
 
-		corr.doStraightLineCorrection();
+		corr.turnOnCorrection();
 	}
 
 	private void moveBackToPreviousIntersection() {
@@ -373,13 +367,26 @@ public class MobileRobot extends SensorMotorUser {
 	}
 
 	// returns the number of degrees the wheels must turn over a distance
-	private static int convertDistance(double radius, double distance) {
+	private int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
 	// returns the number of degrees to turn a certain angle
-	private static int convertAngle(double radius, double width, double angle) {
+	private int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
+	
+	
+	
+	private void lightLocalization(){
+		
+		corr.doRotationalCorrection();
+		
+		rotateByAngle(-360);
+		
+		corr.doStraightLineCorrection();
+		
+	}
+	
 
 }

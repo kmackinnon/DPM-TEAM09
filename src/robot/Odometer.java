@@ -155,7 +155,7 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 	 * @param double angle angle to fix
 	 * @return angle value within range of 0.0 to 359.9
 	 */
-	private static double fixDegAngle(double angle) {
+	public double fixDegAngle(double angle) {
 		if (angle < 0.0)
 			angle = 360.0 + (angle % 360.0);
 

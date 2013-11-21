@@ -171,12 +171,120 @@ public class OdometryCorrection extends SensorMotorUser implements
 		}
 
 	}
+	
+	
+	private double leftCSAngle1;
+	private double leftCSAngle2;
+	private double leftCSAngle3;
+	private double leftCSAngle4;
+	
+	private int leftCSLineCount;
+	private int rightCSLineCount;
+	
+	private double rightCSAngle1;
+	private double rightCSAngle2;
+	private double rightCSAngle3;
+	private double rightCSAngle4;
+	
+	private double xLeft;
+	private double yLeft;
+	private double xRight;
+	private double yRight;
+	
+	private double leftCSDeltaThetaX;
+	private double leftCSDeltaThetaY;
+	private double rightCSDeltaThetaX;
+	private double rightCSDeltaThetaY;
+	
+	private void rotationalCorrection(){
+
+    	if(lineDetected(leftCS)){
+    		
+    		if(leftCSLineCount == 0){
+    			leftCSAngle1 = odo.getTheta();
+    		}
+    		
+    		else if(leftCSLineCount == 1){
+    			leftCSAngle2 = odo.getTheta();
+    		}
+    		
+       		else if(leftCSLineCount == 2){
+    			leftCSAngle3 = odo.getTheta();
+    		}
+    		
+       		else if(leftCSLineCount == 3){
+    			leftCSAngle4 = odo.getTheta();
+    		}
+    	
+    		leftCSLineCount++;
+    			
+    	}
+    	
+    	if(lineDetected(rightCS)){
+    		
+    		if(rightCSLineCount == 0){
+    			rightCSAngle1 = odo.getTheta();
+    		}
+    		
+    		else if(rightCSLineCount == 1){
+    			rightCSAngle2 = odo.getTheta();
+    		}
+    		
+       		else if(rightCSLineCount == 2){
+       			rightCSAngle3 = odo.getTheta();
+    		}
+    		
+       		else if(rightCSLineCount == 3){
+       			rightCSAngle4 = odo.getTheta();
+    		}
+    	
+    		leftCSLineCount++;
+               
+        }
+
+    	
+    	if(leftCSLineCount>=4){
+    		leftCSDeltaThetaY = Math.abs(leftCSAngle1 - leftCSAngle3);
+    		leftCSDeltaThetaX = 360 - Math.abs(leftCSAngle4 - leftCSAngle2);
+    		
+            if (leftCSDeltaThetaY > 180) {
+            	leftCSDeltaThetaY = 360 - leftCSDeltaThetaY;
+            }
+            
+            if (leftCSDeltaThetaX > 180) {
+            	leftCSDeltaThetaX = 360 - leftCSDeltaThetaX;
+            }
+            
+            xLeft = -SENSOR_TO_WHEEL_DISTANCE * Math.cos(Math.toRadians(leftCSDeltaThetaY / 2));
+            yLeft = -SENSOR_TO_WHEEL_DISTANCE * Math.cos(Math.toRadians(leftCSDeltaThetaX / 2));
+            
+    	}
+    	
+      	if(rightCSLineCount>=4){
+    		rightCSDeltaThetaY = Math.abs(rightCSAngle1 - rightCSAngle3);
+    		rightCSDeltaThetaX = 360 - Math.abs(rightCSAngle4 - rightCSAngle2);
+    		
+            if (rightCSDeltaThetaY > 180) {
+            	rightCSDeltaThetaY = 360 - rightCSDeltaThetaY;
+            }
+            
+            if (rightCSDeltaThetaX > 180) {
+            	rightCSDeltaThetaX = 360 - rightCSDeltaThetaX;
+            }
+            
+            xRight = -SENSOR_TO_WHEEL_DISTANCE * Math.cos(Math.toRadians(rightCSDeltaThetaY / 2));
+            yRight = -SENSOR_TO_WHEEL_DISTANCE * Math.cos(Math.toRadians(rightCSDeltaThetaX / 2));
+    	}
+			  
+		
+	}
+	
 
 	private int prevValueL = 0;
 	private int prevValueR = 0;
 	private boolean negativeDiffL = false;
 	private boolean negativeDiffR = false;
-	private static final int LINE_DIFF = 20;
+	private final int LINE_DIFF = 20;
 
 	private boolean lineDetected(ColorSensor cs) {
 
@@ -288,8 +396,10 @@ public class OdometryCorrection extends SensorMotorUser implements
 		}
 
 		adjustment = Math.toDegrees(angleOff) - currentAngleOff;
+		
+		double newTheta = odo.fixDegAngle(currentTheta + adjustment);
 
-		odo.setTheta(currentTheta + adjustment);
+		odo.setTheta(newTheta);
 
 	}
 

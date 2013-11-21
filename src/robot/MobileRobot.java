@@ -383,7 +383,7 @@ public class MobileRobot extends SensorMotorUser {
 	
 	
 	
-	private void lightLocalization(){
+	/*private void lightLocalization(){
 		
 		corr.doRotationalCorrection();
 		
@@ -391,7 +391,7 @@ public class MobileRobot extends SensorMotorUser {
 		
 		corr.doStraightLineCorrection();
 		
-	}
+	}*/
 	
 
 }

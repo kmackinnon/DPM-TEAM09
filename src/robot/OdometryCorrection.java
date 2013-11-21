@@ -1,7 +1,6 @@
 package robot;
 
 import lejos.nxt.ColorSensor;
-import lejos.nxt.LCD;
 import lejos.nxt.Sound;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
@@ -12,15 +11,15 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private static final int DEFAULT_PERIOD = 25;
 
 	private final double MIN_DISTANCE_BETWEEN_DETECTIONS = 25;
+	private final double MAX_DISTANCE_BETWEEN_DIAGONAL_DETECTIONS = 14;
 
 	private Timer correctionTimer;
 
 	private Odometer odo;
 
-	private boolean doStraightLineCorrection;
-	private boolean doDiagonalCorrection;
-	private boolean doRotationalCorrection;
+	private boolean doCorrection;
 
+	//straight line detection variables
 	private boolean leftSensorDetected;
 	private boolean rightSensorDetected;
 
@@ -35,12 +34,17 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	private double xAtFirstDetection;
 	private double yAtFirstDetection;
+	//end of straight line detection variables
 
 	public OdometryCorrection(Odometer odo) {
 		this.odo = odo;
 
 		correctionTimer = new Timer(DEFAULT_PERIOD, this);
 
+	}
+	
+	public void startCorrectionTimer(){
+		correctionTimer.start();
 	}
 
 	public void turnOnCorrection() {
@@ -50,68 +54,40 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		leftSensorDetected = false;
 		rightSensorDetected = false;
-
-		// straight line correction is the default
-		doStraightLineCorrection();
-
-		correctionTimer.start();
-
-	}
-
-	public void turnOffCorrection() {
-
-//		leftCS.setFloodlight(false);
-//		rightCS.setFloodlight(false);
-
-		correctionTimer.stop();
-
-	}
-
-	public void doStraightLineCorrection() {
-
+		
 		// set the prevTacho counts to values that guarantee that the next line
 		// will be considered.
 		prevLeftTachoAtDetection = -Double.MAX_VALUE;
 		prevRightTachoAtDetection = -Double.MAX_VALUE;
 
-		doStraightLineCorrection = true;
-		doDiagonalCorrection = false;
-		doRotationalCorrection = false;
+		doCorrection = true;
+
 
 	}
 
-	public void doDiagonalCorrection() {
+	public void turnOffCorrection() {
 
-		doDiagonalCorrection = true;
-		doStraightLineCorrection = false;
-		doRotationalCorrection = false;
+		doCorrection = false;
 
 	}
 
-	public void doRotationalCorrection() {
-		
-		doRotationalCorrection = true;
-		doStraightLineCorrection = false;
-		doDiagonalCorrection = false;
-
-	}
 
 	public void timedOut() {
 
 		//long start = System.currentTimeMillis();
 		
-		if (doStraightLineCorrection) {
-
-			straightLineCorrection();
+		if(doCorrection){
 			
-		}
-		
-		else if(doDiagonalCorrection){
+			double currentTheta = odo.getTheta();
 			
-		}
-		
-		else if(doRotationalCorrection){
-			//rotationalCorrection();
+			if(Math.abs(currentTheta - 45) < 10 ||Math.abs(currentTheta - 135) < 10||Math.abs(currentTheta - 225) < 10||Math.abs(currentTheta - 315) < 10){
+				diagonalCorrection();
+			}
+			
+			else{
+				straightLineCorrection();
+			}
+			
 		}
 		
 		/*LCD.clear();
@@ -174,114 +150,145 @@ public class OdometryCorrection extends SensorMotorUser implements
 	}
 	
 	
-	/*private double leftCSAngle1;
-	private double leftCSAngle2;
-	private double leftCSAngle3;
-	private double leftCSAngle4;
+	private boolean leftFirstDiagonalDetect;
+	private boolean rightFirstDiagonalDetect;
 	
-	private int leftCSLineCount;
-	private int rightCSLineCount;
+	private double leftFirstTachoDiagonal;
+	private double rightFirstTachoDiagonal;
 	
-	private double rightCSAngle1;
-	private double rightCSAngle2;
-	private double rightCSAngle3;
-	private double rightCSAngle4;
-	
-	private double horizontalDistanceLeftCS;
-	private double verticalDistanceLeftCS;
-	private double horizontalDistanceRightCS;
-	private double verticalDistanceRightCS;
-	
-	private double leftCSDeltaThetaHorizontal;
-	private double leftCSDeltaThetaVertical;
-	private double rightCSDeltaThetaHorizontal;
-	private double rightCSDeltaThetaVertical;
-	
-	private double initialTheta;
-	
-	private void rotationalCorrection(){
-
-    	if(lineDetected(leftCS)){
-    		
-    		if(leftCSLineCount == 0){
-    			leftCSAngle1 = odo.getTheta();
-    		}
-    		
-    		else if(leftCSLineCount == 1){
-    			leftCSAngle2 = odo.getTheta();
-    		}
-    		
-       		else if(leftCSLineCount == 2){
-    			leftCSAngle3 = odo.getTheta();
-    		}
-    		
-       		else if(leftCSLineCount == 3){
-    			leftCSAngle4 = odo.getTheta();
-    		}
-    	
-    		leftCSLineCount++;
-    			
-    	}
-    	
-    	if(lineDetected(rightCS)){
-    		
-    		if(rightCSLineCount == 0){
-    			rightCSAngle1 = odo.getTheta();
-    		}
-    		
-    		else if(rightCSLineCount == 1){
-    			rightCSAngle2 = odo.getTheta();
-    		}
-    		
-       		else if(rightCSLineCount == 2){
-       			rightCSAngle3 = odo.getTheta();
-    		}
-    		
-       		else if(rightCSLineCount == 3){
-       			rightCSAngle4 = odo.getTheta();
-    		}
-    	
-    		leftCSLineCount++;
-               
-        }
-
-    	
-    	if(leftCSLineCount>=4){
-    		leftCSDeltaThetaVertical = leftCSAngle1 - leftCSAngle3;
-    		leftCSDeltaThetaHorizontal = 360 - Math.abs(leftCSAngle2 - leftCSAngle4);
-    		
-            if (leftCSDeltaThetaY > 180) {
-            	leftCSDeltaThetaY = 360 - leftCSDeltaThetaY;
-            }
-            
-            if (leftCSDeltaThetaX > 180) {
-            	leftCSDeltaThetaX = 360 - leftCSDeltaThetaX;
-            }
-            
-            xLeft = -SENSOR_TO_WHEEL_DISTANCE * Math.cos(Math.toRadians(leftCSDeltaThetaY / 2));
-            yLeft = -SENSOR_TO_WHEEL_DISTANCE * Math.cos(Math.toRadians(leftCSDeltaThetaX / 2));
-            
-    	}
-    	
-      	if(rightCSLineCount>=4){
-    		rightCSDeltaThetaY = Math.abs(rightCSAngle1 - rightCSAngle3);
-    		rightCSDeltaThetaX = 360 - Math.abs(rightCSAngle2 - rightCSAngle4);
-    		
-            if (rightCSDeltaThetaY > 180) {
-            	rightCSDeltaThetaY = 360 - rightCSDeltaThetaY;
-            }
-            
-            if (rightCSDeltaThetaX > 180) {
-            	rightCSDeltaThetaX = 360 - rightCSDeltaThetaX;
-            }
-            
-            xRight = -SENSOR_TO_WHEEL_DISTANCE * Math.cos(Math.toRadians(rightCSDeltaThetaY / 2));
-            yRight = -SENSOR_TO_WHEEL_DISTANCE * Math.cos(Math.toRadians(rightCSDeltaThetaX / 2));
-    	}
-			  
+	private void diagonalCorrection(){
 		
-	}*/
+		if(lineDetected(leftCS)){
+			
+			if(!leftFirstDiagonalDetect){
+				
+				leftFirstDiagonalDetect = true;
+				leftFirstTachoDiagonal = leftMotor.getTachoCount();
+			}
+			
+			else if(isLessThanHalfTileFromPreviousDetection(leftCS)){
+				
+				double diagonalDistanceTravelled = 2 * Math.PI * LEFT_RADIUS * ((leftMotor.getTachoCount() - leftFirstTachoDiagonal) / 360);
+				
+				double leftCSMeasuredDistance = diagonalDistanceTravelled * Math.cos(45);
+				
+				xyDiagonalCorrection(leftCSMeasuredDistance,leftCS);
+				
+			}
 	
+		}
+			
+		if(lineDetected(rightCS)){
+			
+			if(!rightFirstDiagonalDetect){
+				
+				rightFirstDiagonalDetect = true;
+				
+				rightFirstTachoDiagonal = rightMotor.getTachoCount();
+			}
+
+			else if(isLessThanHalfTileFromPreviousDetection(rightCS)){
+					
+				double diagonalDistanceTravelled = 2 * Math.PI * RIGHT_RADIUS * ((rightMotor.getTachoCount() - rightFirstTachoDiagonal) / 360);
+				
+				double rightCSMeasuredDistance = diagonalDistanceTravelled * Math.cos(45);
+				
+				xyDiagonalCorrection(rightCSMeasuredDistance,rightCS);
+				
+			}
+		}
+		
+	}
+	
+	
+	private void xyDiagonalCorrection(double measuredDistance, ColorSensor cs){
+		
+		boolean left = (cs == leftCS);
+		double currentTheta = odo.getTheta();
+		
+		if(left){
+			
+			if(Math.abs(currentTheta - 45) < 10){
+				
+				double yDistanceFromIntersection = measuredDistance - (SENSOR_WIDTH / 2) * Math.cos(45);
+				double yOfNearestIntersection = Map.getIntersection(odo.getX(),odo.getY()).getYInCm();
+				
+				odo.setY(yOfNearestIntersection + yDistanceFromIntersection);
+				
+			}
+			
+			if(Math.abs(currentTheta - 135) < 10){
+				
+				double xDistanceFromIntersection = measuredDistance - (SENSOR_WIDTH / 2) * Math.cos(45);
+				double xOfNearestIntersection = Map.getIntersection(odo.getX(),odo.getY()).getXInCm();
+				
+				odo.setX(xOfNearestIntersection + xDistanceFromIntersection);
+				
+			}
+			
+			if(Math.abs(currentTheta - 225) < 10){
+				
+				double yDistanceFromIntersection = measuredDistance - (SENSOR_WIDTH / 2) * Math.cos(45);
+				double yOfNearestIntersection = Map.getIntersection(odo.getX(),odo.getY()).getYInCm();
+				
+				odo.setY(yOfNearestIntersection - yDistanceFromIntersection);
+				
+			}
+			
+			if(Math.abs(currentTheta - 315) < 10){
+				
+				double xDistanceFromIntersection = measuredDistance - (SENSOR_WIDTH / 2) * Math.cos(45);
+				double xOfNearestIntersection = Map.getIntersection(odo.getX(),odo.getY()).getXInCm();
+				
+				odo.setX(xOfNearestIntersection - xDistanceFromIntersection);
+				
+			}
+			
+		}
+		
+		else{
+	
+			if(Math.abs(currentTheta - 45) < 10){
+				
+				double xDistanceFromIntersection = measuredDistance - (SENSOR_WIDTH / 2) * Math.cos(45);
+				double xOfNearestIntersection = Map.getIntersection(odo.getX(),odo.getY()).getXInCm();
+				
+				odo.setX(xOfNearestIntersection + xDistanceFromIntersection);
+				
+			}
+			
+			if(Math.abs(currentTheta - 135) < 10){
+				
+				double yDistanceFromIntersection = measuredDistance - (SENSOR_WIDTH / 2) * Math.cos(45);
+				double yOfNearestIntersection = Map.getIntersection(odo.getX(),odo.getY()).getYInCm();
+				
+				odo.setY(yOfNearestIntersection - yDistanceFromIntersection);
+				
+			}
+			
+			if(Math.abs(currentTheta - 225) < 10){
+				
+				double xDistanceFromIntersection = measuredDistance - (SENSOR_WIDTH / 2) * Math.cos(45);
+				double xOfNearestIntersection = Map.getIntersection(odo.getX(),odo.getY()).getXInCm();
+				
+				odo.setX(xOfNearestIntersection - xDistanceFromIntersection);
+				
+			}
+			
+			if(Math.abs(currentTheta - 315) < 10){
+				
+				double yDistanceFromIntersection = measuredDistance - (SENSOR_WIDTH / 2) * Math.cos(45);
+				double yOfNearestIntersection = Map.getIntersection(odo.getX(),odo.getY()).getYInCm();
+				
+				odo.setY(yOfNearestIntersection + yDistanceFromIntersection);
+				
+			}
+				
+		}
+		
+		
+	}
+
 
 	private int prevValueL = 0;
 	private int prevValueR = 0;
@@ -332,40 +339,6 @@ public class OdometryCorrection extends SensorMotorUser implements
 		return false;
 	}
 	
-	
-	/*int leftOnTopOfLineCounter = 0;
-	int rightOnTopOfLineCounter = 0;
-	
-	private boolean sustainedLineDetected(ColorSensor cs){
-		
-		boolean left = (cs == leftCS);
-		
-		if(left&&negativeDiffL){
-			
-			leftOnTopOfLineCounter++;
-			
-		}
-		
-		if((!left) && negativeDiffR){
-			rightOnTopOfLineCounter++;
-		}
-		
-		if(left&&leftOnTopOfLineCounter>=25){
-			leftOnTopOfLineCounter = 0;
-			Sound.beep();
-			return true;
-		}
-		
-		if((!left)&&rightOnTopOfLineCounter>=25){
-			rightOnTopOfLineCounter = 0;
-			Sound.beep();
-			return true;
-		}
-		
-		return false;
-		
-		
-	}*/
 	
 
 	private void correctXY() {
@@ -522,6 +495,18 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		else {
 			return ((rightMotor.getTachoCount() - prevRightTachoAtDetection) > ((MIN_DISTANCE_BETWEEN_DETECTIONS * 360) / (2 * Math.PI * RIGHT_RADIUS)));
+		}
+
+	}
+	
+	private boolean isLessThanHalfTileFromPreviousDetection(ColorSensor cs) {
+
+		if (cs == leftCS) {
+			return ((leftMotor.getTachoCount() - leftFirstTachoDiagonal) < ((MAX_DISTANCE_BETWEEN_DIAGONAL_DETECTIONS * 360) / (2 * Math.PI * LEFT_RADIUS)));
+		}
+
+		else {
+			return ((rightMotor.getTachoCount() - rightFirstTachoDiagonal) < ((MAX_DISTANCE_BETWEEN_DIAGONAL_DETECTIONS * 360) / (2 * Math.PI * RIGHT_RADIUS)));
 		}
 
 	}

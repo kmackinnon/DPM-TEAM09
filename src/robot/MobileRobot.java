@@ -53,7 +53,7 @@ public class MobileRobot extends SensorMotorUser {
 
 			if (!isSuccess) {
 
-				if (!blockDetector.objectIsStyrofoam()) {
+				if (!blockDetector.isObjectStyrofoam()) {
 					moveBackToPreviousIntersection();
 
 					Intersection prevIntersection = Map.getIntersection(
@@ -112,7 +112,7 @@ public class MobileRobot extends SensorMotorUser {
 		// target position is greater than the position error threshold
 		while (!isAtPoint(xTarget, yTarget)) {
 
-			if (blockDetector.objectInFrontOfRobot()
+			if (blockDetector.isObjectInFront()
 					&& !(xTarget == xPrevTarget && yTarget == yPrevTarget)) {
 				return false;
 			}

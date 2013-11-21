@@ -8,7 +8,7 @@ import lejos.util.TimerListener;
 /**
  * BlockDetector uses the ultrasonic sensor and light sensor to detect blocks
  * that are close by. The light sensor identifies the block as wooden or
- * styrofoam
+ * styrofoam.
  * 
  */
 public class BlockDetector extends SensorMotorUser implements TimerListener {
@@ -17,35 +17,39 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	private Object lock;
 
 	private final int DIST_TO_STOP = 11;
-
 	private final int LIGHT_DIFF = 5;
 
-	private boolean objectDetected = false;
+	private boolean isObjectDetected = false;
 	private boolean isStyrofoam = false;
+	
+	// variables for object detection
+	private int[] window = { 255, 255, 255, 255, 255 };
+	private int prevValue = 0;
+	private boolean prevLatch = false;
+	private int median, value, diff;
+	private boolean latch;
+	
 
 	public BlockDetector() {
 		lock = new Object();
-
 		blockDetectorTimer = new Timer(DEFAULT_TIMER_PERIOD, this);
 	}
 
 	public void turnOnBlockDetection() {
 		blockDetectorTimer.start();
 	}
-	
+
 	public void turnOffBlockDetection() {
 		blockDetectorTimer.stop();
 	}
 
 	public void timedOut() {
 
-
-
-		if (objectDetected()) {
+		if (isObjectDetected()) {
 			Sound.beep();
-			
+
 			synchronized (lock) {
-				objectDetected = true;
+				isObjectDetected = true;
 			}
 
 			if (isStyrofoam()) {
@@ -53,21 +57,18 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 					isStyrofoam = true;
 				}
 			}
-		}
-		
-		else{
 			
+		} else {
+
 			synchronized (lock) {
-				objectDetected = false;
+				isObjectDetected = false;
 				isStyrofoam = false;
 			}
-			
 		}
-
 	}
-
-	public boolean objectIsStyrofoam() {
-
+	
+	// returns the isStyrofoam boolean
+	public boolean isObjectStyrofoam() {
 		boolean result;
 
 		synchronized (lock) {
@@ -77,16 +78,15 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		return result;
 	}
 
-	public boolean objectInFrontOfRobot() {
-
+	// returns the isObjectDetected boolean
+	public boolean isObjectInFront() {
 		boolean result;
 
 		synchronized (lock) {
-			result = objectDetected;
+			result = isObjectDetected;
 		}
 
 		return result;
-
 	}
 
 	/**
@@ -95,14 +95,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	 * 
 	 * @return true if a block is detected, false otherwise.
 	 */
-
-	private int[] window = { 255, 255, 255, 255, 255 };
-	private int prevValue = 0;
-	private boolean prevLatch = false;
-	private int median, value, diff;
-	private boolean latch;
-
-	private boolean objectDetected() {
+	private boolean isObjectDetected() {
 		// SensorMotorUser.frontCS.setFloodlight(true);
 
 		// stopping by ultrasonic sensor
@@ -127,6 +120,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		}
 		prevValue = value;
 		prevLatch = latch;
+		
 		return false;
 	}
 
@@ -136,7 +130,6 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	 * @return true if styrofoam, false otherwise.
 	 */
 	private boolean isStyrofoam() {
-
 		// RConsole.println(red + " " + green + " " + blue);
 
 		Color color = frontCS.getColor();
@@ -150,30 +143,12 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 			testValue = ((red / blue) * (green / blue));
 		}
 
-		// RConsole.println("testValue: " + testValue);
-
+		// conditions for styrofoam block
 		if (testValue > .75 && testValue < .9) {
 			return true; // this is only true when 5-7 cm from block
 		}
 
 		return false;
 	}
-
-	/**
-	 * Returns a boolean indicating whether or not the block is wooden.
-	 * 
-	 * @return true if wooden, false otherwise.
-	 */
-	/*
-	 * public boolean isWood(double red, double green, double blue) {
-	 * 
-	 * double testValue = -1.0;
-	 * 
-	 * testValue = ((red / blue) * (green / blue));
-	 * 
-	 * if (testValue > 1.9){ return true; }
-	 * 
-	 * return false; }
-	 */
 
 }

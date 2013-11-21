@@ -12,7 +12,7 @@ public class Map {
 	public final static double TILE_SIZE = 30.48;
 
 	/** There are 11 intersections in both the x and y directions. */
-	public final static int NUM_OF_INTERSECTIONS = 11;
+	public final static int NUM_OF_INTERSECTIONS = 7;
 
 	private static ArrayList<Intersection> intersectionList = new ArrayList<Intersection>();
 
@@ -146,6 +146,11 @@ public class Map {
 
 	}
 
+	
+	public static double nearestIntersectionCoordinate(double input){
+		
+		return (int) (Math.round(input / Map.TILE_SIZE)) * Map.TILE_SIZE;
+	}
 	
 	public static Intersection getIntersection(double x, double y){
 		

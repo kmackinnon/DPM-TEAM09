@@ -2,6 +2,7 @@ package testing;
 
 import lejos.nxt.Button;
 import lejos.nxt.comm.RConsole;
+import robot.Map;
 import robot.MobileRobot;
 
 /**
@@ -14,6 +15,9 @@ import robot.MobileRobot;
 public class OdometerTest {
 	
 	public static void main(String[] args) {
+		
+		Map.initializeMap();
+		
 		MobileRobot robot = new MobileRobot();
 		int option = 0;
 		
@@ -24,11 +28,11 @@ public class OdometerTest {
 		
 		switch(option) {
 		case Button.ID_LEFT:
-			MobileRobot.corr.turnOnCorrection();
-			squareTest(robot);
+			MobileRobot.corr.startCorrectionTimer();
+			triangleTest(robot);
 			break;
 		case Button.ID_RIGHT:
-			MobileRobot.corr.turnOffCorrection();
+			MobileRobot.corr.startCorrectionTimer();
 			squareTest(robot);
 			break;
 		default:
@@ -41,10 +45,20 @@ public class OdometerTest {
 		System.exit(0);
 	}
 	
+	
+	public static void triangleTest(MobileRobot robot) {
+		robot.travelCoordinate(60.96,60.96, false);
+		robot.travelCoordinate(0,121.92, false);
+		robot.travelCoordinate(0,0, true);
+		robot.turnToOnPoint(0.0);
+	}
+	
+	
+	
 	public static void squareTest(MobileRobot robot) {
-		robot.travelCoordinate(0,60.96, true);
-		robot.travelCoordinate(60.96,60.96, true);
-		robot.travelCoordinate(60.96,0, true);
+		robot.travelCoordinate(0,60.96, false);
+		robot.travelCoordinate(60.96,60.96, false);
+		robot.travelCoordinate(60.96,0, false);
 		robot.travelCoordinate(0,0, true);
 		robot.turnToOnPoint(0.0);
 	}

@@ -66,7 +66,7 @@ public class Competitor {
 		//localizer.localize();
 		//Sound.beep();
 		
-		MobileRobot.corr.turnOnCorrection();
+		MobileRobot.corr.startCorrectionTimer();
 		MobileRobot.blockDetector.turnOnBlockDetection();
 		
 		while(!explorer.isFinishedLooking()){

@@ -72,7 +72,7 @@ public class Localizer extends MobileRobot {
 
 			medianDistance = getMedian(distanceArray);
 
-			if (medianDistance <= 50) {
+			if (medianDistance <= 10) {
 				countWall++;
 			}
 		}
@@ -223,7 +223,7 @@ public class Localizer extends MobileRobot {
 			medianDistance = getMedian(distanceArray);
 
 			// ensure facing away from walls before attempting to detect angles
-			if (medianDistance == US_SENSOR_255) {
+			if (medianDistance >= 35) {
 				count255++;
 			} else {
 				count255 = 0;

@@ -18,7 +18,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	private Odometer odo;
 
-	private boolean doCorrection;
+	private boolean doCorrection = false;
 
 	// straight line detection variables
 	private boolean leftSensorDetected;

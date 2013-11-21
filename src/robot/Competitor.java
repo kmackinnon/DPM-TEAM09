@@ -77,9 +77,6 @@ public class Competitor {
 			
 		}
 		
-		
-		
-
 		System.exit(0);
 	}
 	
@@ -135,8 +132,8 @@ public class Competitor {
 	
 	private static void testWithoutBluetooth(){
 		
-		int[] testGreen = { 0, 3, 2, 4 };
-		int[] testRed = {4, 3, 5, 4 };
+		int[] testGreen = { 0, 1, 1, 2};
+		int[] testRed = {3, 3, 4, 4 };
 
 
 		// set role. For now, assume the robot will be a builder.

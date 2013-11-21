@@ -22,6 +22,7 @@ public class Localizer extends MobileRobot {
 	
 	private final int LATCH_ANGLE_DISTANCE = 30;
 	private final int US_OFFSET = 2;
+	private final double ANGLE_INITIALIZE_OFFSET = 5;
 
 	public Localizer() {
 
@@ -51,6 +52,8 @@ public class Localizer extends MobileRobot {
 		else if(getXStart() == 0 && getYStart() == (Map.NUM_OF_INTERSECTIONS-1)){
 			turnToOnPoint(90);
 		}
+		
+		initializePrevTarget(odo.getX(),odo.getY());
 		
 	}
 
@@ -100,19 +103,19 @@ public class Localizer extends MobileRobot {
 		odo.setY(0);
 		
 		if(getXStart()==0 && getYStart()==0){
-			odo.setTheta(deltaTheta + angleB);
+			odo.setTheta(deltaTheta + angleB - ANGLE_INITIALIZE_OFFSET);
 		}
 		
 		else if(getXStart() == (Map.NUM_OF_INTERSECTIONS-1) && getYStart() == 0){
-			odo.setTheta(deltaTheta + angleB - 90);
+			odo.setTheta(deltaTheta + angleB - 90 - ANGLE_INITIALIZE_OFFSET);
 		}
 		
 		else if(getXStart() == (Map.NUM_OF_INTERSECTIONS-1) && getYStart() == (Map.NUM_OF_INTERSECTIONS-1)){
-			odo.setTheta(deltaTheta + angleB - 180);
+			odo.setTheta(deltaTheta + angleB - 180 - ANGLE_INITIALIZE_OFFSET);
 		}
 		
 		else if(getXStart() == 0 && getYStart() == (Map.NUM_OF_INTERSECTIONS-1)){
-			odo.setTheta(deltaTheta + angleB - 270);
+			odo.setTheta(deltaTheta + angleB - 270 - ANGLE_INITIALIZE_OFFSET);
 		}
 
 
@@ -180,8 +183,8 @@ public class Localizer extends MobileRobot {
 			odo.setY(Map.NUM_OF_INTERSECTIONS * Map.TILE_SIZE - getUSDistance() - US_OFFSET);
 		}
 		
-
 		initializePrevTarget(odo.getX(),odo.getY());
+
 	}
 
 	private void lookForRightWall() {

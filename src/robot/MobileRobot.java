@@ -16,8 +16,8 @@ public class MobileRobot extends SensorMotorUser {
 	public static OdometryCorrection corr = new OdometryCorrection(odo);
 	public static BlockDetector blockDetector = new BlockDetector();
 
-	private double xPrevTarget;
-	private double yPrevTarget;
+	private static double xPrevTarget;
+	private static double yPrevTarget;
 
 	private final int ANGLE_ERROR_THRESHOLD = 1; // measured in degrees
 	private final int POSITION_ERROR_THRESHOLD = 1;
@@ -128,7 +128,7 @@ public class MobileRobot extends SensorMotorUser {
 				// Determine whether to turn or not
 				xDiff = xTarget - odo.getX();
 				yDiff = yTarget - odo.getY();
-				targetTheta = 90 - Math.toDegrees(Math.atan2(yDiff, xDiff));
+				targetTheta = odo.fixDegAngle(90 - Math.toDegrees(Math.atan2(yDiff, xDiff)));
 
 				// RConsole.println("targetTheta" + targetTheta);
 

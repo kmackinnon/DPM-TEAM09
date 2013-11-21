@@ -1,5 +1,7 @@
 package robot;
 
+import lejos.nxt.LCD;
+
 
 
 /**
@@ -37,11 +39,13 @@ public class Explorer extends MobileRobot {
 	 */
 	public boolean lookForStyrofoamBlocks() {
 		
-		liftClaw();
 		blockDetector.turnOnBlockDetection();
 
 		for (int initialRow = rowNumber; loopCondition(rowNumber, initialRow); loopAfterthought(initialRow)) {
 			
+			LCD.clear();
+			LCD.drawInt(endOfCurrentRow().getX(), 0, 4);
+			LCD.drawInt(endOfCurrentRow().getY(), 3, 4);
 			travelTo(endOfCurrentRow());
 			
 			if(giveControlToBlockMover){

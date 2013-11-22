@@ -392,17 +392,5 @@ public class MobileRobot extends SensorMotorUser {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 	
-	
-	
-	/*private void lightLocalization(){
-		
-		corr.doRotationalCorrection();
-		
-		rotateByAngle(-360);
-		
-		corr.doStraightLineCorrection();
-		
-	}*/
-	
 
 }

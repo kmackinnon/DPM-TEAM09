@@ -27,11 +27,11 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private double rightTachoAtDetection;
 	private double leftTachoAtDetection;
 
-	private double prevRightTachoAtDetection = 0;
-	private double prevLeftTachoAtDetection = 0;
+	private double prevRightTachoAtDetection;
+	private double prevLeftTachoAtDetection;
 
-	private double distanceTravelledByLaggingWheel = 0;
-	private double angleOff = 0;
+	private double distanceTravelledByLaggingWheel;
+	private double angleOff;
 
 	private double xAtFirstDetection;
 	private double yAtFirstDetection;

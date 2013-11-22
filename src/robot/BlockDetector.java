@@ -18,6 +18,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	private final int DIST_TO_STOP = 11;
 	private final int LIGHT_DIFF = 5;
+	private final int CONFIRMATION_MINIMUM = 7;
 
 	private boolean isObjectDetected = false;
 	private boolean isStyrofoam = false;
@@ -160,17 +161,33 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		return false;*/
 		
 		
-        Color color = frontCS.getColor();
-        int redValue = color.getRed();
-        int blueValue = color.getBlue();
+		Color color;
+		int redValue;
+		int blueValue;
+		double ratio;
+		int counter = 0;
+		
+		for(int i = 0; i<10; i++){
+	        color = frontCS.getColor();
+	        redValue = color.getRed();
+	        blueValue = color.getBlue();
+	        
+	        ratio = (double) redValue / (double) blueValue;
+	        
+	        if (ratio < 3.0) {
+	        	counter++;
+	        }
+		}
+		
+		if(counter>=CONFIRMATION_MINIMUM){
+			return true;
+		}
+		
+		else{
+			return false;
+		}
 
-        double ratio = (double) redValue / (double) blueValue;
 
-        if (ratio > 1.8) {
-            return false;
-        } else {
-    		return true;
-        }
 	}
 
 }

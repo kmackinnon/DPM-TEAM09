@@ -47,9 +47,12 @@ public class BlockMover extends MobileRobot {
 		corr.turnOffCorrection();
 		blockDetector.turnOffBlockDetection();
 
-		travelMagnitude(-8);
-
+		travelMagnitude(-16);
+		
 		dropClaw();
+		
+		travelMagnitude(13);
+
 		liftClaw();
 
 	}

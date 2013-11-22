@@ -3,6 +3,7 @@ package testing;
 import lejos.nxt.Button;
 import lejos.nxt.Sound;
 import robot.BlockMover;
+import robot.MobileRobot;
 
 public class BlockMoverTest {
 
@@ -18,11 +19,24 @@ public class BlockMoverTest {
 		
 		blockMover.liftClaw();
 		
-		blockMover.travelCoordinate(0, 30.48, true);
+		MobileRobot.blockDetector.startBlockDetectorTimer();
+		MobileRobot.blockDetector.turnOnBlockDetection();
 		
-		blockMover.grabBlock();
 		
-		Sound.beep();
+		while(true){
+			if(MobileRobot.blockDetector.isObjectInFront()){
+				blockMover.stopMoving();
+				
+				if(MobileRobot.blockDetector.isObjectStyrofoam()){
+					blockMover.grabBlock();
+					System.exit(0);
+				}
+			}
+			
+			else{
+				blockMover.moveForward();
+			}
+		}
 
 	}
 

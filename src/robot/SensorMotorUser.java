@@ -69,7 +69,9 @@ public class SensorMotorUser {
 	 * The speed of the lifting motor when the robot is lifting blocks. The
 	 * number is how many degrees the motor rotates per second
 	 */
-	public static final int LIFTING_SPEED = 50;
+	public static final int LIFTING_SPEED = 120;
+	
+	public static final int LIFTING_DEGREE = 320;
 
 	public static final double SENSOR_WIDTH = 11.05;
 	

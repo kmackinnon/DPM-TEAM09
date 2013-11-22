@@ -43,11 +43,11 @@ public class BlockMover extends MobileRobot {
 		return;
 	}
 
-	private void grabBlock() {
+	public void grabBlock() {
 		corr.turnOffCorrection();
 		blockDetector.turnOffBlockDetection();
 
-		travelMagnitude(-5);
+		travelMagnitude(-8);
 
 		dropClaw();
 		liftClaw();

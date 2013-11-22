@@ -21,8 +21,10 @@ public class MobileRobot extends SensorMotorUser {
 
 	private final int ANGLE_ERROR_THRESHOLD = 1; // measured in degrees
 	private final int POSITION_ERROR_THRESHOLD = 1;
-	private final int TURN_ON_POINT_ANGLE_THRESHOLD = 30;
+	private final int TURN_ON_POINT_ANGLE_THRESHOLD = 20;
+	private final int POINT_IS_BEHIND_ANGLE_THRESHOLD = 45;
 	private final int TARGET_ZONE_FLAG = -100;
+	private final int CLOSE_POINT_THRESHOLD = 2;
 
 	/**
 	 * Default Constructor
@@ -32,7 +34,6 @@ public class MobileRobot extends SensorMotorUser {
 	public MobileRobot() {
 	}
 
-
 	public void travelTo(Intersection destination) {
 		boolean isSuccess = false;
 		Intersection source;
@@ -41,20 +42,19 @@ public class MobileRobot extends SensorMotorUser {
 		while (!isSuccess) {
 
 			source = Map.getIntersection(odo.getX(), odo.getY());
-			
-			if(destination.getX() == TARGET_ZONE_FLAG && destination.getY() == TARGET_ZONE_FLAG){
-				listOfWayPoints = Dijkstra.algorithmForTargetZone(
-						source);
+
+			if (destination.getX() == TARGET_ZONE_FLAG
+					&& destination.getY() == TARGET_ZONE_FLAG) {
+				listOfWayPoints = Dijkstra.algorithmForTargetZone(source);
 			}
-			
-			else{
-				
+
+			else {
+
 				if (destination.getAdjacencyList().isEmpty()) {
 					return;
 				}
-				
-				listOfWayPoints = Dijkstra.algorithm(
-						source, destination);
+
+				listOfWayPoints = Dijkstra.algorithm(source, destination);
 			}
 
 			isSuccess = travelToWaypoints(listOfWayPoints);
@@ -77,8 +77,8 @@ public class MobileRobot extends SensorMotorUser {
 				}
 
 				else {
-					
-					if(pickUpStyrofoamBlock()){
+
+					if (pickUpStyrofoamBlock()) {
 						return;
 					}
 
@@ -88,11 +88,10 @@ public class MobileRobot extends SensorMotorUser {
 		}
 
 	}
-	
 
 	public void travelToTargetZone() {
-		
-		travelTo(new Intersection(TARGET_ZONE_FLAG,TARGET_ZONE_FLAG));
+
+		travelTo(new Intersection(TARGET_ZONE_FLAG, TARGET_ZONE_FLAG));
 
 	}
 
@@ -108,6 +107,13 @@ public class MobileRobot extends SensorMotorUser {
 	public boolean travelCoordinate(double xTarget, double yTarget,
 			boolean stopAtTarget) {
 
+		// this happens when the robot sees an obstacle and should back up to
+		// previous point. if the previous point ends up being in front of the
+		// robot, then it will move forward.
+		if (xTarget == xPrevTarget && yTarget == yPrevTarget) {
+			travelCoordinateBackwards(xTarget, yTarget, true);
+		}
+
 		double xDiff;
 		double yDiff;
 		double targetTheta;
@@ -117,18 +123,15 @@ public class MobileRobot extends SensorMotorUser {
 		// target position is greater than the position error threshold
 		while (!isAtPoint(xTarget, yTarget)) {
 
-			if (blockDetector.isObjectInFront()
-					&& !(xTarget == xPrevTarget && yTarget == yPrevTarget)) {
+			if (blockDetector.isObjectInFront()&&!isAtPoint(xPrevTarget,yPrevTarget)) {
 				return false;
 			}
-
-			// this means there is a wooden block in the way, and we want to
-			// move backwards to the previous intersection.
 
 			// Determine whether to turn or not
 			xDiff = xTarget - odo.getX();
 			yDiff = yTarget - odo.getY();
-			targetTheta = odo.fixDegAngle(90 - Math.toDegrees(Math.atan2(yDiff, xDiff)));
+			targetTheta = odo.fixDegAngle(90 - Math.toDegrees(Math.atan2(yDiff,
+					xDiff)));
 
 			// RConsole.println("targetTheta" + targetTheta);
 
@@ -137,34 +140,8 @@ public class MobileRobot extends SensorMotorUser {
 			deltaTheta = targetTheta - odo.getTheta();
 
 			deltaTheta = getMinAngle(deltaTheta);
-			
-			if(xTarget == xPrevTarget && yTarget == yPrevTarget){
-				if(Math.abs(deltaTheta - 180) < 10){
-					moveBackward();
-				}
-				
-				else {
-					moveForward();
-				}
-				
-			}
 
-			// if the heading is off by more than acceptable error, we must
-			// correct
-			else if (Math.abs(deltaTheta) > ANGLE_ERROR_THRESHOLD) {
-
-				if (isAtPoint(xPrevTarget, yPrevTarget)
-						&& (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD)) {
-					onPointTurnBy(deltaTheta);
-				} else {
-					whileMovingTurnBy(deltaTheta);
-				}
-
-			} else {
-
-				moveForward(); // the heading is good
-			}
-
+			howToMoveDecider(xTarget,yTarget,deltaTheta);
 		}
 
 		if (stopAtTarget) {
@@ -177,14 +154,76 @@ public class MobileRobot extends SensorMotorUser {
 		return true;
 
 	}
+
+	public void travelCoordinateBackwards(double xTarget, double yTarget,
+			boolean stopAtTarget) {
+
+		double xDiff;
+		double yDiff;
+		double targetTheta;
+		double deltaTheta;
+		double backwardDeltaTheta;
+
+		while (!isAtPoint(xTarget, yTarget)) {
+
+			// Determine whether to turn or not
+			xDiff = xTarget - odo.getX();
+			yDiff = yTarget - odo.getY();
+			targetTheta = odo.fixDegAngle(90 - Math.toDegrees(Math.atan2(yDiff,
+					xDiff)));
+
+			// RConsole.println("targetTheta" + targetTheta);
+
+			// change in theta is target minus current
+
+			deltaTheta = targetTheta - odo.getTheta();
+
+			deltaTheta = getMinAngle(deltaTheta);
+			
+			backwardDeltaTheta = getMinAngle(deltaTheta - 180);
+
+			// is the point behind the robot
+			if (Math.abs(backwardDeltaTheta) < POINT_IS_BEHIND_ANGLE_THRESHOLD) {
+
+				if(backwardDeltaTheta > ANGLE_ERROR_THRESHOLD){
+				
+					if (Math.abs(backwardDeltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD) {
+						
+						onPointTurnBy(backwardDeltaTheta);
+					}
 	
-	
-	public void travelMagnitude(double magnitudeInCm){
-		
+					else if (Math.abs(backwardDeltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD) {
+						
+						onPointTurnBy(backwardDeltaTheta);
+						
+					}
+					
+					else{
+						whileMovingBackwardTurnBy(backwardDeltaTheta);
+					}
+				}
+				
+				else{
+					moveBackward();
+				}
+			}
+
+			else{
+				howToMoveDecider(xTarget,yTarget,deltaTheta);
+			}
+		}
+
+	}
+
+	public void travelMagnitude(double magnitudeInCm) {
+
 		int leftAmount = convertDistance(LEFT_RADIUS, magnitudeInCm);
-		
+
 		int rightAmount = convertDistance(RIGHT_RADIUS, magnitudeInCm);
-		
+
+		leftMotor.setSpeed(FORWARD_SPEED);
+		rightMotor.setSpeed(FORWARD_SPEED);
+
 		leftMotor.rotate(leftAmount, true);
 		rightMotor.rotate(rightAmount, false);
 	}
@@ -193,12 +232,12 @@ public class MobileRobot extends SensorMotorUser {
 		xPrevTarget = x;
 		yPrevTarget = y;
 	}
-	
-	public double getPrevX(){
+
+	public double getPrevX() {
 		return xPrevTarget;
 	}
-	
-	public double getPrevY(){
+
+	public double getPrevY() {
 		return yPrevTarget;
 	}
 
@@ -292,6 +331,27 @@ public class MobileRobot extends SensorMotorUser {
 		rightMotor.forward();
 
 	}
+	
+	
+	public void turnLeftWhileMovingBackward() {
+
+		leftMotor.setSpeed(FORWARD_SPEED);
+		rightMotor.setSpeed(TURNING_SPEED);
+
+		leftMotor.backward();
+		rightMotor.backward();
+
+	}
+
+	public void turnRightWhileMovingBackward() {
+
+		leftMotor.setSpeed(TURNING_SPEED);
+		rightMotor.setSpeed(FORWARD_SPEED);
+
+		leftMotor.backward();
+		rightMotor.backward();
+
+	}
 
 	public void stopMoving() {
 
@@ -304,15 +364,15 @@ public class MobileRobot extends SensorMotorUser {
 		clawMotor.setSpeed(120);
 		clawMotor.rotateTo(310);
 	}
-	
+
 	public void dropClaw() {
 		clawMotor.setSpeed(120);
 		clawMotor.rotateTo(0);
 	}
-	
-	//override this
-	public boolean pickUpStyrofoamBlock(){
-		
+
+	// override this
+	public boolean pickUpStyrofoamBlock() {
+
 		return true;
 	}
 
@@ -353,6 +413,16 @@ public class MobileRobot extends SensorMotorUser {
 			turnRightWhileMoving();
 		} else if (minimumAngle < 0) {
 			turnLeftWhileMoving();
+		}
+
+	}
+	
+	private void whileMovingBackwardTurnBy(double minimumAngle) {
+
+		if (minimumAngle > 0) {
+			turnRightWhileMovingBackward();
+		} else if (minimumAngle < 0) {
+			turnLeftWhileMovingBackward();
 		}
 
 	}
@@ -400,6 +470,42 @@ public class MobileRobot extends SensorMotorUser {
 
 	}
 
+	private boolean isCloseToPoint(double xTarget, double yTarget) {
+
+		if (Math.abs(xTarget - odo.getX()) < CLOSE_POINT_THRESHOLD
+				&& Math.abs(yTarget - odo.getY()) < CLOSE_POINT_THRESHOLD) {
+			return true;
+		}
+
+		else {
+			return false;
+		}
+
+	}
+	
+	private void howToMoveDecider(double xTarget, double yTarget, double deltaTheta){
+		
+		if (Math.abs(deltaTheta) > ANGLE_ERROR_THRESHOLD) {
+			if (isAtPoint(xPrevTarget, yPrevTarget)
+					&& (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD)) {
+				onPointTurnBy(deltaTheta);
+			}
+
+			else if (isCloseToPoint(xTarget, yTarget) && (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD)) {
+				onPointTurnBy(deltaTheta);
+			}
+
+			else {
+				whileMovingTurnBy(deltaTheta);
+			}
+
+		} else {
+
+			moveForward(); // the heading is good
+		}
+		
+	}
+
 	// returns the number of degrees the wheels must turn over a distance
 	private int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
@@ -409,6 +515,5 @@ public class MobileRobot extends SensorMotorUser {
 	private int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
-	
 
 }

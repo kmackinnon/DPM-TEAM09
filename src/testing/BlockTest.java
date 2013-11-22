@@ -15,7 +15,7 @@ import robot.SensorMotorUser;
  * @author Sidney Ng
  * 
  */
-public class BlockTest /*extends Thread*/ {
+public class BlockTest {
 
 	public static void main(String[] args) {
 		MobileRobot robot = new MobileRobot();
@@ -28,27 +28,22 @@ public class BlockTest /*extends Thread*/ {
 		switch(option) {
 			case Button.ID_ENTER:
 				//SensorMotorUser.frontCS.setFloodlight(true);
-				SensorMotorUser.clawMotor.setSpeed(60);
-				SensorMotorUser.clawMotor.rotateTo(320);
+				robot.liftClaw();
 
 //			RConsole.open(); // opens a USB connection with no timeout
+				MobileRobot.blockDetector.startBlockDetectorTimer();
 				MobileRobot.blockDetector.turnOnBlockDetection();
 
 				robot.moveForward();
 				boolean object = false;
 				int buttonChoice;
 				do {
-//				try {
-//					Thread.sleep(25); // 20 polls per second
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
 
 					if (!object) {
 						if (MobileRobot.blockDetector.isObjectInFront()) {
 							robot.stopMoving();
 					
-//						object = true; // comment or uncomment this if you want only object detection or detection and recognition
+						object = true; // comment or uncomment this if you want only object detection or detection and recognition
 						}
 					}
 			

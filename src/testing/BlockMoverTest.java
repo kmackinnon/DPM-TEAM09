@@ -28,6 +28,7 @@ public class BlockMoverTest {
 
 		MobileRobot.blockDetector.startBlockDetectorTimer();
 		MobileRobot.blockDetector.turnOnBlockDetection();
+		blockMover.moveForward();
 
 		boolean isSearching = true;
 		while (isSearching) {
@@ -45,8 +46,6 @@ public class BlockMoverTest {
 					LCD.drawString("Not styro", 0, 0);
 				}
 				
-			} else {
-				blockMover.moveForward();
 			}
 
 		}

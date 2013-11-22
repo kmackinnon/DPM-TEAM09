@@ -132,8 +132,8 @@ public class Competitor {
 	
 	private static void testWithoutBluetooth(){
 		
-		int[] testGreen = { 0, 1, 1, 2};
-		int[] testRed = {3, 3, 4, 4 };
+		int[] testGreen = { 4, 3, 6, 6};
+		int[] testRed = {0,3,2,5 };
 
 
 		// set role. For now, assume the robot will be a builder.
@@ -144,7 +144,7 @@ public class Competitor {
 		Map.setForbiddenZone(testRed);
 
 		SensorMotorUser
-		.setStartCorner(new int[] {6,0});
+		.setStartCorner(new int[] {0,0});
 		
 	}
 	

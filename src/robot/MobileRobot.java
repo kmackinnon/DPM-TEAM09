@@ -124,42 +124,47 @@ public class MobileRobot extends SensorMotorUser {
 
 			// this means there is a wooden block in the way, and we want to
 			// move backwards to the previous intersection.
-			if (xTarget == xPrevTarget && yTarget == yPrevTarget) {
-				moveBackward();
+
+			// Determine whether to turn or not
+			xDiff = xTarget - odo.getX();
+			yDiff = yTarget - odo.getY();
+			targetTheta = odo.fixDegAngle(90 - Math.toDegrees(Math.atan2(yDiff, xDiff)));
+
+			// RConsole.println("targetTheta" + targetTheta);
+
+			// change in theta is target minus current
+
+			deltaTheta = targetTheta - odo.getTheta();
+
+			deltaTheta = getMinAngle(deltaTheta);
+			
+			if(xTarget == xPrevTarget && yTarget == yPrevTarget){
+				if(Math.abs(deltaTheta - 180) < 10){
+					moveBackward();
+				}
+				
+				else {
+					moveForward();
+				}
+				
 			}
 
-			else {
+			// if the heading is off by more than acceptable error, we must
+			// correct
+			else if (Math.abs(deltaTheta) > ANGLE_ERROR_THRESHOLD) {
 
-				// Determine whether to turn or not
-				xDiff = xTarget - odo.getX();
-				yDiff = yTarget - odo.getY();
-				targetTheta = odo.fixDegAngle(90 - Math.toDegrees(Math.atan2(yDiff, xDiff)));
-
-				// RConsole.println("targetTheta" + targetTheta);
-
-				// change in theta is target minus current
-
-				deltaTheta = targetTheta - odo.getTheta();
-
-				deltaTheta = getMinAngle(deltaTheta);
-
-				// if the heading is off by more than acceptable error, we must
-				// correct
-				if (Math.abs(deltaTheta) > ANGLE_ERROR_THRESHOLD) {
-
-					if (isAtPoint(xPrevTarget, yPrevTarget)
-							&& (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD)) {
-						onPointTurnBy(deltaTheta);
-					} else {
-						whileMovingTurnBy(deltaTheta);
-					}
-
+				if (isAtPoint(xPrevTarget, yPrevTarget)
+						&& (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD)) {
+					onPointTurnBy(deltaTheta);
 				} else {
-
-					moveForward(); // the heading is good
+					whileMovingTurnBy(deltaTheta);
 				}
 
+			} else {
+
+				moveForward(); // the heading is good
 			}
+
 		}
 
 		if (stopAtTarget) {

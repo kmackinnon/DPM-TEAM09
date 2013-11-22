@@ -139,7 +139,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	 * @return true if styrofoam, false otherwise.
 	 */
 	private boolean isStyrofoam() {
-		// RConsole.println(red + " " + green + " " + blue);
+/*		// RConsole.println(red + " " + green + " " + blue);
 
 		Color color = frontCS.getColor();
 
@@ -157,7 +157,20 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 			return true; // this is only true when 5-7 cm from block
 		}
 
-		return false;
+		return false;*/
+		
+		
+        Color color = frontCS.getColor();
+        int redValue = color.getRed();
+        int blueValue = color.getBlue();
+
+        double ratio = (double) redValue / (double) blueValue;
+
+        if (ratio > 1.8) {
+            return false;
+        } else {
+    		return true;
+        }
 	}
 
 }

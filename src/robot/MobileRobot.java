@@ -22,6 +22,7 @@ public class MobileRobot extends SensorMotorUser {
 	private final int ANGLE_ERROR_THRESHOLD = 1; // measured in degrees
 	private final int POSITION_ERROR_THRESHOLD = 1;
 	private final int TURN_ON_POINT_ANGLE_THRESHOLD = 30;
+	private final int TARGET_ZONE_FLAG = -100;
 
 	/**
 	 * Default Constructor
@@ -31,23 +32,30 @@ public class MobileRobot extends SensorMotorUser {
 	public MobileRobot() {
 	}
 
-	// returns false when it stops trying to get to the destination. This may be
-	// because the destination is impossible to get to, or because it has
-	// detected a styrofoam block and does not know whether to pick it up or
-	// avoid it 
+
 	public void travelTo(Intersection destination) {
 		boolean isSuccess = false;
+		Intersection source;
+		ArrayList<Intersection> listOfWayPoints;
 
 		while (!isSuccess) {
 
-			Intersection source = Map.getIntersection(odo.getX(), odo.getY());
-
-			if (destination.getAdjacencyList().isEmpty()) {
-				return;
+			source = Map.getIntersection(odo.getX(), odo.getY());
+			
+			if(destination.getX() == TARGET_ZONE_FLAG && destination.getY() == TARGET_ZONE_FLAG){
+				listOfWayPoints = Dijkstra.algorithmForTargetZone(
+						source);
 			}
-
-			ArrayList<Intersection> listOfWayPoints = Dijkstra.algorithm(
-					source, destination);
+			
+			else{
+				
+				if (destination.getAdjacencyList().isEmpty()) {
+					return;
+				}
+				
+				listOfWayPoints = Dijkstra.algorithm(
+						source, destination);
+			}
 
 			isSuccess = travelToWaypoints(listOfWayPoints);
 
@@ -70,7 +78,7 @@ public class MobileRobot extends SensorMotorUser {
 
 				else {
 					
-					if(avoidStyrofoamBlock()){
+					if(pickUpStyrofoamBlock()){
 						return;
 					}
 
@@ -80,14 +88,11 @@ public class MobileRobot extends SensorMotorUser {
 		}
 
 	}
+	
 
 	public void travelToTargetZone() {
-		Intersection source = Map.getIntersection(odo.getX(), odo.getY());
-
-		ArrayList<Intersection> listOfWayPoints = Dijkstra
-				.algorithmForTargetZone(source);
-
-		travelToWaypoints(listOfWayPoints);
+		
+		travelTo(new Intersection(TARGET_ZONE_FLAG,TARGET_ZONE_FLAG));
 
 	}
 
@@ -182,6 +187,14 @@ public class MobileRobot extends SensorMotorUser {
 	public void initializePrevTarget(double x, double y) {
 		xPrevTarget = x;
 		yPrevTarget = y;
+	}
+	
+	public double getPrevX(){
+		return xPrevTarget;
+	}
+	
+	public double getPrevY(){
+		return yPrevTarget;
 	}
 
 	public void turnToWhileMoving(double targetTheta) {
@@ -293,7 +306,7 @@ public class MobileRobot extends SensorMotorUser {
 	}
 	
 	//override this
-	public boolean avoidStyrofoamBlock(){
+	public boolean pickUpStyrofoamBlock(){
 		
 		return true;
 	}

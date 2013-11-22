@@ -40,6 +40,10 @@ public class BlockMover extends MobileRobot {
 			releaseBlock();
 		}
 		
+		travelMagnitude(-12);
+		
+		travelCoordinate(getPrevX(), getPrevY(), true);
+		
 		return;
 	}
 

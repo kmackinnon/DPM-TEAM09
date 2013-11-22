@@ -21,7 +21,6 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	private final int CONFIRMATION_MINIMUM = 7;
 
 	private boolean isObjectDetected = false;
-	private boolean isStyrofoam = false;
 	private boolean doBlockDetection = false;
 	
 	// variables for object detection
@@ -58,18 +57,12 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 				synchronized (lock) {
 					isObjectDetected = true;
 				}
-
-				if (isStyrofoam()) {
-					synchronized (lock) {
-						isStyrofoam = true;
-					}
-				}
+				
 				
 			} else {
 
 				synchronized (lock) {
 					isObjectDetected = false;
-					isStyrofoam = false;
 				}
 			}
 		}
@@ -77,16 +70,6 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		
 	}
 	
-	// returns the isStyrofoam boolean
-	public boolean isObjectStyrofoam() {
-		boolean result;
-
-		synchronized (lock) {
-			result = isStyrofoam;
-		}
-
-		return result;
-	}
 
 	// returns the isObjectDetected boolean
 	public boolean isObjectInFront() {
@@ -139,26 +122,43 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	 * 
 	 * @return true if styrofoam, false otherwise.
 	 */
-	private boolean isStyrofoam() {
-/*		// RConsole.println(red + " " + green + " " + blue);
+	public boolean isObjectStyrofoam() {
+		// RConsole.println(red + " " + green + " " + blue);
 
-		Color color = frontCS.getColor();
+		/*Color color;
+		int redValue;
+		int blueValue;
+		int greenValue;
+		double ratio;
+		int counter = 0;
+		
+		
+		for(int i=0; i<10; i++){
+			color = frontCS.getColor();
 
-		double red = color.getRed();
-		double green = color.getGreen();
-		double blue = color.getBlue();
+			redValue = color.getRed();
+			greenValue = color.getGreen();
+			blueValue = color.getBlue();
 
-		double testValue = -1.0;
-		if (blue != 0) {
-			testValue = ((red / blue) * (green / blue));
+			ratio = -1.0;
+			if (blueValue != 0) {
+				ratio = ((redValue / blueValue) * (greenValue / blueValue));
+			}
+
+			// conditions for styrofoam block
+			if (ratio > .75 && ratio < .9) {
+				counter++; // this is only true when 5-7 cm from block
+			}
+
 		}
-
-		// conditions for styrofoam block
-		if (testValue > .75 && testValue < .9) {
-			return true; // this is only true when 5-7 cm from block
+		
+		if(counter>=CONFIRMATION_MINIMUM){
+			return true;
 		}
-
-		return false;*/
+		
+		else{
+			return false;
+		}*/
 		
 		
 		Color color;
@@ -174,7 +174,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	        
 	        ratio = (double) redValue / (double) blueValue;
 	        
-	        if (ratio < 3.0) {
+	        if (ratio < 2.0) {
 	        	counter++;
 	        }
 		}

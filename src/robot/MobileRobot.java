@@ -362,7 +362,7 @@ public class MobileRobot extends SensorMotorUser {
 
 	public void liftClaw() {
 		clawMotor.setSpeed(120);
-		clawMotor.rotateTo(310);
+		clawMotor.rotateTo(320);
 	}
 
 	public void dropClaw() {

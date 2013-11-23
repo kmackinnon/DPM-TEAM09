@@ -18,13 +18,11 @@ public class MobileRobot extends SensorMotorUser {
 
 	private static double xPrevTarget;
 	private static double yPrevTarget;
-
+	
 	private final int ANGLE_ERROR_THRESHOLD = 1; // measured in degrees
 	private final int POSITION_ERROR_THRESHOLD = 1;
 	private final int TURN_ON_POINT_ANGLE_THRESHOLD = 20;
 	private final int POINT_IS_BEHIND_ANGLE_THRESHOLD = 45;
-	private final int TARGET_ZONE_FLAG = -100;
-	private final int CLOSE_POINT_THRESHOLD = 2;
 
 	/**
 	 * Default Constructor
@@ -43,8 +41,8 @@ public class MobileRobot extends SensorMotorUser {
 
 			source = Map.getIntersection(odo.getX(), odo.getY());
 
-			if (destination.getX() == TARGET_ZONE_FLAG
-					&& destination.getY() == TARGET_ZONE_FLAG) {
+			if (destination.getX() == INT_SPECIAL_FLAG
+					&& destination.getY() == INT_SPECIAL_FLAG) {
 				listOfWayPoints = Dijkstra.algorithmForTargetZone(source);
 			}
 
@@ -91,7 +89,7 @@ public class MobileRobot extends SensorMotorUser {
 
 	public void travelToTargetZone() {
 
-		travelTo(new Intersection(TARGET_ZONE_FLAG, TARGET_ZONE_FLAG));
+		travelTo(new Intersection(INT_SPECIAL_FLAG, INT_SPECIAL_FLAG));
 
 	}
 
@@ -190,12 +188,6 @@ public class MobileRobot extends SensorMotorUser {
 					if (Math.abs(backwardDeltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD) {
 						
 						onPointTurnBy(backwardDeltaTheta);
-					}
-	
-					else if (Math.abs(backwardDeltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD) {
-						
-						onPointTurnBy(backwardDeltaTheta);
-						
 					}
 					
 					else{
@@ -366,7 +358,7 @@ public class MobileRobot extends SensorMotorUser {
 	}
 
 	public void dropClaw() {
-		clawMotor.setSpeed(120);
+		clawMotor.setSpeed(LIFTING_SPEED);
 		clawMotor.rotateTo(0);
 	}
 
@@ -375,7 +367,19 @@ public class MobileRobot extends SensorMotorUser {
 
 		return true;
 	}
-
+	
+	public void scanArea(double scanAngle){
+		
+		blockDetector.turnOnScanMode();
+		
+		onPointTurnBy(-scanAngle);
+		onPointTurnBy(2*scanAngle);
+		onPointTurnBy(-scanAngle);
+		
+		blockDetector.turnOffScanMode();
+		
+	}
+	
 	private boolean travelToWaypoints(ArrayList<Intersection> listOfWayPoints) {
 
 		Intersection intersection;
@@ -470,31 +474,13 @@ public class MobileRobot extends SensorMotorUser {
 
 	}
 
-	private boolean isCloseToPoint(double xTarget, double yTarget) {
-
-		if (Math.abs(xTarget - odo.getX()) < CLOSE_POINT_THRESHOLD
-				&& Math.abs(yTarget - odo.getY()) < CLOSE_POINT_THRESHOLD) {
-			return true;
-		}
-
-		else {
-			return false;
-		}
-
-	}
 	
 	private void howToMoveDecider(double xTarget, double yTarget, double deltaTheta){
 		
 		if (Math.abs(deltaTheta) > ANGLE_ERROR_THRESHOLD) {
-			if (isAtPoint(xPrevTarget, yPrevTarget)
-					&& (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD)) {
+			if (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD){
 				onPointTurnBy(deltaTheta);
 			}
-
-			else if (isCloseToPoint(xTarget, yTarget) && (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD)) {
-				onPointTurnBy(deltaTheta);
-			}
-
 			else {
 				whileMovingTurnBy(deltaTheta);
 			}

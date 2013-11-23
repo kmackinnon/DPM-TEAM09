@@ -8,6 +8,9 @@ package robot;
 
 public class BlockMover extends MobileRobot {
 
+	private final int NARROW_SCAN_ANGLE = 20;
+	private final int GIVE_UP_LIMIT = 2;
+
 	public BlockMover() {
 
 	}
@@ -17,19 +20,34 @@ public class BlockMover extends MobileRobot {
 	 * traveling to destination and releasing or stacking the block
 	 */
 	public void moveBlockToZone() {
-		
-		grabBlock();
-		
+
+		// find best orientation for grabbing the block
+		if (!findBestAngleForBlockGrab()) {
+			return;
+		}
+
+		// try grabbing the block the twice. if it fails twice, stop trying.
+		for (int i = 0; i <= GIVE_UP_LIMIT && !confirmBlockGrab(); i++) {
+
+			if (i == GIVE_UP_LIMIT) {
+				return;
+			}
+
+			grabBlock();
+		}
+
+		// go to the last intersection the robot was at before seeing and
+		// grabbing the block.
 		travelCoordinate(getPrevX(), getPrevY(), true);
-		
+
 		corr.turnOnCorrection();
 		blockDetector.turnOnBlockDetection();
-		
+
 		travelToTargetZone();
-		
+
 		corr.turnOffCorrection();
 		blockDetector.turnOffBlockDetection();
-		
+
 		getReadyForBlockRelease();
 
 		if (isBuilder()) {
@@ -39,26 +57,66 @@ public class BlockMover extends MobileRobot {
 		else {
 			releaseBlock();
 		}
-		
+
+		//back away before lifting claw again
 		travelMagnitude(-12);
 		
+		liftClaw();
+
 		travelCoordinate(getPrevX(), getPrevY(), true);
-		
+
 		return;
 	}
 
-	public void grabBlock() {
+	private void grabBlock() {
 		corr.turnOffCorrection();
 		blockDetector.turnOffBlockDetection();
 
 		travelMagnitude(-19); // -16, 18
-		
+
 		dropClaw();
-		
+
 		travelMagnitude(17); // 13, 15, 16
 
 		liftClaw();
 
+	}
+
+	private boolean confirmBlockGrab() {
+		blockDetector.turnOnBlockDetection();
+
+		int counter = 0;
+
+		for (int i = 0; i < DEFAULT_NUM_OF_SAMPLES; i++) {
+			if (!blockDetector.isObjectInFront()) {
+				counter++;
+			}
+		}
+
+		blockDetector.turnOffBlockDetection();
+
+		if (counter >= DEFAULT_CONFIRMATION_MINIMUM) {
+			return true;
+		}
+
+		else {
+			return false;
+		}
+
+	}
+
+	private boolean findBestAngleForBlockGrab() {
+		scanArea(NARROW_SCAN_ANGLE);
+
+		double minDistanceAngle = blockDetector.getMinDistanceAngle();
+
+		if (minDistanceAngle == DOUBLE_SPECIAL_FLAG) {
+			return false;
+		}
+
+		turnToOnPoint(minDistanceAngle);
+
+		return true;
 	}
 
 	private void releaseBlock() {
@@ -72,64 +130,64 @@ public class BlockMover extends MobileRobot {
 
 		dropClaw();
 		liftClaw();
-		
+
 	}
-	
-	private void getReadyForBlockRelease(){
-		Intersection current = Map.getIntersection(odo.getX(),odo.getY());
-		
+
+	private void getReadyForBlockRelease() {
+		Intersection current = Map.getIntersection(odo.getX(), odo.getY());
+
 		double xMax = -Double.MAX_VALUE;
 		double yMax = -Double.MAX_VALUE;
 		double xMin = Double.MAX_VALUE;
 		double yMin = Double.MAX_VALUE;
-		
-		for(Intersection intersection: Map.getTargetZone()){
-			if(intersection.getX()>xMax){
+
+		for (Intersection intersection : Map.getTargetZone()) {
+			if (intersection.getX() > xMax) {
 				xMax = intersection.getX();
 			}
-			
-			if(intersection.getY()>yMax){
+
+			if (intersection.getY() > yMax) {
 				yMax = intersection.getY();
 			}
-			
-			if(intersection.getX()<xMin){
+
+			if (intersection.getX() < xMin) {
 				xMin = intersection.getX();
 			}
-			
-			if(intersection.getY()<yMin){
+
+			if (intersection.getY() < yMin) {
 				yMin = intersection.getY();
 			}
 		}
-		
-		if(current.getX() == xMin && current.getY() == yMin){
+
+		if (current.getX() == xMin && current.getY() == yMin) {
 			turnToOnPoint(45);
 		}
-		
-		else if(current.getX() == xMin && current.getY() == yMax){
+
+		else if (current.getX() == xMin && current.getY() == yMax) {
 			turnToOnPoint(135);
 		}
-		
-		else if(current.getX() == xMax && current.getY() == yMax){
+
+		else if (current.getX() == xMax && current.getY() == yMax) {
 			turnToOnPoint(225);
 		}
-		
-		else if(current.getX() == xMax && current.getY() == yMin){
+
+		else if (current.getX() == xMax && current.getY() == yMin) {
 			turnToOnPoint(315);
 		}
-		
-		else if(current.getX() == xMin){
+
+		else if (current.getX() == xMin) {
 			turnToOnPoint(90);
 		}
-		
-		else if(current.getX() == xMax){
+
+		else if (current.getX() == xMax) {
 			turnToOnPoint(270);
 		}
-		
-		else if(current.getY() == yMin){
+
+		else if (current.getY() == yMin) {
 			turnToOnPoint(0);
 		}
-		
-		else if(current.getY() == yMax){
+
+		else if (current.getY() == yMax) {
 			turnToOnPoint(180);
 		}
 	}

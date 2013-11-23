@@ -18,10 +18,14 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	private final int DIST_TO_STOP = 11;
 	private final int LIGHT_DIFF = 5;
-	private final int CONFIRMATION_MINIMUM = 7;
+	private final double RED_BLUE_RATIO = 2.0;
 
 	private boolean isObjectDetected = false;
 	private boolean doBlockDetection = false;
+	private boolean doScan = false;
+
+	private int scanMinDistance;
+	private double minDistanceAngle;
 	
 	// variables for object detection
 	private int[] window = { 255, 255, 255, 255, 255 };
@@ -41,18 +45,28 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	}
 	
 	public void turnOnBlockDetection() {
+		isObjectDetected = false;
 		doBlockDetection = true;
 	}
 
 	public void turnOffBlockDetection() {
 		doBlockDetection = false;
 	}
+	
+	public void turnOnScanMode(){
+		scanMinDistance = US_SENSOR_255;
+		
+		doScan = true;
+	}
+	
+	public void turnOffScanMode(){
+		doScan = false;
+	}
 
 	public void timedOut() {
 
 		if(doBlockDetection){
 			if (isObjectDetected()) {
-				Sound.beep();
 
 				synchronized (lock) {
 					isObjectDetected = true;
@@ -68,8 +82,25 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		}
 		
 		
+		if(doScan){
+			
+			scanRoutine();
+			
+		}
+		
+		
 	}
 	
+	
+	public double getMinDistanceAngle(){
+		
+		if(scanMinDistance == US_SENSOR_255){
+			minDistanceAngle = DOUBLE_SPECIAL_FLAG;
+		}
+		
+		return minDistanceAngle;
+		
+	}
 
 	// returns the isObjectDetected boolean
 	public boolean isObjectInFront() {
@@ -167,19 +198,19 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		double ratio;
 		int counter = 0;
 		
-		for(int i = 0; i<10; i++){
+		for(int i = 0; i<DEFAULT_NUM_OF_SAMPLES; i++){
 	        color = frontCS.getColor();
 	        redValue = color.getRed();
 	        blueValue = color.getBlue();
 	        
 	        ratio = (double) redValue / (double) blueValue;
 	        
-	        if (ratio < 2.0) {
+	        if (ratio < RED_BLUE_RATIO) {
 	        	counter++;
 	        }
 		}
 		
-		if(counter>=CONFIRMATION_MINIMUM){
+		if(counter>=DEFAULT_CONFIRMATION_MINIMUM){
 			return true;
 		}
 		
@@ -188,6 +219,21 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		}
 
 
+	}
+	
+	
+	
+	private void scanRoutine(){
+		
+		shiftArrayByOne(window, getUSDistance());
+		median = getMedian(window);
+		
+		if(median <= scanMinDistance){
+			
+			scanMinDistance = median;
+			minDistanceAngle = MobileRobot.odo.getTheta();
+		}
+		
 	}
 
 }

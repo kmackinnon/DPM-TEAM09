@@ -8,8 +8,6 @@ import lejos.util.TimerListener;
 public class OdometryCorrection extends SensorMotorUser implements
 		TimerListener {
 
-	private static final int DEFAULT_PERIOD = 25;
-
 	private final double MIN_DISTANCE_BETWEEN_DETECTIONS = 25;
 	private final double MAX_DISTANCE_BETWEEN_DIAGONAL_DETECTIONS = 14;
 	private final double DIAGONAL_IN_RADIANS = Math.toRadians(45);
@@ -53,7 +51,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 	public OdometryCorrection(Odometer odo) {
 		this.odo = odo;
 
-		correctionTimer = new Timer(DEFAULT_PERIOD, this);
+		correctionTimer = new Timer(DEFAULT_TIMER_PERIOD, this);
 
 	}
 
@@ -215,7 +213,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 			else if (isLessThanHalfTileFromPreviousDetection(rightCS)) {
 
-				Sound.beep();
+				//Sound.beep();
 
 				double diagonalDistanceTravelled = distanceTravelled(
 						rightMotor.getTachoCount() - rightFirstTachoDiagonal,

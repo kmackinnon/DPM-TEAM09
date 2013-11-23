@@ -81,6 +81,14 @@ public class SensorMotorUser {
 	
 	public static final int US_SENSOR_255 = 255;
 	
+	public static final int INT_SPECIAL_FLAG = -Integer.MAX_VALUE;
+	
+	public static final double DOUBLE_SPECIAL_FLAG = -Double.MAX_VALUE;
+	
+	public static final int DEFAULT_NUM_OF_SAMPLES = 10;
+	
+	public static final int DEFAULT_CONFIRMATION_MINIMUM = 7;
+	
 	private static boolean isBuilder;
 
 	private static boolean isBuilderHasBeenSet = false;

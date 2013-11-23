@@ -1,6 +1,6 @@
 package robot;
 
-import lejos.nxt.LCD;
+import lejos.nxt.Sound;
 
 /**
  * BlockMover moves the styrofoam block to either the red or green zone. It
@@ -22,8 +22,9 @@ public class BlockMover extends MobileRobot {
 	 * traveling to destination and releasing or stacking the block
 	 */
 	public void moveBlockToZone() {
-
-		LCD.clear();
+		
+		corr.turnOffCorrection();
+		blockDetector.turnOffBlockDetection();
 		
 		// find best orientation for grabbing the block
 		if (!findBestAngleForBlockGrab()) {
@@ -37,8 +38,6 @@ public class BlockMover extends MobileRobot {
 				return;
 			}
 			
-			LCD.drawString("grabbingBlock", 0, 1);
-			
 			grabBlock();
 			
 			if(confirmBlockGrab()){
@@ -49,37 +48,20 @@ public class BlockMover extends MobileRobot {
 		// go to the last intersection the robot was at before seeing and
 		// grabbing the block.
 		
-		LCD.drawString("going to previous intersection", 0, 2);
-		
 		travelCoordinate(getPrevX(), getPrevY(), true);
 
 		corr.turnOnCorrection();
 		blockDetector.turnOnBlockDetection();
 
-		
-		LCD.drawString("going to targetZone", 0, 3);
 		travelToTargetZone();
 
 		corr.turnOffCorrection();
 		blockDetector.turnOffBlockDetection();
 
-		LCD.drawString("getting ready for block release", 0, 4);
 		getReadyForBlockRelease();
-
-		if (isBuilder()) {
-			stackBlock();
-		}
-
-		else {
-			releaseBlock();
-		}
-
 		
-		LCD.drawString("backing up", 0, 5);
-		//back away before lifting claw again
-		travelMagnitude(-12);
-		
-		LCD.drawString("lifting claw", 0, 6);
+		releaseBlock();
+
 		liftClaw();
 
 		travelCoordinate(getPrevX(), getPrevY(), true);
@@ -88,37 +70,35 @@ public class BlockMover extends MobileRobot {
 	}
 
 	private void grabBlock() {
-		corr.turnOffCorrection();
-		blockDetector.turnOffBlockDetection();
-
 		travelMagnitude(-19); // -16, 18
 
 		dropClaw();
 
-		travelMagnitude(17); // 13, 15, 16
+		travelMagnitude(21); // 13, 15, 16
 
 		liftClaw();
 
 	}
 
 	private boolean confirmBlockGrab() {
-		blockDetector.turnOnBlockDetection();
-
+		
 		int counter = 0;
-
-		for (int i = 0; i < DEFAULT_NUM_OF_SAMPLES; i++) {
-			if (!blockDetector.isObjectInFront()) {
+		
+		for(int i = 0; i<DEFAULT_NUM_OF_SAMPLES; i++){
+			if(!blockDetector.isObjectDetected()){
+				
 				counter++;
+				
 			}
 		}
-
-		blockDetector.turnOffBlockDetection();
-
-		if (counter >= DEFAULT_CONFIRMATION_MINIMUM) {
+		
+		if(counter>=DEFAULT_CONFIRMATION_MINIMUM){
+			Sound.beep();
 			return true;
 		}
-
-		else {
+		
+		else{
+			//Sound.beep();
 			return false;
 		}
 
@@ -141,16 +121,14 @@ public class BlockMover extends MobileRobot {
 	private void releaseBlock() {
 
 		dropClaw();
+		
+		//back away before lifting claw again
+		travelMagnitude(-12);
+		
 		liftClaw();
 
 	}
 
-	private void stackBlock() {
-
-		dropClaw();
-		liftClaw();
-
-	}
 
 	private void getReadyForBlockRelease() {
 		Intersection current = Map.getIntersection(odo.getX(), odo.getY());

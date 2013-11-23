@@ -119,7 +119,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	 * 
 	 * @return true if a block is detected, false otherwise.
 	 */
-	private boolean isObjectDetected() {
+	public boolean isObjectDetected() {
 		// SensorMotorUser.frontCS.setFloodlight(true);
 
 		// stopping by ultrasonic sensor
@@ -235,6 +235,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		}
 		
 	}
+	
 	
 
 }

@@ -60,24 +60,17 @@ public class MobileRobot extends SensorMotorUser {
 			if (!isSuccess) {
 
 				if (!blockDetector.isObjectStyrofoam()) {
-					moveBackToPreviousIntersection();
-
-					Intersection prevIntersection = Map.getIntersection(
-							xPrevTarget, yPrevTarget);
-
-					int indexOfNextIntersection = listOfWayPoints
-							.indexOf(prevIntersection) + 1;
-
-					Intersection nextIntersection = listOfWayPoints
-							.get(indexOfNextIntersection);
-
-					Map.removeEdge(prevIntersection, nextIntersection);
+					moveAwayFromObstacle(listOfWayPoints);
 				}
 
 				else {
 
 					if (pickUpStyrofoamBlock()) {
 						return;
+					}
+					
+					else{
+						moveAwayFromObstacle(listOfWayPoints);
 					}
 
 				}
@@ -491,6 +484,25 @@ public class MobileRobot extends SensorMotorUser {
 		}
 		
 	}
+	
+	
+	private void moveAwayFromObstacle(ArrayList<Intersection> listOfWayPoints){
+		
+		moveBackToPreviousIntersection();
+
+		Intersection prevIntersection = Map.getIntersection(
+				xPrevTarget, yPrevTarget);
+
+		int indexOfNextIntersection = listOfWayPoints
+				.indexOf(prevIntersection) + 1;
+
+		Intersection nextIntersection = listOfWayPoints
+				.get(indexOfNextIntersection);
+
+		Map.removeEdge(prevIntersection, nextIntersection);
+		
+	}
+	
 
 	// returns the number of degrees the wheels must turn over a distance
 	private int convertDistance(double radius, double distance) {

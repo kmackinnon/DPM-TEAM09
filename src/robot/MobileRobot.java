@@ -202,12 +202,23 @@ public class MobileRobot extends SensorMotorUser {
 
 	public void travelMagnitude(double magnitudeInCm) {
 
+		travelMagnitude(magnitudeInCm, FORWARD_SPEED);
+	}
+	
+	public void travelMagnitudeSlow(double magnitudeInCm) {
+
+		travelMagnitude(magnitudeInCm, SLOW_FORWARD_SPEED);
+	}
+	
+	
+	public void travelMagnitude(double magnitudeInCm, int speed) {
+
 		int leftAmount = convertDistance(LEFT_RADIUS, magnitudeInCm);
 
 		int rightAmount = convertDistance(RIGHT_RADIUS, magnitudeInCm);
 
-		leftMotor.setSpeed(FORWARD_SPEED);
-		rightMotor.setSpeed(FORWARD_SPEED);
+		leftMotor.setSpeed(speed);
+		rightMotor.setSpeed(speed);
 
 		leftMotor.rotate(leftAmount, true);
 		rightMotor.rotate(rightAmount, false);
@@ -251,6 +262,16 @@ public class MobileRobot extends SensorMotorUser {
 
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
+
+		leftMotor.forward();
+		rightMotor.forward();
+
+	}
+	
+	public void moveForwardSlow() {
+
+		leftMotor.setSpeed(SLOW_FORWARD_SPEED);
+		rightMotor.setSpeed(SLOW_FORWARD_SPEED);
 
 		leftMotor.forward();
 		rightMotor.forward();
@@ -370,6 +391,23 @@ public class MobileRobot extends SensorMotorUser {
 		onPointTurnBy(-scanAngle);
 		
 		blockDetector.turnOffScanMode();
+		
+	}
+	
+	public void performRotationCorrection(){
+		corr.turnOffCorrection();
+		moveForwardSlow();
+		corr.rotateCorrection();
+		
+		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
+		
+		onPointTurnBy(90);
+		
+		corr.turnOffCorrection();
+		moveForwardSlow();
+		corr.rotateCorrection();
+		
+		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
 		
 	}
 	

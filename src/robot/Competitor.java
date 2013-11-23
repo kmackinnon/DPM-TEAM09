@@ -60,12 +60,12 @@ public class Competitor {
 		Explorer explorer = new Explorer();
 		BlockMover blockMover = new BlockMover();
 		
+		SensorMotorUser.leftCS.setFloodlight(true);
+		SensorMotorUser.rightCS.setFloodlight(true);
+		MobileRobot.blockDetector.startBlockDetectorTimer();
 		
 		localizer.localize();
 		Sound.beep();
-		
-		MobileRobot.corr.startCorrectionTimer();
-		MobileRobot.blockDetector.startBlockDetectorTimer();
 		
 		while(!explorer.isFinishedLooking()){
 			

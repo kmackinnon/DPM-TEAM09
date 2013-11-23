@@ -54,6 +54,8 @@ public class SensorMotorUser {
 	 * line. The number is how many degrees the motors rotate per second
 	 */
 	public static final int FORWARD_SPEED = 360;
+	
+	public static final int SLOW_FORWARD_SPEED = 180;
 
 	/**
 	 * The speed of the wheel motors when the robot is rotating on point. The

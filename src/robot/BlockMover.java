@@ -69,7 +69,7 @@ public class BlockMover extends MobileRobot {
 		return;
 	}
 
-	private void grabBlock() {
+	public void grabBlock() {
 		travelMagnitude(-19); // -16, 18
 
 		dropClaw();

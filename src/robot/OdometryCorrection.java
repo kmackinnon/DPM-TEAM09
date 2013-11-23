@@ -46,6 +46,13 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	private double xRightAtFirstDetectDiagonal;
 	private double yRightAtFirstDetectDiagonal;
+	// end of diagonal detection variables
+	
+	
+	// rotate correction variables
+	private boolean rightCSDone;
+	private boolean leftCSDone;
+	
 
 	public OdometryCorrection(Odometer odo) {
 		this.odo = odo;
@@ -546,6 +553,28 @@ public class OdometryCorrection extends SensorMotorUser implements
 		return measuredDistance - ((SENSOR_WIDTH / 2) * Math.cos(45))
 				+ (SENSOR_TO_WHEEL_DISTANCE * Math.cos(45));
 
+	}
+	
+	
+	
+	private void rotateCorrection(){
+		
+		if(lineDetected(rightCS)){
+			rightCSDone = true;
+			rightMotor.setSpeed(0);
+		}
+		
+		if(lineDetected(leftCS)){
+			leftCSDone = true;
+			leftMotor.setSpeed(0);
+		}
+		
+		if(rightCSDone && leftCSDone){
+			
+			
+		}
+		
+		
 	}
 
 }

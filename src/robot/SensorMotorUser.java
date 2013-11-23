@@ -6,7 +6,6 @@ import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
-import lejos.nxt.Sound;
 import lejos.nxt.UltrasonicSensor;
 
 /**
@@ -71,7 +70,9 @@ public class SensorMotorUser {
 	 */
 	public static final int LIFTING_SPEED = 120;
 	
-	public static final int LIFTING_DEGREE = 320;
+	public static final int LIFTING_DEGREE = 330;
+	
+	public static final int DROPPING_DEGREE = -10;
 
 	public static final double SENSOR_WIDTH = 11.05;
 	

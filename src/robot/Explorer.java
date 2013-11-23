@@ -1,8 +1,5 @@
 package robot;
 
-import lejos.nxt.LCD;
-
-
 
 /**
  * Explorer looks for styrofoam blocks. As soon as it finds a styrofoam block,

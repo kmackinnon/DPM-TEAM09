@@ -1,7 +1,6 @@
 package robot;
 
 import lejos.nxt.ColorSensor.Color;
-import lejos.nxt.Sound;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
 
@@ -84,7 +83,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		
 		if(doScan){
 			
-			scanRoutine();
+			minDistanceScanRoutine();
 			
 		}
 		
@@ -92,7 +91,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	}
 	
 	
-	public double getMinDistanceAngle(){
+	public double getFinalAngle(){
 		
 		if(scanMinDistance == US_SENSOR_255){
 			minDistanceAngle = DOUBLE_SPECIAL_FLAG;
@@ -101,6 +100,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		return minDistanceAngle;
 		
 	}
+
 
 	// returns the isObjectDetected boolean
 	public boolean isObjectInFront() {
@@ -223,7 +223,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	
 	
 	
-	private void scanRoutine(){
+	private void minDistanceScanRoutine(){
 		
 		shiftArrayByOne(window, getUSDistance());
 		median = getMedian(window);
@@ -235,5 +235,6 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		}
 		
 	}
+	
 
 }

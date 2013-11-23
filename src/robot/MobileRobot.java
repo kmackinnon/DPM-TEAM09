@@ -359,7 +359,7 @@ public class MobileRobot extends SensorMotorUser {
 
 	public void dropClaw() {
 		clawMotor.setSpeed(LIFTING_SPEED);
-		clawMotor.rotateTo(0);
+		clawMotor.rotateTo(DROPPING_DEGREE);
 	}
 
 	// override this

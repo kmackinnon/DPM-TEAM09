@@ -132,7 +132,7 @@ public class Competitor {
 	
 	private static void testWithoutBluetooth(){
 		
-		int[] testGreen = { 4, 3, 6, 6};
+		int[] testGreen = { 4, 3, 6, 5};
 		int[] testRed = {0,3,2,5 };
 
 

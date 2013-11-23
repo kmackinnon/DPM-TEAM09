@@ -1,5 +1,7 @@
 package robot;
 
+import lejos.nxt.LCD;
+
 /**
  * BlockMover moves the styrofoam block to either the red or green zone. It
  * grabs the styrofoam block, travels to one of the zones, and stacks the block
@@ -8,7 +10,7 @@ package robot;
 
 public class BlockMover extends MobileRobot {
 
-	private final int NARROW_SCAN_ANGLE = 20;
+	private final int SCAN_ANGLE = 45;
 	private final int GIVE_UP_LIMIT = 2;
 
 	public BlockMover() {
@@ -21,33 +23,47 @@ public class BlockMover extends MobileRobot {
 	 */
 	public void moveBlockToZone() {
 
+		LCD.clear();
+		
 		// find best orientation for grabbing the block
 		if (!findBestAngleForBlockGrab()) {
 			return;
 		}
 
 		// try grabbing the block the twice. if it fails twice, stop trying.
-		for (int i = 0; i <= GIVE_UP_LIMIT && !confirmBlockGrab(); i++) {
+		for (int i = 0; i <= GIVE_UP_LIMIT; i++) {
 
 			if (i == GIVE_UP_LIMIT) {
 				return;
 			}
-
+			
+			LCD.drawString("grabbingBlock", 0, 1);
+			
 			grabBlock();
+			
+			if(confirmBlockGrab()){
+				break;
+			}
 		}
 
 		// go to the last intersection the robot was at before seeing and
 		// grabbing the block.
+		
+		LCD.drawString("going to previous intersection", 0, 2);
+		
 		travelCoordinate(getPrevX(), getPrevY(), true);
 
 		corr.turnOnCorrection();
 		blockDetector.turnOnBlockDetection();
 
+		
+		LCD.drawString("going to targetZone", 0, 3);
 		travelToTargetZone();
 
 		corr.turnOffCorrection();
 		blockDetector.turnOffBlockDetection();
 
+		LCD.drawString("getting ready for block release", 0, 4);
 		getReadyForBlockRelease();
 
 		if (isBuilder()) {
@@ -58,9 +74,12 @@ public class BlockMover extends MobileRobot {
 			releaseBlock();
 		}
 
+		
+		LCD.drawString("backing up", 0, 5);
 		//back away before lifting claw again
 		travelMagnitude(-12);
 		
+		LCD.drawString("lifting claw", 0, 6);
 		liftClaw();
 
 		travelCoordinate(getPrevX(), getPrevY(), true);
@@ -106,15 +125,15 @@ public class BlockMover extends MobileRobot {
 	}
 
 	private boolean findBestAngleForBlockGrab() {
-		scanArea(NARROW_SCAN_ANGLE);
+		scanArea(SCAN_ANGLE);
 
-		double minDistanceAngle = blockDetector.getMinDistanceAngle();
+		double finalAngle = blockDetector.getFinalAngle();
 
-		if (minDistanceAngle == DOUBLE_SPECIAL_FLAG) {
+		if (finalAngle == DOUBLE_SPECIAL_FLAG) {
 			return false;
 		}
 
-		turnToOnPoint(minDistanceAngle);
+		turnToOnPoint(finalAngle);
 
 		return true;
 	}

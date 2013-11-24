@@ -182,6 +182,18 @@ public class Map {
 			if (intersection != null) {
 				intersection.setPrevious(null);
 				intersection.setMinDistance(Double.POSITIVE_INFINITY);
+				intersection.setHeuristicDistance(Double.POSITIVE_INFINITY);
+			}
+		}
+
+	}
+	
+	public static void resetClosedOpenStatus() {
+
+		for (Intersection intersection : intersectionList) {
+
+			if (intersection != null) {
+				intersection.resetClosedOpenStatus();
 			}
 		}
 

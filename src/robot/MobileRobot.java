@@ -44,7 +44,7 @@ public class MobileRobot extends SensorMotorUser {
 
 			if (destination.getX() == INT_SPECIAL_FLAG
 					&& destination.getY() == INT_SPECIAL_FLAG) {
-				listOfWayPoints = Dijkstra.algorithmForTargetZone(source);
+				listOfWayPoints = AStar.algorithmForTargetZone(source);
 			}
 
 			else {
@@ -53,7 +53,7 @@ public class MobileRobot extends SensorMotorUser {
 					return;
 				}
 
-				listOfWayPoints = Dijkstra.algorithm(source, destination);
+				listOfWayPoints = AStar.algorithm(source, destination);
 			}
 
 			isSuccess = travelToWaypoints(listOfWayPoints);
@@ -397,7 +397,9 @@ public class MobileRobot extends SensorMotorUser {
 	
 	public void performRotationCorrection(){
 		
-		turnToOnPoint(0);
+		double closestRightAngle = 90 * Math.round(odo.getTheta() / 90);
+		
+		turnToOnPoint(closestRightAngle);
 		
 		corr.turnOffCorrection();
 		moveForwardSlow();

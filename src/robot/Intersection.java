@@ -16,6 +16,9 @@ public class Intersection {
 	private boolean isTarget;
 	private Intersection previous;
 	private double minDistance = Double.POSITIVE_INFINITY;
+	private double heuristicDistance = Double.POSITIVE_INFINITY;
+	private boolean isClosed = false;
+	private boolean isOpen = false;
 	private ArrayList<Intersection> adjacencyList = new ArrayList<Intersection>();
 
 	public Intersection(int x, int y) {
@@ -27,6 +30,45 @@ public class Intersection {
 
 		previous = null;
 
+	}
+	
+	public void resetClosedOpenStatus(){
+		isClosed = false;
+		isOpen = false;
+	}
+	
+	public void setIsClosed(boolean closed){
+		
+		if(closed){
+			isClosed = true;
+			isOpen = false;
+		}
+		
+		else{
+			isClosed = false;
+		}
+		
+		
+	}
+	
+	public void setIsOpen(boolean open){
+		
+		if(open){
+			isOpen = true;
+			isClosed = false;
+		}
+		
+		else{
+			isOpen = false;
+		}
+	}
+	
+	public boolean getIsOpen(){
+		return isOpen;
+	}
+	
+	public boolean getIsClosed(){
+		return isClosed;
 	}
 
 	public void addToAdjacencyList(Intersection intersection) {
@@ -55,6 +97,14 @@ public class Intersection {
 
 	public double getMinDistance() {
 		return minDistance;
+	}
+	
+	public void setHeuristicDistance(double h){
+		heuristicDistance = h;
+	}
+	
+	public double getHeuristicDistance(){
+		return heuristicDistance;
 	}
 
 	public void setAsTarget() {

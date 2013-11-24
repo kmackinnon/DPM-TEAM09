@@ -65,10 +65,13 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	}
 
-	public void startCorrectionTimer() {
-		correctionTimer.start();
+	public void turnOnLightSensors(){
 		leftCS.setFloodlight(true);
 		rightCS.setFloodlight(true);
+	}
+	
+	public void startCorrectionTimer() {
+		correctionTimer.start();
 	}
 
 	public void turnOnCorrection() {

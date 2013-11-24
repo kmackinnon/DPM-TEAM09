@@ -18,6 +18,7 @@ public class MobileRobot extends SensorMotorUser {
 
 	private static double xPrevTarget;
 	private static double yPrevTarget;
+	private static int travelCounter = 0;
 	
 	private final int ANGLE_ERROR_THRESHOLD = 1; // measured in degrees
 	private final int POSITION_ERROR_THRESHOLD = 1;
@@ -395,6 +396,9 @@ public class MobileRobot extends SensorMotorUser {
 	}
 	
 	public void performRotationCorrection(){
+		
+		turnToOnPoint(0);
+		
 		corr.turnOffCorrection();
 		moveForwardSlow();
 		corr.rotateCorrection();
@@ -428,6 +432,13 @@ public class MobileRobot extends SensorMotorUser {
 			else {
 				isSuccess = travelCoordinate(intersection.getXInCm(),
 						intersection.getYInCm(), false);
+			}
+			
+			if(isSuccess){
+				travelCounter++;
+				if(travelCounter % 4 == 0){
+					performRotationCorrection();
+				}
 			}
 
 			if (!isSuccess) {

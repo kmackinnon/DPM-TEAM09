@@ -1,6 +1,5 @@
 package robot;
 
-import lejos.nxt.Sound;
 
 /**
  * BlockMover moves the styrofoam block to either the red or green zone. It
@@ -93,12 +92,10 @@ public class BlockMover extends MobileRobot {
 		}
 		
 		if(counter>=DEFAULT_CONFIRMATION_MINIMUM){
-			Sound.beep();
 			return true;
 		}
 		
 		else{
-			//Sound.beep();
 			return false;
 		}
 
@@ -107,7 +104,7 @@ public class BlockMover extends MobileRobot {
 	private boolean findBestAngleForBlockGrab() {
 		scanArea(SCAN_ANGLE);
 
-		double finalAngle = blockDetector.getFinalAngle();
+		double finalAngle = blockDetector.getMinDistanceAngle();
 
 		if (finalAngle == DOUBLE_SPECIAL_FLAG) {
 			return false;

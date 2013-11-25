@@ -21,7 +21,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	private boolean isObjectDetected = false;
 	private boolean doBlockDetection = false;
-	private boolean doScan = false;
+	private boolean doMinDistanceScan = false;
 
 	private int scanMinDistance;
 	private double minDistanceAngle;
@@ -52,15 +52,16 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		doBlockDetection = false;
 	}
 	
-	public void turnOnScanMode(){
+	public void turnOnMinDistanceScanMode(){
 		scanMinDistance = US_SENSOR_255;
 		
-		doScan = true;
+		doMinDistanceScan = true;
 	}
 	
-	public void turnOffScanMode(){
-		doScan = false;
+	public void turnOffMinDistanceScanMode(){
+		doMinDistanceScan = false;
 	}
+	
 
 	public void timedOut() {
 
@@ -81,17 +82,16 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		}
 		
 		
-		if(doScan){
+		if(doMinDistanceScan){
 			
 			minDistanceScanRoutine();
 			
 		}
 		
-		
 	}
 	
 	
-	public double getFinalAngle(){
+	public double getMinDistanceAngle(){
 		
 		if(scanMinDistance == US_SENSOR_255){
 			minDistanceAngle = DOUBLE_SPECIAL_FLAG;
@@ -99,6 +99,10 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		
 		return minDistanceAngle;
 		
+	}
+	
+	public double getMinDistance(){
+		return scanMinDistance;
 	}
 
 
@@ -235,6 +239,20 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		}
 		
 	}
+	
+	
+	/*private void pathScanRoutine(){
+		
+		for(int i=0; i<DEFAULT_NUM_OF_SAMPLES; i++){
+			shiftArrayByOne(window, getUSDistance());
+			median = getMedian(window);
+		}
+		
+		if()
+		
+		pathScanDistance = median;
+		
+	}*/
 	
 	
 

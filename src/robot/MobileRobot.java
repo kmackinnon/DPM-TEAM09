@@ -19,11 +19,15 @@ public class MobileRobot extends SensorMotorUser {
 	private static double xPrevTarget;
 	private static double yPrevTarget;
 	private static int travelCounter = 0;
+	private static boolean isPathSafe = false;
 	
 	private final int ANGLE_ERROR_THRESHOLD = 1; // measured in degrees
 	private final int POSITION_ERROR_THRESHOLD = 1;
 	private final int TURN_ON_POINT_ANGLE_THRESHOLD = 20;
 	private final int POINT_IS_BEHIND_ANGLE_THRESHOLD = 45;
+	private final double PATH_SCAN_ANGLE = 15;
+	private final double ROTATION_CORRECTION_CHECK_ANGLE = 90;
+	private final int PATH_IS_SAFE_THRESHOLD = 20;
 
 	/**
 	 * Default Constructor
@@ -59,9 +63,14 @@ public class MobileRobot extends SensorMotorUser {
 			isSuccess = travelToWaypoints(listOfWayPoints);
 
 			if (!isSuccess) {
+				
+				if(!isPathSafe){
+					removePath(listOfWayPoints);
+				}
 
-				if (!blockDetector.isObjectStyrofoam()) {
-					moveAwayFromObstacle(listOfWayPoints);
+				else if (!blockDetector.isObjectStyrofoam()) {
+					moveBackToPreviousIntersection();
+					removePath(listOfWayPoints);
 				}
 
 				else {
@@ -71,7 +80,8 @@ public class MobileRobot extends SensorMotorUser {
 					}
 					
 					else{
-						moveAwayFromObstacle(listOfWayPoints);
+						moveBackToPreviousIntersection();
+						removePath(listOfWayPoints);
 					}
 
 				}
@@ -106,9 +116,6 @@ public class MobileRobot extends SensorMotorUser {
 			travelCoordinateBackwards(xTarget, yTarget, true);
 		}
 
-		double xDiff;
-		double yDiff;
-		double targetTheta;
 		double deltaTheta;
 
 		// keep looping while the difference between the current position and
@@ -119,19 +126,7 @@ public class MobileRobot extends SensorMotorUser {
 				return false;
 			}
 
-			// Determine whether to turn or not
-			xDiff = xTarget - odo.getX();
-			yDiff = yTarget - odo.getY();
-			targetTheta = odo.fixDegAngle(90 - Math.toDegrees(Math.atan2(yDiff,
-					xDiff)));
-
-			// RConsole.println("targetTheta" + targetTheta);
-
-			// change in theta is target minus current
-
-			deltaTheta = targetTheta - odo.getTheta();
-
-			deltaTheta = getMinAngle(deltaTheta);
+			deltaTheta = findAngle(xTarget,yTarget);
 
 			howToMoveDecider(xTarget,yTarget,deltaTheta);
 		}
@@ -150,27 +145,12 @@ public class MobileRobot extends SensorMotorUser {
 	public void travelCoordinateBackwards(double xTarget, double yTarget,
 			boolean stopAtTarget) {
 
-		double xDiff;
-		double yDiff;
-		double targetTheta;
 		double deltaTheta;
 		double backwardDeltaTheta;
 
 		while (!isAtPoint(xTarget, yTarget)) {
 
-			// Determine whether to turn or not
-			xDiff = xTarget - odo.getX();
-			yDiff = yTarget - odo.getY();
-			targetTheta = odo.fixDegAngle(90 - Math.toDegrees(Math.atan2(yDiff,
-					xDiff)));
-
-			// RConsole.println("targetTheta" + targetTheta);
-
-			// change in theta is target minus current
-
-			deltaTheta = targetTheta - odo.getTheta();
-
-			deltaTheta = getMinAngle(deltaTheta);
+			deltaTheta = findAngle(xTarget,yTarget);
 			
 			backwardDeltaTheta = getMinAngle(deltaTheta - 180);
 
@@ -385,13 +365,29 @@ public class MobileRobot extends SensorMotorUser {
 	
 	public void scanArea(double scanAngle){
 		
-		blockDetector.turnOnScanMode();
+		blockDetector.turnOnMinDistanceScanMode();
 		
 		onPointTurnBy(-scanAngle);
 		onPointTurnBy(2*scanAngle);
 		onPointTurnBy(-scanAngle);
 		
-		blockDetector.turnOffScanMode();
+		blockDetector.turnOffMinDistanceScanMode();
+		
+	}
+	
+	public boolean isPathAheadSafe(){
+
+		scanArea(PATH_SCAN_ANGLE);
+		
+		if(blockDetector.getMinDistance()<PATH_IS_SAFE_THRESHOLD){
+			isPathSafe = false;
+			return false;
+		}
+		
+		else{
+			isPathSafe = true;
+			return true;
+		}
 		
 	}
 	
@@ -400,6 +396,13 @@ public class MobileRobot extends SensorMotorUser {
 		double closestRightAngle = 90 * Math.round(odo.getTheta() / 90);
 		
 		turnToOnPoint(closestRightAngle);
+		
+		for(int i = 0; i<4; i++){
+			onPointTurnBy(-90);
+			if(!blockDetector.isObjectDetected()){
+				break;
+			}
+		}
 		
 		corr.turnOffCorrection();
 		moveForwardSlow();
@@ -418,14 +421,24 @@ public class MobileRobot extends SensorMotorUser {
 	}
 	
 	private boolean travelToWaypoints(ArrayList<Intersection> listOfWayPoints) {
-
+		
 		Intersection intersection;
 		boolean isSuccess = false;
+		double deltaTheta;
 
 		for (int i = 0; i < listOfWayPoints.size(); i++) {
 
 			intersection = listOfWayPoints.get(i);
 
+			if(i == 0){
+				deltaTheta = findAngle(intersection.getXInCm(),intersection.getYInCm());
+				onPointTurnBy(deltaTheta);
+				
+				if(!isPathAheadSafe()){
+					return false;
+				}
+			}
+			
 			if (i == listOfWayPoints.size() - 1) {
 				isSuccess = travelCoordinate(intersection.getXInCm(),
 						intersection.getYInCm(), true);
@@ -537,10 +550,8 @@ public class MobileRobot extends SensorMotorUser {
 	}
 	
 	
-	private void moveAwayFromObstacle(ArrayList<Intersection> listOfWayPoints){
+	private void removePath(ArrayList<Intersection> listOfWayPoints){
 		
-		moveBackToPreviousIntersection();
-
 		Intersection prevIntersection = Map.getIntersection(
 				xPrevTarget, yPrevTarget);
 
@@ -551,6 +562,26 @@ public class MobileRobot extends SensorMotorUser {
 				.get(indexOfNextIntersection);
 
 		Map.removeEdge(prevIntersection, nextIntersection);
+		
+	}
+	
+	
+	private double findAngle(double xTarget, double yTarget){
+		double xDiff;
+		double yDiff;
+		double targetTheta;
+		double deltaTheta;
+		
+		xDiff = xTarget - odo.getX();
+		yDiff = yTarget - odo.getY();
+		targetTheta = odo.fixDegAngle(90 - Math.toDegrees(Math.atan2(yDiff,
+				xDiff)));
+		
+		deltaTheta = targetTheta - odo.getTheta();
+
+		deltaTheta = getMinAngle(deltaTheta);
+		
+		return deltaTheta;
 		
 	}
 	

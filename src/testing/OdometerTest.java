@@ -28,11 +28,13 @@ public class OdometerTest {
 		
 		switch(option) {
 		case Button.ID_LEFT:
+			MobileRobot.corr.turnOnLightSensors();
 			MobileRobot.corr.startCorrectionTimer();
 			MobileRobot.corr.turnOnCorrection();
 			triangleTest(robot);
 			break;
 		case Button.ID_RIGHT:
+			MobileRobot.corr.turnOnLightSensors();
 			MobileRobot.corr.startCorrectionTimer();
 			MobileRobot.corr.turnOnCorrection();
 			squareTest(robot);

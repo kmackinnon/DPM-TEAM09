@@ -26,7 +26,6 @@ public class MobileRobot extends SensorMotorUser {
 	private final int TURN_ON_POINT_ANGLE_THRESHOLD = 20;
 	private final int POINT_IS_BEHIND_ANGLE_THRESHOLD = 45;
 	private final double PATH_SCAN_ANGLE = 15;
-	private final double ROTATION_CORRECTION_CHECK_ANGLE = 90;
 	private final int PATH_IS_SAFE_THRESHOLD = 20;
 
 	/**
@@ -403,6 +402,8 @@ public class MobileRobot extends SensorMotorUser {
 				break;
 			}
 		}
+		
+		onPointTurnBy(90);
 		
 		corr.turnOffCorrection();
 		moveForwardSlow();

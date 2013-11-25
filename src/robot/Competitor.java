@@ -62,10 +62,8 @@ public class Competitor {
 		
 		MobileRobot.corr.turnOnLightSensors();
 		
-		//localizer.localize();
-		//Sound.beep();
-		
-		explorer.liftClaw();
+		localizer.localize();
+		Sound.beep();
 		
 		MobileRobot.corr.startCorrectionTimer();
 		MobileRobot.blockDetector.startBlockDetectorTimer();

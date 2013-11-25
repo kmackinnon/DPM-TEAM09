@@ -11,10 +11,6 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private final double MAX_DISTANCE_BETWEEN_DIAGONAL_DETECTIONS = 14;
 	private final double DIAGONAL_IN_RADIANS = Math.toRadians(45);
 
-	private final int LARGE_ANGLE_RANGE_TOLERANCE = 20;
-
-	private final int SMALL_ANGLE_RANGE_TOLERANCE = 10;
-
 	private Timer correctionTimer;
 
 	private Odometer odo;
@@ -103,12 +99,12 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		if (doCorrection) {
 
-			double currentTheta = odo.getTheta();
+			Direction currentDirection = odo.getDirection();
 
-			if (Math.abs(currentTheta - 45) < SMALL_ANGLE_RANGE_TOLERANCE
-					|| Math.abs(currentTheta - 135) < SMALL_ANGLE_RANGE_TOLERANCE
-					|| Math.abs(currentTheta - 225) < SMALL_ANGLE_RANGE_TOLERANCE
-					|| Math.abs(currentTheta - 315) < SMALL_ANGLE_RANGE_TOLERANCE) {
+			if (currentDirection == Direction.NORTHEAST
+					|| currentDirection == Direction.SOUTHEAST
+					|| currentDirection == Direction.NORTHWEST
+					|| currentDirection == Direction.SOUTHWEST) {
 				diagonalCorrection();
 			}
 
@@ -247,9 +243,9 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private void xyDiagonalCorrection(double measuredDistance, ColorSensor cs) {
 
 		boolean left = (cs == leftCS);
-		double currentTheta = odo.getTheta();
+		Direction currentDirection = odo.getDirection();
 
-		if (Math.abs(currentTheta - 45) < SMALL_ANGLE_RANGE_TOLERANCE) {
+		if (currentDirection == Direction.NORTHEAST) {
 
 			double distanceFromIntersection = actualDistanceFromIntersection(measuredDistance);
 
@@ -269,7 +265,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		}
 
-		else if (Math.abs(currentTheta - 135) < SMALL_ANGLE_RANGE_TOLERANCE) {
+		else if (currentDirection == Direction.SOUTHEAST) {
 
 			double distanceFromIntersection = actualDistanceFromIntersection(measuredDistance);
 
@@ -289,7 +285,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		}
 
-		else if (Math.abs(currentTheta - 225) < SMALL_ANGLE_RANGE_TOLERANCE) {
+		else if (currentDirection == Direction.SOUTHWEST) {
 
 			double distanceFromIntersection = actualDistanceFromIntersection(measuredDistance);
 
@@ -309,7 +305,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 			}
 		}
 
-		else if (Math.abs(currentTheta - 315) < SMALL_ANGLE_RANGE_TOLERANCE) {
+		else if (currentDirection == Direction.NORTHWEST) {
 
 			double distanceFromIntersection = actualDistanceFromIntersection(measuredDistance);
 
@@ -392,9 +388,9 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	private void correctXY() {
 
-		double currentTheta = odo.getTheta();
+		Direction currentDirection = odo.getDirection();
 
-		if (Math.abs(currentTheta - 90) < LARGE_ANGLE_RANGE_TOLERANCE) {
+		if (currentDirection == Direction.EAST) {
 			odo.setX(xAtFirstDetection + (distanceTravelledByLaggingWheel)
 					* Math.cos(angleOff));
 
@@ -402,7 +398,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 					* Math.sin(angleOff));
 		}
 
-		else if (Math.abs(currentTheta - 180) < LARGE_ANGLE_RANGE_TOLERANCE) {
+		else if (currentDirection == Direction.SOUTH) {
 			odo.setX(xAtFirstDetection - (distanceTravelledByLaggingWheel)
 					* Math.sin(angleOff));
 
@@ -410,7 +406,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 					* Math.cos(angleOff));
 		}
 
-		else if (Math.abs(currentTheta - 270) < LARGE_ANGLE_RANGE_TOLERANCE) {
+		else if (currentDirection == Direction.WEST) {
 			odo.setX(xAtFirstDetection - (distanceTravelledByLaggingWheel)
 					* Math.cos(angleOff));
 
@@ -418,8 +414,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 					* Math.sin(angleOff));
 		}
 
-		else if (currentTheta < LARGE_ANGLE_RANGE_TOLERANCE
-				|| currentTheta > (360 - LARGE_ANGLE_RANGE_TOLERANCE)) {
+		else if (currentDirection == Direction.NORTH) {
 
 			odo.setX(xAtFirstDetection + (distanceTravelledByLaggingWheel)
 					* Math.sin(angleOff));
@@ -434,27 +429,30 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		double currentAngleOff = 0;
 		double adjustment;
-
 		double currentTheta = odo.getTheta();
 
-		if (Math.abs(currentTheta - 90) < 20) {
+		Direction currentDirection = odo.getDirection();
+
+		if (currentDirection == Direction.EAST) {
 			currentAngleOff = currentTheta - 90;
 		}
 
-		else if (Math.abs(currentTheta - 180) < 20) {
+		else if (currentDirection == Direction.SOUTH) {
 			currentAngleOff = currentTheta - 180;
 		}
 
-		else if (Math.abs(currentTheta - 270) < 20) {
+		else if (currentDirection == Direction.WEST) {
 			currentAngleOff = currentTheta - 270;
 		}
 
-		else if (currentTheta < 20) {
-			currentAngleOff = currentTheta;
-		}
+		else if(currentDirection == Direction.NORTH){
+			if (currentTheta < 20) {
+				currentAngleOff = currentTheta;
+			}
 
-		else if (currentTheta > 340) {
-			currentAngleOff = currentTheta - 360;
+			else if (currentTheta > 340) {
+				currentAngleOff = currentTheta - 360;
+			}
 		}
 
 		adjustment = Math.toDegrees(angleOff) - currentAngleOff;
@@ -607,25 +605,24 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 				odo.setTheta(90 * Math.round(odo.getTheta() / 90));
 
-				double currentTheta = odo.getTheta();
+				Direction currentDirection = odo.getDirection();
 
-				if (Math.abs(currentTheta) < SMALL_ANGLE_RANGE_TOLERANCE
-						|| Math.abs(currentTheta) > (360 - SMALL_ANGLE_RANGE_TOLERANCE)) {
+				if (currentDirection == Direction.NORTH) {
 					odo.setY(Map.nearestIntersectionCoordinate(initialY)
 							+ SENSOR_TO_WHEEL_DISTANCE);
 				}
 
-				else if (Math.abs(currentTheta - 90) < SMALL_ANGLE_RANGE_TOLERANCE) {
+				else if (currentDirection == Direction.EAST) {
 					odo.setX(Map.nearestIntersectionCoordinate(initialX)
 							+ SENSOR_TO_WHEEL_DISTANCE);
 				}
 
-				else if (Math.abs(currentTheta - 180) < SMALL_ANGLE_RANGE_TOLERANCE) {
+				else if (currentDirection == Direction.SOUTH) {
 					odo.setY(Map.nearestIntersectionCoordinate(initialY)
 							- SENSOR_TO_WHEEL_DISTANCE);
 				}
 
-				else if (Math.abs(currentTheta - 270) < SMALL_ANGLE_RANGE_TOLERANCE) {
+				else if (currentDirection == Direction.WEST) {
 					odo.setX(Map.nearestIntersectionCoordinate(initialX)
 							- SENSOR_TO_WHEEL_DISTANCE);
 				}

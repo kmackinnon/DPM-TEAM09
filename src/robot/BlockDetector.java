@@ -17,7 +17,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	private final int DIST_TO_STOP = 11;
 	private final int LIGHT_DIFF = 5;
-	private final double RED_BLUE_RATIO = 2.0;
+	private final double RED_BLUE_RATIO = 1.8;
 
 	private boolean isObjectDetected = false;
 	private boolean doBlockDetection = false;
@@ -25,24 +25,23 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	private int scanMinDistance;
 	private double minDistanceAngle;
-	
+
 	// variables for object detection
 	private int[] window = { 255, 255, 255, 255, 255 };
 	private int prevValue = 0;
 	private boolean prevLatch = false;
 	private int median, value, diff;
 	private boolean latch;
-	
 
 	public BlockDetector() {
 		lock = new Object();
 		blockDetectorTimer = new Timer(DEFAULT_TIMER_PERIOD, this);
 	}
 
-	public void startBlockDetectorTimer(){
+	public void startBlockDetectorTimer() {
 		blockDetectorTimer.start();
 	}
-	
+
 	public void turnOnBlockDetection() {
 		isObjectDetected = false;
 		doBlockDetection = true;
@@ -51,28 +50,26 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	public void turnOffBlockDetection() {
 		doBlockDetection = false;
 	}
-	
-	public void turnOnMinDistanceScanMode(){
+
+	public void turnOnMinDistanceScanMode() {
 		scanMinDistance = US_SENSOR_255;
-		
+
 		doMinDistanceScan = true;
 	}
-	
-	public void turnOffMinDistanceScanMode(){
+
+	public void turnOffMinDistanceScanMode() {
 		doMinDistanceScan = false;
 	}
-	
 
 	public void timedOut() {
 
-		if(doBlockDetection){
+		if (doBlockDetection) {
 			if (isObjectDetected()) {
 
 				synchronized (lock) {
 					isObjectDetected = true;
 				}
-				
-				
+
 			} else {
 
 				synchronized (lock) {
@@ -80,31 +77,28 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 				}
 			}
 		}
-		
-		
-		if(doMinDistanceScan){
-			
+
+		if (doMinDistanceScan) {
+
 			minDistanceScanRoutine();
-			
+
 		}
-		
-	}
-	
-	
-	public double getMinDistanceAngle(){
-		
-		if(scanMinDistance == US_SENSOR_255){
-			minDistanceAngle = DOUBLE_SPECIAL_FLAG;
-		}
-		
-		return minDistanceAngle;
-		
-	}
-	
-	public double getMinDistance(){
-		return scanMinDistance;
+
 	}
 
+	public double getMinDistanceAngle() {
+
+		if (scanMinDistance == US_SENSOR_255) {
+			minDistanceAngle = DOUBLE_SPECIAL_FLAG;
+		}
+
+		return minDistanceAngle;
+
+	}
+
+	public double getMinDistance() {
+		return scanMinDistance;
+	}
 
 	// returns the isObjectDetected boolean
 	public boolean isObjectInFront() {
@@ -148,7 +142,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		}
 		prevValue = value;
 		prevLatch = latch;
-		
+
 		return false;
 	}
 
@@ -160,100 +154,81 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	public boolean isObjectStyrofoam() {
 		// RConsole.println(red + " " + green + " " + blue);
 
-		/*Color color;
-		int redValue;
-		int blueValue;
-		int greenValue;
-		double ratio;
-		int counter = 0;
-		
-		
-		for(int i=0; i<10; i++){
-			color = frontCS.getColor();
+		/*
+		 * Color color; int redValue; int blueValue; int greenValue; double
+		 * ratio; int counter = 0;
+		 * 
+		 * 
+		 * for(int i=0; i<10; i++){ color = frontCS.getColor();
+		 * 
+		 * redValue = color.getRed(); greenValue = color.getGreen(); blueValue =
+		 * color.getBlue();
+		 * 
+		 * ratio = -1.0; if (blueValue != 0) { ratio = ((redValue / blueValue) *
+		 * (greenValue / blueValue)); }
+		 * 
+		 * // conditions for styrofoam block if (ratio > .75 && ratio < .9) {
+		 * counter++; // this is only true when 5-7 cm from block }
+		 * 
+		 * }
+		 * 
+		 * if(counter>=CONFIRMATION_MINIMUM){ return true; }
+		 * 
+		 * else{ return false; }
+		 */
 
-			redValue = color.getRed();
-			greenValue = color.getGreen();
-			blueValue = color.getBlue();
-
-			ratio = -1.0;
-			if (blueValue != 0) {
-				ratio = ((redValue / blueValue) * (greenValue / blueValue));
-			}
-
-			// conditions for styrofoam block
-			if (ratio > .75 && ratio < .9) {
-				counter++; // this is only true when 5-7 cm from block
-			}
-
-		}
-		
-		if(counter>=CONFIRMATION_MINIMUM){
-			return true;
-		}
-		
-		else{
-			return false;
-		}*/
-		
-		
 		Color color;
 		int redValue;
 		int blueValue;
 		double ratio;
 		int counter = 0;
-		
-		for(int i = 0; i<DEFAULT_NUM_OF_SAMPLES; i++){
-	        color = frontCS.getColor();
-	        redValue = color.getRed();
-	        blueValue = color.getBlue();
-	        
-	        ratio = (double) redValue / (double) blueValue;
-	        
-	        if (ratio < RED_BLUE_RATIO) {
-	        	counter++;
-	        }
+
+		for (int i = 0; i < DEFAULT_NUM_OF_SAMPLES; i++) {
+			color = frontCS.getColor();
+			redValue = color.getRed();
+			blueValue = color.getBlue();
+
+			ratio = (double) redValue / (double) blueValue;
+
+			if (ratio < RED_BLUE_RATIO) {
+				counter++;
+			}
 		}
-		
-		if(counter>=DEFAULT_CONFIRMATION_MINIMUM){
+
+		if (counter >= DEFAULT_CONFIRMATION_MINIMUM) {
 			return true;
 		}
-		
-		else{
+
+		else {
 			return false;
 		}
 
-
 	}
-	
-	
-	
-	private void minDistanceScanRoutine(){
-		
+
+	private void minDistanceScanRoutine() {
+
 		shiftArrayByOne(window, getUSDistance());
 		median = getMedian(window);
-		
-		if(median <= scanMinDistance){
-			
+
+		if (median <= scanMinDistance) {
+
 			scanMinDistance = median;
 			minDistanceAngle = MobileRobot.odo.getTheta();
 		}
-		
+
 	}
-	
-	
-	/*private void pathScanRoutine(){
-		
-		for(int i=0; i<DEFAULT_NUM_OF_SAMPLES; i++){
-			shiftArrayByOne(window, getUSDistance());
-			median = getMedian(window);
+
+	public boolean isWood(double red, double green, double blue) {
+
+		double testValue = -1.0;
+
+		testValue = ((red / blue) * (green / blue));
+
+		if (testValue > 1.9) {
+			return true;
 		}
-		
-		if()
-		
-		pathScanDistance = median;
-		
-	}*/
-	
-	
+
+		return false;
+	}
 
 }

@@ -11,6 +11,10 @@ import lejos.util.TimerListener;
 
 public class Odometer extends SensorMotorUser implements TimerListener {
 
+	private final int LARGE_ANGLE_RANGE_TOLERANCE = 20;
+
+	private final int SMALL_ANGLE_RANGE_TOLERANCE = 10;
+	
 	/** Timer to execute timedOut method every period */
 	private Timer odometerTimer;
 
@@ -183,6 +187,42 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 		return (leftMotor.getTachoCount() * LEFT_RADIUS - rightMotor
 				.getTachoCount() * RIGHT_RADIUS)
 				/ WIDTH;
+	}
+	
+	public Direction getDirection(){
+		
+		if(theta < LARGE_ANGLE_RANGE_TOLERANCE || theta > (360 - LARGE_ANGLE_RANGE_TOLERANCE)){
+			return Direction.NORTH;
+		}
+		
+		else if(Math.abs(theta-90) < LARGE_ANGLE_RANGE_TOLERANCE){
+			return Direction.EAST;
+		}
+		
+		else if(Math.abs(theta-180) < LARGE_ANGLE_RANGE_TOLERANCE){
+			return Direction.SOUTH;
+		}
+		
+		else if(Math.abs(theta-270) < LARGE_ANGLE_RANGE_TOLERANCE){
+			return Direction.WEST;
+		}
+		
+		else if(Math.abs(theta-45) < SMALL_ANGLE_RANGE_TOLERANCE){
+			return Direction.NORTHEAST;
+		}
+		
+		else if(Math.abs(theta-135) < LARGE_ANGLE_RANGE_TOLERANCE){
+			return Direction.SOUTHEAST;
+		}
+		
+		else if(Math.abs(theta-225) < LARGE_ANGLE_RANGE_TOLERANCE){
+			return Direction.SOUTHWEST;
+		}
+		
+		else {
+			return Direction.NORTHWEST;
+		}
+		
 	}
 
 	

@@ -10,6 +10,8 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private final double MIN_DISTANCE_BETWEEN_DETECTIONS = 25;
 	private final double MAX_DISTANCE_BETWEEN_DIAGONAL_DETECTIONS = 14;
 	private final double DIAGONAL_IN_RADIANS = Math.toRadians(45);
+	
+	private final int LARGE_ANGLE_RANGE_TOLERANCE = 20;
 
 	private Timer correctionTimer;
 
@@ -53,6 +55,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private boolean leftCSDone;
 	private double initialX;
 	private double initialY;
+	private double initialTheta;
 
 	public OdometryCorrection(Odometer odo) {
 		this.odo = odo;
@@ -99,9 +102,17 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		if (doCorrection) {
 			
-			straightLineCorrection();
+			Direction currentDirection = odo.getDirection();
+			
+			if (currentDirection == Direction.NORTH
+			|| currentDirection == Direction.EAST
+			|| currentDirection == Direction.WEST
+			|| currentDirection == Direction.SOUTH) {
+			
+				straightLineCorrection();
+			}
 
-//			Direction currentDirection = odo.getDirection();
+			
 //
 //			if (currentDirection == Direction.NORTHEAST
 //					|| currentDirection == Direction.SOUTHEAST
@@ -590,6 +601,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		initialX = odo.getX();
 		initialY = odo.getY();
+		initialTheta = odo.getTheta();
 		
 		while ((!rightCSDone) || (!leftCSDone)) {
 
@@ -604,6 +616,10 @@ public class OdometryCorrection extends SensorMotorUser implements
 			}
 
 			if (rightCSDone && leftCSDone) {
+				
+				if(odo.getTheta() - initialTheta > LARGE_ANGLE_RANGE_TOLERANCE){
+					break;
+				}
 
 				odo.setTheta(90 * Math.round(odo.getTheta() / 90));
 

@@ -20,6 +20,7 @@ public class MobileRobot extends SensorMotorUser {
 	private static double yPrevTarget;
 	private static int travelCounter = 0;
 	private static boolean isPathSafe = false;
+	//private static boolean nextPointIsATurn = false;
 	
 	private final int ANGLE_ERROR_THRESHOLD = 1; // measured in degrees
 	private final int POSITION_ERROR_THRESHOLD = 1;
@@ -27,7 +28,8 @@ public class MobileRobot extends SensorMotorUser {
 	private final int POINT_IS_BEHIND_ANGLE_THRESHOLD = 45;
 	private final double PATH_SCAN_ANGLE = 15;
 	private final int PATH_IS_SAFE_THRESHOLD = 20;
-	private final int LOCALIZE_PERIODICALLY = 4;
+	//private final int FAR_AWAY_PATH_IS_SAFE_THRESHOLD = 45;
+	private final int LOCALIZE_PERIODICALLY = 6;
 
 	/**
 	 * Default Constructor
@@ -397,11 +399,27 @@ public class MobileRobot extends SensorMotorUser {
 		
 		turnToOnPoint(closestRightAngle);
 		
+		boolean previousDirectionIsBlocked = false;
+		
 		for(int i = 0; i<4; i++){
 			onPointTurnBy(-90);
-			if(!blockDetector.isObjectInFront()){
+			
+			if(!blockDetector.isObjectInFront() && !previousDirectionIsBlocked){
 				break;
 			}
+			
+			if(blockDetector.isObjectInFront()){
+				previousDirectionIsBlocked = true;
+			}
+			
+			else if(!blockDetector.isObjectInFront()){
+				previousDirectionIsBlocked = false;
+			}
+
+		}
+		
+		if(previousDirectionIsBlocked){
+			return;
 		}
 		
 		onPointTurnBy(90);
@@ -442,6 +460,7 @@ public class MobileRobot extends SensorMotorUser {
 			}
 			
 			if (i == listOfWayPoints.size() - 1) {
+				
 				isSuccess = travelCoordinate(intersection.getXInCm(),
 						intersection.getYInCm(), true);
 			}

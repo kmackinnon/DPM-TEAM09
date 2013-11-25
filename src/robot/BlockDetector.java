@@ -18,6 +18,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	private final int DIST_TO_STOP = 11;
 	private final int LIGHT_DIFF = 5;
 	private final double RED_BLUE_RATIO = 1.8;
+	private final double WOOD_RATIO = 1.9;
 
 	private boolean isObjectDetected = false;
 	private boolean doBlockDetection = false;
@@ -145,13 +146,23 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 		return false;
 	}
+	
+	public boolean isObjectStyrofoam(){
+		if(isStyrofoamColor() && !isWoodColor()){
+			return true;
+		}
+		
+		else{
+			return false;
+		}
+	}
 
 	/**
 	 * Returns a boolean indicating whether or not the block is styrofoam.
 	 * 
 	 * @return true if styrofoam, false otherwise.
 	 */
-	public boolean isObjectStyrofoam() {
+	private boolean isStyrofoamColor() {
 		// RConsole.println(red + " " + green + " " + blue);
 
 		/*
@@ -178,8 +189,8 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		 */
 
 		Color color;
-		int redValue;
-		int blueValue;
+		double redValue;
+		double blueValue;
 		double ratio;
 		int counter = 0;
 
@@ -188,7 +199,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 			redValue = color.getRed();
 			blueValue = color.getBlue();
 
-			ratio = (double) redValue / (double) blueValue;
+			ratio = redValue / blueValue;
 
 			if (ratio < RED_BLUE_RATIO) {
 				counter++;
@@ -218,17 +229,36 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	}
 
-	public boolean isWood(double red, double green, double blue) {
+	private boolean isWoodColor() {
 
-		double testValue = -1.0;
+		Color color;
+		double redValue;
+		double blueValue;
+		double greenValue;
+		double ratio;
+		int counter = 0;
+		
+		
+		for (int i = 0; i < DEFAULT_NUM_OF_SAMPLES; i++) {
+			color = frontCS.getColor();
+			redValue = color.getRed();
+			blueValue = color.getBlue();
+			greenValue = color.getGreen();
 
-		testValue = ((red / blue) * (green / blue));
+			ratio = ((redValue / blueValue) * (greenValue / blueValue));
 
-		if (testValue > 1.9) {
+			if (ratio > WOOD_RATIO) {
+				counter++;
+			}
+		}
+
+		if (counter >= DEFAULT_CONFIRMATION_MINIMUM) {
 			return true;
 		}
 
-		return false;
+		else {
+			return false;
+		}
 	}
 
 }

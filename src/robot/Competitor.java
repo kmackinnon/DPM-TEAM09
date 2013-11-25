@@ -26,7 +26,7 @@ public class Competitor {
 	private static int[] redZone;
 
 	public static void main(String[] args) throws InterruptedException {
-		
+
 		Map.initializeMap();
 
 		int buttonChoice;
@@ -55,33 +55,33 @@ public class Competitor {
 
 		// sets the start corner from the test data or from the BT connection
 
-		
 		Localizer localizer = new Localizer();
 		Explorer explorer = new Explorer();
 		BlockMover blockMover = new BlockMover();
-		
+
 		MobileRobot.corr.turnOnLightSensors();
-		
+
 		localizer.localize();
 		Sound.beep();
 		
+		explorer.liftClaw();
+
 		MobileRobot.corr.startCorrectionTimer();
 		MobileRobot.blockDetector.startBlockDetectorTimer();
-		
-		while(!explorer.isFinishedLooking()){
-			
-			if(explorer.lookForStyrofoamBlocks()){
-				
+
+		while (!explorer.isFinishedLooking()) {
+
+			if (explorer.lookForStyrofoamBlocks()) {
+
 				blockMover.moveBlockToZone();
-				
+
 			}
-			
+
 		}
-		
+
 		System.exit(0);
 	}
-	
-	
+
 	/** This sets up the demo by setting starting corner and player type. */
 	private static void connectBT() {
 		BluetoothConnection conn = new BluetoothConnection();
@@ -125,16 +125,15 @@ public class Competitor {
 			Map.setTargetZone(redZone);
 			Map.setForbiddenZone(greenZone);
 		}
-		
+
 		SensorMotorUser.setStartCorner(corner.getCooridinates());
-		
-		
+
 	}
-	
-	private static void testWithoutBluetooth(){
-		
-		int[] testGreen = { 2, 3, 3, 4};
-		int[] testRed = {0,5,1,6 };
+
+	private static void testWithoutBluetooth() {
+
+		int[] testGreen = { 2, 3, 3, 4 };
+		int[] testRed = { 0, 5, 1, 6 };
 
 		// set role. For now, assume the robot will be a builder.
 		SensorMotorUser.becomeBuilder(true);
@@ -143,9 +142,19 @@ public class Competitor {
 		Map.setTargetZone(testGreen);
 		Map.setForbiddenZone(testRed);
 
-		SensorMotorUser
-		.setStartCorner(new int[] {0,0});
-		
+		// corners
+		Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+				Map.NUM_OF_INTERSECTIONS - 1, 0 });
+
+		Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
+				Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
+				Map.NUM_OF_INTERSECTIONS - 1 });
+
+		Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1, 0,
+				Map.NUM_OF_INTERSECTIONS - 1 });
+
+		SensorMotorUser.setStartCorner(new int[] { 0, 0 });
+
 	}
-	
+
 }

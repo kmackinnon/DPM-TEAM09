@@ -16,7 +16,9 @@ public class RotateCorrTest {
 		
 		MobileRobot robot = new MobileRobot();
 		
+		MobileRobot.corr.turnOnLightSensors();
 		MobileRobot.corr.startCorrectionTimer();
+		robot.liftClaw();
 
 		robot.performRotationCorrection();
 		

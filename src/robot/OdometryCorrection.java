@@ -98,19 +98,21 @@ public class OdometryCorrection extends SensorMotorUser implements
 		// long start = System.currentTimeMillis();
 
 		if (doCorrection) {
+			
+			straightLineCorrection();
 
-			Direction currentDirection = odo.getDirection();
-
-			if (currentDirection == Direction.NORTHEAST
-					|| currentDirection == Direction.SOUTHEAST
-					|| currentDirection == Direction.NORTHWEST
-					|| currentDirection == Direction.SOUTHWEST) {
-				diagonalCorrection();
-			}
-
-			else {
-				straightLineCorrection();
-			}
+//			Direction currentDirection = odo.getDirection();
+//
+//			if (currentDirection == Direction.NORTHEAST
+//					|| currentDirection == Direction.SOUTHEAST
+//					|| currentDirection == Direction.NORTHWEST
+//					|| currentDirection == Direction.SOUTHWEST) {
+//				diagonalCorrection();
+//			}
+//
+//			else {
+//				
+//			}
 
 		}
 

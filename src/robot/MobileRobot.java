@@ -27,6 +27,7 @@ public class MobileRobot extends SensorMotorUser {
 	private final int POINT_IS_BEHIND_ANGLE_THRESHOLD = 45;
 	private final double PATH_SCAN_ANGLE = 15;
 	private final int PATH_IS_SAFE_THRESHOLD = 20;
+	private final int LOCALIZE_PERIODICALLY = 4;
 
 	/**
 	 * Default Constructor
@@ -398,7 +399,7 @@ public class MobileRobot extends SensorMotorUser {
 		
 		for(int i = 0; i<4; i++){
 			onPointTurnBy(-90);
-			if(!blockDetector.isObjectDetected()){
+			if(!blockDetector.isObjectInFront()){
 				break;
 			}
 		}
@@ -452,7 +453,7 @@ public class MobileRobot extends SensorMotorUser {
 			
 			if(isSuccess){
 				travelCounter++;
-				if(travelCounter % 4 == 0){
+				if(travelCounter % LOCALIZE_PERIODICALLY == 0){
 					performRotationCorrection();
 				}
 			}

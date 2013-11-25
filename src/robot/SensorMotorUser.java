@@ -72,9 +72,9 @@ public class SensorMotorUser {
 	 */
 	public static final int LIFTING_SPEED = 120;
 	
-	public static final int LIFTING_DEGREE = 340;
+	public static final int LIFTING_DEGREE = 335;
 	
-	public static final int DROPPING_DEGREE = -20;
+	public static final int DROPPING_DEGREE = 0;
 
 	public static final double SENSOR_WIDTH = 11.05;
 	

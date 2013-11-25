@@ -18,8 +18,8 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	private final int DIST_TO_STOP = 11;
 	private final int LIGHT_DIFF = 5;
-	private final double RED_BLUE_RATIO = 2.0;
-	private final double WOOD_RATIO = 3.0;
+	private final double RED_BLUE_RATIO = 1.8;
+	private final double WOOD_RATIO = 1.9;
 
 	private boolean isObjectDetected = false;
 	private boolean doBlockDetection = false;
@@ -150,6 +150,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	
 	public boolean isObjectStyrofoam(){
 		if(isStyrofoamColor() && !isWoodColor()){
+			Sound.beep();
 			return true;
 		}
 		
@@ -208,7 +209,6 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		}
 
 		if (counter >= DEFAULT_CONFIRMATION_MINIMUM) {
-			Sound.beep();
 			return true;
 		}
 

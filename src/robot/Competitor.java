@@ -132,8 +132,8 @@ public class Competitor {
 
 	private static void testWithoutBluetooth() {
 
-		int[] testGreen = { 2, 3, 3, 4 };
-		int[] testRed = { 0, 5, 1, 6 };
+		int[] testGreen = { 4, 4, 5, 6 };
+		int[] testRed = { 0, 1, 4, 3 };
 
 		// set role. For now, assume the robot will be a builder.
 		SensorMotorUser.becomeBuilder(true);

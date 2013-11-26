@@ -50,6 +50,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	}
 
 	public void turnOffBlockDetection() {
+		isObjectDetected = false;
 		doBlockDetection = false;
 	}
 

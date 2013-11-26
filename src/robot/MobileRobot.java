@@ -19,15 +19,15 @@ public class MobileRobot extends SensorMotorUser {
 	private static double xPrevTarget;
 	private static double yPrevTarget;
 	private static int travelCounter = 0;
-	private static boolean isPathSafe = false;
-	
+	// private static boolean isPathSafe = false;
+
 	private final int ANGLE_ERROR_THRESHOLD = 1; // measured in degrees
 	private final int POSITION_ERROR_THRESHOLD = 1;
 	private final int TURN_ON_POINT_ANGLE_THRESHOLD = 20;
 	private final int POINT_IS_BEHIND_ANGLE_THRESHOLD = 45;
-	private final double PATH_SCAN_ANGLE = 15;
-	private final int PATH_IS_SAFE_THRESHOLD = 20;
-	private final int LOCALIZE_PERIODICALLY = 4;
+	// private final double PATH_SCAN_ANGLE = 15;
+	// private final int PATH_IS_SAFE_THRESHOLD = 20;
+	private final int LOCALIZE_PERIODICALLY = 6;
 
 	/**
 	 * Default Constructor
@@ -38,55 +38,57 @@ public class MobileRobot extends SensorMotorUser {
 	}
 
 	public void travelTo(Intersection destination) {
-		boolean isSuccess = false;
-		Intersection source;
-		ArrayList<Intersection> listOfWayPoints;
 
-		while (!isSuccess) {
+		try {
+			boolean isSuccess = false;
+			Intersection source;
+			ArrayList<Intersection> listOfWayPoints;
 
-			source = Map.getIntersection(odo.getX(), odo.getY());
+			while (!isSuccess) {
 
-			if (destination.getX() == INT_SPECIAL_FLAG
-					&& destination.getY() == INT_SPECIAL_FLAG) {
-				listOfWayPoints = AStar.algorithmForTargetZone(source);
-			}
+				source = Map.getIntersection(odo.getX(), odo.getY());
 
-			else {
-
-				if (destination.getAdjacencyList().isEmpty()) {
-					return;
-				}
-
-				listOfWayPoints = AStar.algorithm(source, destination);
-			}
-
-			isSuccess = travelToWaypoints(listOfWayPoints);
-
-			if (!isSuccess) {
-				
-				if(!isPathSafe){
-					removePath(listOfWayPoints);
-				}
-
-				else if (!blockDetector.isObjectStyrofoam()) {
-					moveBackToPreviousIntersection();
-					removePath(listOfWayPoints);
+				if (destination.getX() == INT_SPECIAL_FLAG
+						&& destination.getY() == INT_SPECIAL_FLAG) {
+					listOfWayPoints = AStar.algorithmForTargetZone(source);
 				}
 
 				else {
 
-					if (pickUpStyrofoamBlock()) {
+					if (destination.getAdjacencyList().isEmpty()) {
 						return;
 					}
-					
-					else{
+
+					listOfWayPoints = AStar.algorithm(source, destination);
+				}
+
+				isSuccess = travelToWaypoints(listOfWayPoints);
+
+				if (!isSuccess) {
+
+					if (!blockDetector.isObjectStyrofoam()) {
 						moveBackToPreviousIntersection();
 						removePath(listOfWayPoints);
 					}
 
-				}
+					else {
 
+						if (pickUpStyrofoamBlock()) {
+							return;
+						}
+
+						else {
+							moveBackToPreviousIntersection();
+							removePath(listOfWayPoints);
+						}
+
+					}
+
+				}
 			}
+		} catch (IndexOutOfBoundsException e) {
+			specialMoveAround();
+			return;
 		}
 
 	}
@@ -122,13 +124,14 @@ public class MobileRobot extends SensorMotorUser {
 		// target position is greater than the position error threshold
 		while (!isAtPoint(xTarget, yTarget)) {
 
-			if (blockDetector.isObjectInFront()&&!isAtPoint(xPrevTarget,yPrevTarget)) {
+			if (blockDetector.isObjectInFront()
+					&& !isAtPoint(xPrevTarget, yPrevTarget)) {
 				return false;
 			}
 
-			deltaTheta = findAngle(xTarget,yTarget);
+			deltaTheta = findAngle(xTarget, yTarget);
 
-			howToMoveDecider(xTarget,yTarget,deltaTheta);
+			howToMoveDecider(xTarget, yTarget, deltaTheta);
 		}
 
 		if (stopAtTarget) {
@@ -150,32 +153,32 @@ public class MobileRobot extends SensorMotorUser {
 
 		while (!isAtPoint(xTarget, yTarget)) {
 
-			deltaTheta = findAngle(xTarget,yTarget);
-			
+			deltaTheta = findAngle(xTarget, yTarget);
+
 			backwardDeltaTheta = getMinAngle(deltaTheta - 180);
 
 			// is the point behind the robot
 			if (Math.abs(backwardDeltaTheta) < POINT_IS_BEHIND_ANGLE_THRESHOLD) {
 
-				if(backwardDeltaTheta > ANGLE_ERROR_THRESHOLD){
-				
+				if (backwardDeltaTheta > ANGLE_ERROR_THRESHOLD) {
+
 					if (Math.abs(backwardDeltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD) {
-						
+
 						onPointTurnBy(backwardDeltaTheta);
 					}
-					
-					else{
+
+					else {
 						whileMovingBackwardTurnBy(backwardDeltaTheta);
 					}
 				}
-				
-				else{
+
+				else {
 					moveBackward();
 				}
 			}
 
-			else{
-				howToMoveDecider(xTarget,yTarget,deltaTheta);
+			else {
+				howToMoveDecider(xTarget, yTarget, deltaTheta);
 			}
 		}
 
@@ -185,13 +188,12 @@ public class MobileRobot extends SensorMotorUser {
 
 		travelMagnitude(magnitudeInCm, FORWARD_SPEED);
 	}
-	
+
 	public void travelMagnitudeSlow(double magnitudeInCm) {
 
 		travelMagnitude(magnitudeInCm, SLOW_FORWARD_SPEED);
 	}
-	
-	
+
 	public void travelMagnitude(double magnitudeInCm, int speed) {
 
 		int leftAmount = convertDistance(LEFT_RADIUS, magnitudeInCm);
@@ -248,7 +250,7 @@ public class MobileRobot extends SensorMotorUser {
 		rightMotor.forward();
 
 	}
-	
+
 	public void moveForwardSlow() {
 
 		leftMotor.setSpeed(SLOW_FORWARD_SPEED);
@@ -318,8 +320,7 @@ public class MobileRobot extends SensorMotorUser {
 		rightMotor.forward();
 
 	}
-	
-	
+
 	public void turnLeftWhileMovingBackward() {
 
 		leftMotor.setSpeed(FORWARD_SPEED);
@@ -362,85 +363,77 @@ public class MobileRobot extends SensorMotorUser {
 
 		return true;
 	}
-	
-	public void scanArea(double scanAngle){
-		
-		blockDetector.turnOnMinDistanceScanMode();
-		
-		onPointTurnBy(-scanAngle);
-		onPointTurnBy(2*scanAngle);
-		onPointTurnBy(-scanAngle);
-		
-		blockDetector.turnOffMinDistanceScanMode();
-		
-	}
-	
-	public boolean isPathAheadSafe(){
 
-		scanArea(PATH_SCAN_ANGLE);
-		
-		if(blockDetector.getMinDistance()<PATH_IS_SAFE_THRESHOLD){
-			isPathSafe = false;
-			return false;
-		}
-		
-		else{
-			isPathSafe = true;
-			return true;
-		}
-		
+	public void scanArea(double scanAngle) {
+
+		blockDetector.turnOnMinDistanceScanMode();
+
+		onPointTurnBy(-scanAngle);
+		onPointTurnBy(2 * scanAngle);
+		onPointTurnBy(-scanAngle);
+
+		blockDetector.turnOffMinDistanceScanMode();
+
 	}
-	
-	public void performRotationCorrection(){
-		
+
+	public void performRotationCorrection() {
+
 		double closestRightAngle = 90 * Math.round(odo.getTheta() / 90);
-		
+
 		turnToOnPoint(closestRightAngle);
-		
-		for(int i = 0; i<4; i++){
+
+		for (int i = 0; i < 4; i++) {
 			onPointTurnBy(-90);
-			if(!blockDetector.isObjectInFront()){
+			if (!blockDetector.isObjectInFront()) {
 				break;
 			}
 		}
-		
+
 		onPointTurnBy(90);
-		
+
 		corr.turnOffCorrection();
 		moveForwardSlow();
 		corr.rotateCorrection();
-		
+
 		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
-		
+
 		onPointTurnBy(90);
-		
+
 		corr.turnOffCorrection();
 		moveForwardSlow();
 		corr.rotateCorrection();
-		
+
 		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
-		
+
 	}
-	
+
+	public void performRotationCorrectionLocalization() {
+
+		corr.turnOffCorrection();
+		moveForwardSlow();
+		corr.rotateCorrection();
+
+		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
+
+		onPointTurnBy(90);
+
+		corr.turnOffCorrection();
+		moveForwardSlow();
+		corr.rotateCorrection();
+
+		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
+
+	}
+
 	private boolean travelToWaypoints(ArrayList<Intersection> listOfWayPoints) {
-		
+
 		Intersection intersection;
 		boolean isSuccess = false;
-		double deltaTheta;
 
 		for (int i = 0; i < listOfWayPoints.size(); i++) {
 
 			intersection = listOfWayPoints.get(i);
 
-			if(i == 0){
-				deltaTheta = findAngle(intersection.getXInCm(),intersection.getYInCm());
-				onPointTurnBy(deltaTheta);
-				
-				if(!isPathAheadSafe()){
-					return false;
-				}
-			}
-			
 			if (i == listOfWayPoints.size() - 1) {
 				isSuccess = travelCoordinate(intersection.getXInCm(),
 						intersection.getYInCm(), true);
@@ -450,10 +443,10 @@ public class MobileRobot extends SensorMotorUser {
 				isSuccess = travelCoordinate(intersection.getXInCm(),
 						intersection.getYInCm(), false);
 			}
-			
-			if(isSuccess){
+
+			if (isSuccess) {
 				travelCounter++;
-				if(travelCounter % LOCALIZE_PERIODICALLY == 0){
+				if (travelCounter % LOCALIZE_PERIODICALLY == 0) {
 					performRotationCorrection();
 				}
 			}
@@ -479,7 +472,7 @@ public class MobileRobot extends SensorMotorUser {
 		}
 
 	}
-	
+
 	private void whileMovingBackwardTurnBy(double minimumAngle) {
 
 		if (minimumAngle > 0) {
@@ -533,14 +526,13 @@ public class MobileRobot extends SensorMotorUser {
 
 	}
 
-	
-	private void howToMoveDecider(double xTarget, double yTarget, double deltaTheta){
-		
+	private void howToMoveDecider(double xTarget, double yTarget,
+			double deltaTheta) {
+
 		if (Math.abs(deltaTheta) > ANGLE_ERROR_THRESHOLD) {
-			if (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD){
+			if (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD) {
 				onPointTurnBy(deltaTheta);
-			}
-			else {
+			} else {
 				whileMovingTurnBy(deltaTheta);
 			}
 
@@ -548,54 +540,94 @@ public class MobileRobot extends SensorMotorUser {
 
 			moveForward(); // the heading is good
 		}
-		
-	}
-	
-	
-	private void removePath(ArrayList<Intersection> listOfWayPoints){
-		
-		Intersection prevIntersection = Map.getIntersection(
-				xPrevTarget, yPrevTarget);
 
-		int indexOfNextIntersection = listOfWayPoints
-				.indexOf(prevIntersection) + 1;
+	}
+
+	private void removePath(ArrayList<Intersection> listOfWayPoints) {
+
+		Intersection prevIntersection = Map.getIntersection(xPrevTarget,
+				yPrevTarget);
+
+		int indexOfNextIntersection = listOfWayPoints.indexOf(prevIntersection) + 1;
 
 		Intersection nextIntersection = listOfWayPoints
 				.get(indexOfNextIntersection);
 
 		Map.removeEdge(prevIntersection, nextIntersection);
-		
+
 	}
-	
-	
-	private double findAngle(double xTarget, double yTarget){
+
+	private double findAngle(double xTarget, double yTarget) {
 		double xDiff;
 		double yDiff;
 		double targetTheta;
 		double deltaTheta;
-		
+
 		xDiff = xTarget - odo.getX();
 		yDiff = yTarget - odo.getY();
 		targetTheta = odo.fixDegAngle(90 - Math.toDegrees(Math.atan2(yDiff,
 				xDiff)));
-		
+
 		deltaTheta = targetTheta - odo.getTheta();
 
 		deltaTheta = getMinAngle(deltaTheta);
-		
+
 		return deltaTheta;
-		
+
 	}
-	
 
 	// returns the number of degrees the wheels must turn over a distance
 	private int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
+	// returns the distance from tacho count
+	private int convertTachoCount(double radius, int tachoCount) {
+		return (int) ((2 * Math.PI * radius) / (360.0 * tachoCount));
+	}
+
 	// returns the number of degrees to turn a certain angle
 	private int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	}
+
+	private void specialMoveAround() {
+
+		int initialLineCount = corr.getLineCount();
+		double initialX = odo.getX();
+		double initialY = odo.getY();
+
+		int initialLeftTacho = leftMotor.getTachoCount();
+		int initialRightTacho = rightMotor.getTachoCount();
+
+		blockDetector.turnOffBlockDetection();
+
+		travelMagnitude(Map.TILE_SIZE * 2);
+
+		int changeInLineCount = corr.getLineCount() - initialLineCount;
+		int currentLineCount = corr.getLineCount();
+
+		int leftTachoDifference = leftMotor.getTachoCount() - initialLeftTacho;
+		int rightTachoDifference = rightMotor.getTachoCount() - initialRightTacho;
+
+		while ((currentLineCount < (initialLineCount + 2 * changeInLineCount))
+				&& (convertTachoCount(LEFT_RADIUS, leftTachoDifference) < Map.TILE_SIZE * 2)
+				&& (convertTachoCount(RIGHT_RADIUS, rightTachoDifference) < Map.TILE_SIZE * 2)) {
+			
+			moveBackward();
+			currentLineCount = corr.getLineCount();
+			
+		}
+		
+		stopMoving();
+
+		odo.setY(initialY);
+		odo.setX(initialX);
+		
+		performRotationCorrection();
+
+		blockDetector.turnOnBlockDetection();
+
 	}
 
 }

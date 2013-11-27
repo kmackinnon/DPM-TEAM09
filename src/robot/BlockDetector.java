@@ -19,7 +19,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	private final int DIST_TO_STOP = 11;
 	private final int LIGHT_DIFF = 5;
-	private final double RED_BLUE_RATIO = 1.8;
+	private final double UPPER_RED_BLUE_RATIO = 1.4;
 	private final double WOOD_RATIO = 1.9;
 
 	private boolean isObjectDetected = false;
@@ -220,7 +220,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 			ratio = redValue / blueValue;
 
-			if (ratio < RED_BLUE_RATIO) {
+			if (ratio < UPPER_RED_BLUE_RATIO) {
 				counter++;
 			}
 		}

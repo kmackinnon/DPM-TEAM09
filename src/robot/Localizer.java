@@ -35,7 +35,7 @@ public class Localizer extends MobileRobot {
 		ultrasonicLocalization();
 		xyUltrasonicCorrection();
 
-		travelTileCoordinate(getXStart(), getYStart());
+		travelCoordinate(getXStart()*Map.TILE_SIZE, getYStart()*Map.TILE_SIZE, true);
 		
 		if(getXStart()==0 && getYStart()==0){
 			turnToOnPoint(0);

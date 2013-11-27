@@ -63,7 +63,7 @@ public class Competitor {
 
 		localizer.localize();
 		Sound.beep();
-		
+
 		explorer.liftClaw();
 
 		MobileRobot.corr.startCorrectionTimer();
@@ -128,6 +128,8 @@ public class Competitor {
 
 		SensorMotorUser.setStartCorner(corner.getCooridinates());
 
+		setCornersForbidden();
+
 	}
 
 	private static void testWithoutBluetooth() {
@@ -155,6 +157,69 @@ public class Competitor {
 
 		SensorMotorUser.setStartCorner(new int[] { 0, 0 });
 
+	}
+	
+	
+	private static void setCornersForbidden(){
+
+		Map.setForbiddenZone(new int[] { 0, 0,
+				0, 0 });
+		
+		Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+				Map.NUM_OF_INTERSECTIONS - 1, 0 });
+
+		Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
+				Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
+				Map.NUM_OF_INTERSECTIONS - 1 });
+
+		Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1, 0,
+				Map.NUM_OF_INTERSECTIONS - 1 });
+		
+		
+		
+//		if (corner == StartCorner.BOTTOM_LEFT) {
+//			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+//					Map.NUM_OF_INTERSECTIONS - 1, 0 });
+//
+//			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
+//					Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
+//					Map.NUM_OF_INTERSECTIONS - 1 });
+//
+//			Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1,
+//					0, Map.NUM_OF_INTERSECTIONS - 1 });
+//		}
+//
+//		else if (corner == StartCorner.BOTTOM_RIGHT) {
+//			Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
+//
+//			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
+//					Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
+//					Map.NUM_OF_INTERSECTIONS - 1 });
+//
+//			Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1,
+//					0, Map.NUM_OF_INTERSECTIONS - 1 });
+//		}
+//
+//		else if (corner == StartCorner.TOP_RIGHT) {
+//			Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
+//
+//			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+//					Map.NUM_OF_INTERSECTIONS - 1, 0 });
+//
+//			Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1,
+//					0, Map.NUM_OF_INTERSECTIONS - 1 });
+//		}
+//		
+//		else if (corner == StartCorner.TOP_LEFT) {
+//			Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
+//
+//			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+//					Map.NUM_OF_INTERSECTIONS - 1, 0 });
+//
+//			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
+//					Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
+//					Map.NUM_OF_INTERSECTIONS - 1 });
+//		}
 	}
 
 }

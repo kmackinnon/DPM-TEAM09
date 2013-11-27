@@ -2,6 +2,7 @@ package robot;
 
 import lejos.nxt.ColorSensor.Color;
 import lejos.nxt.Sound;
+import lejos.nxt.comm.RConsole;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
 
@@ -27,13 +28,14 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	private int scanMinDistance;
 	private double minDistanceAngle;
+	private int frontCSIgnoreCounter;
 
 	// variables for object detection
 	private int[] window = { 255, 255, 255, 255, 255 };
+	private int[] colorDiffWindow = { 0, 0, 0, 0, 0 };
 	private int prevValue = 0;
-	private boolean prevLatch = false;
+	private boolean prevLatch = false, latch = false;
 	private int median, value, diff;
-	private boolean latch;
 
 	public BlockDetector() {
 		lock = new Object();
@@ -47,6 +49,9 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	public void turnOnBlockDetection() {
 		isObjectDetected = false;
 		doBlockDetection = true;
+		latch = false;
+		prevLatch = false;
+		frontCSIgnoreCounter = 0;
 	}
 
 	public void turnOffBlockDetection() {
@@ -123,27 +128,38 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	public boolean isObjectDetected() {
 		// SensorMotorUser.frontCS.setFloodlight(true);
 
+		frontCSIgnoreCounter++;
+
 		// stopping by ultrasonic sensor
 		shiftArrayByOne(window, getUSDistance());
 		median = getMedian(window);
-		// RConsole.println("Distance: " + median);
-		if (median <= DIST_TO_STOP) {
-			return true;
+//		RConsole.println("Distance: " + median);
+		if(frontCSIgnoreCounter>=10){
+
+			if (median <= DIST_TO_STOP) {
+				return true;
+			}
 		}
 
 		// stopping by color sensor differential
 		latch = false;
 		value = frontCS.getRawLightValue();
 		diff = value - prevValue;
-		// RConsole.println("diff: " + diff);
-		if (diff > LIGHT_DIFF) {
-			latch = true;
-		}
-		if (latch && prevLatch) {
-			prevLatch = false;
-			return true;
-		}
+		shiftArrayByOne(colorDiffWindow, diff);
+		double mean = getMean(colorDiffWindow);
 		prevValue = value;
+//		RConsole.println("value: " + value);
+		
+		if(frontCSIgnoreCounter>=10){
+			if (mean > LIGHT_DIFF) {
+				latch = true;
+			}
+			if (latch && prevLatch) {
+				prevLatch = false;
+				return true;
+			}
+		}
+		
 		prevLatch = latch;
 
 		return false;

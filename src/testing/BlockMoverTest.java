@@ -3,6 +3,7 @@ package testing;
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.Sound;
+import lejos.nxt.comm.RConsole;
 import robot.BlockMover;
 import robot.MobileRobot;
 
@@ -22,6 +23,8 @@ public class BlockMoverTest {
 		while (buttonChoice == 0)
 			buttonChoice = Button.waitForAnyPress();
 
+//		RConsole.open();
+		
 		BlockMover blockMover = new BlockMover();
 
 		blockMover.liftClaw(); // lift the claw at the beginning
@@ -35,13 +38,14 @@ public class BlockMoverTest {
 			
 			// stop moving if there is something in front
 			if (MobileRobot.blockDetector.isObjectInFront()) {
+				Sound.beep();
 				blockMover.stopMoving();
 				isSearching = false; // i.e. it found a block
 
 				// if that object is styrofoam, perform grabBlock() method
 				if (MobileRobot.blockDetector.isObjectStyrofoam()) {
 					blockMover.grabBlock();
-					Sound.beep();
+					Sound.twoBeeps();
 				} else {
 					LCD.drawString("Not styro", 0, 0);
 				}
@@ -49,6 +53,8 @@ public class BlockMoverTest {
 			}
 
 		}
+		
+//		RConsole.close();
 
 	}
 

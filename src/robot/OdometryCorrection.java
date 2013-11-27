@@ -19,6 +19,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private Odometer odo;
 
 	private int lineCounter = 0;
+	private int lineDetectIgnoreCounter = 0;
 	
 	private boolean doCorrection = false;
 
@@ -351,22 +352,26 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private boolean negativeDiffL = false;
 	private boolean negativeDiffR = false;
 	private final int LINE_DIFF = 20;
-	private final int SLOW_LINE_DIFF = 12;
+	private final int SLOW_LINE_DIFF = 5;
 
 	private boolean lineDetected(ColorSensor cs, int lineDiff) {
 
+		lineDetectIgnoreCounter++;
+		
 		boolean left = (cs == leftCS);
 
 		int value = cs.getRawLightValue();
 
 		int diff = (left) ? (value - prevValueL) : (value - prevValueR);
 
-		// RConsole.println("Diff: " + diff);
-		if (diff < -lineDiff) {
-			if (left) {
-				negativeDiffL = true;
-			} else {
-				negativeDiffR = true;
+		if(lineDetectIgnoreCounter >= 500){
+			// RConsole.println("Diff: " + diff);
+			if (diff < -lineDiff) {
+				if (left) {
+					negativeDiffL = true;
+				} else {
+					negativeDiffR = true;
+				}
 			}
 		}
 
@@ -376,17 +381,19 @@ public class OdometryCorrection extends SensorMotorUser implements
 			prevValueR = value;
 		}
 
-		if (diff > lineDiff) {
-			if (negativeDiffL && left) {
-				// RConsole.println("Ldetected");
-				// Sound.beep();
-				negativeDiffL = false;
-				return true;
-			} else if (negativeDiffR && !left) {
-				// RConsole.println("Rdetected");
-				// Sound.beep();
-				negativeDiffR = false;
-				return true;
+		if(lineDetectIgnoreCounter >= 500){
+			if (diff > lineDiff) {
+				if (negativeDiffL && left) {
+					// RConsole.println("Ldetected");
+					 Sound.beep();
+					negativeDiffL = false;
+					return true;
+				} else if (negativeDiffR && !left) {
+					// RConsole.println("Rdetected");
+					 Sound.beep();
+					negativeDiffR = false;
+					return true;
+				}
 			}
 		}
 
@@ -601,6 +608,8 @@ public class OdometryCorrection extends SensorMotorUser implements
 	}
 
 	public void rotateCorrection() {
+		
+		lineDetectIgnoreCounter = 0;
 
 		initialX = odo.getX();
 		initialY = odo.getY();
@@ -608,12 +617,12 @@ public class OdometryCorrection extends SensorMotorUser implements
 		
 		while ((!rightCSDone) || (!leftCSDone)) {
 
-			if ((!rightCSDone) && lineDetected(rightCS)) {
+			if ((!rightCSDone) && lineDetectedSlow(rightCS)) {
 				rightCSDone = true;
 				rightMotor.setSpeed(0);
 			}
 
-			if ((!leftCSDone) && lineDetected(leftCS)) {
+			if ((!leftCSDone) && lineDetectedSlow(leftCS)) {
 				leftCSDone = true;
 				leftMotor.setSpeed(0);
 			}

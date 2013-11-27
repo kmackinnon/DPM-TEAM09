@@ -53,7 +53,7 @@ public class Localizer extends MobileRobot {
 			turnToOnPoint(90);
 		}
 		
-		//performRotationCorrectionLocalization();
+		performRotationCorrectionLocalization();
 		
 		initializePrevTarget(odo.getX(),odo.getY());
 		

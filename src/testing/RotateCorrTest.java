@@ -20,9 +20,9 @@ public class RotateCorrTest {
 		MobileRobot.corr.startCorrectionTimer();
 		robot.liftClaw();
 
-		robot.performRotationCorrection();
+		robot.performRotationCorrectionLocalization();
 		
-		robot.travelCoordinate(0,0,true);
+		//robot.travelCoordinate(0,0,true);
 		
 		Sound.beep();
 		

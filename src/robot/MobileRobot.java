@@ -392,36 +392,36 @@ public class MobileRobot extends SensorMotorUser {
 		onPointTurnBy(90);
 
 		corr.turnOffCorrection();
-		moveForward();
+		moveForwardSlow();
 		corr.rotateCorrection();
 
-		travelMagnitude(-SENSOR_TO_WHEEL_DISTANCE);
+		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
 
 		onPointTurnBy(90);
 
 		corr.turnOffCorrection();
-		moveForward();
+		moveForwardSlow();
 		corr.rotateCorrection();
 
-		travelMagnitude(-SENSOR_TO_WHEEL_DISTANCE);
+		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
 
 	}
 
 	public void performRotationCorrectionLocalization() {
 
 		corr.turnOffCorrection();
-		moveForward();
+		moveForwardSlow();
 		corr.rotateCorrection();
 
-		travelMagnitude(-SENSOR_TO_WHEEL_DISTANCE);
+		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
 
 		onPointTurnBy(90);
 
 		corr.turnOffCorrection();
-		moveForward();
+		moveForwardSlow();
 		corr.rotateCorrection();
 
-		travelMagnitude(-SENSOR_TO_WHEEL_DISTANCE);
+		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
 
 	}
 
@@ -444,12 +444,12 @@ public class MobileRobot extends SensorMotorUser {
 						intersection.getYInCm(), false);
 			}
 
-//			if (isSuccess) {
-//				travelCounter++;
-//				if (travelCounter % LOCALIZE_PERIODICALLY == 0) {
-//					performRotationCorrection();
-//				}
-//			}
+			if (isSuccess) {
+				travelCounter++;
+				if (travelCounter % LOCALIZE_PERIODICALLY == 0) {
+					performRotationCorrection();
+				}
+			}
 
 			if (!isSuccess) {
 

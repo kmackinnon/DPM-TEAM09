@@ -23,7 +23,7 @@ public class BlockMoverTest {
 		while (buttonChoice == 0)
 			buttonChoice = Button.waitForAnyPress();
 
-//		RConsole.open();
+		//RConsole.open();
 		
 		BlockMover blockMover = new BlockMover();
 
@@ -54,7 +54,7 @@ public class BlockMoverTest {
 
 		}
 		
-//		RConsole.close();
+		//RConsole.close();
 
 	}
 

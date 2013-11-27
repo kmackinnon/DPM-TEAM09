@@ -68,18 +68,18 @@ public class Localizer extends MobileRobot {
 		Arrays.fill(distanceArray, US_SENSOR_255);
 
 		// determine initial position of looking at or away from wall
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 10; i++) {
 
 			shiftArrayByOne(distanceArray, getUSDistance());
 
 			medianDistance = getMedian(distanceArray);
 
-			if (medianDistance <= 10) {
+			if (medianDistance <= 30) {
 				countWall++;
 			}
 		}
 
-		isFacingWall = countWall > 3; // either facing wall or away from wall
+		isFacingWall = countWall >= 7; // either facing wall or away from wall
 
 		if (!isFacingWall) {
 			fallingEdge();

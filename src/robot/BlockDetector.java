@@ -18,7 +18,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 	private Object lock;
 
 	private final int DIST_TO_STOP = 11;
-	private final int LIGHT_DIFF = 5;
+	private final int LIGHT_DIFF = 25;
 	private final double UPPER_RED_BLUE_RATIO = 1.4;
 	private final double WOOD_RATIO = 1.9;
 
@@ -32,7 +32,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	// variables for object detection
 	private int[] window = { 255, 255, 255, 255, 255 };
-	private int[] colorDiffWindow = { 0, 0, 0, 0, 0 };
+	private int[] colorDiffWindow = { 0, 0, 0, 0, 0 , 0, 0, 0, 0, 0};
 	private int prevValue = 0;
 	private boolean prevLatch = false, latch = false;
 	private int median, value, diff;
@@ -146,12 +146,12 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		value = frontCS.getRawLightValue();
 		diff = value - prevValue;
 		shiftArrayByOne(colorDiffWindow, diff);
-		double mean = getMean(colorDiffWindow);
+		double colorDiffMedian = getMedian(colorDiffWindow);
 		prevValue = value;
 //		RConsole.println("value: " + value);
 		
 		if(frontCSIgnoreCounter>=10){
-			if (mean > LIGHT_DIFF) {
+			if (colorDiffMedian > LIGHT_DIFF) {
 				latch = true;
 			}
 			if (latch && prevLatch) {
@@ -220,7 +220,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 			ratio = redValue / blueValue;
 
-			if (ratio < UPPER_RED_BLUE_RATIO) {
+			if (ratio < UPPER_RED_BLUE_RATIO && ratio > 0) {
 				counter++;
 			}
 		}

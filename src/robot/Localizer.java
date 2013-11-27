@@ -35,7 +35,7 @@ public class Localizer extends MobileRobot {
 		ultrasonicLocalization();
 		xyUltrasonicCorrection();
 
-		travelCoordinate(getXStart()*Map.TILE_SIZE, getYStart()*Map.TILE_SIZE, true);
+		travelTileCoordinate(getXStart(), getYStart());
 		
 		if(getXStart()==0 && getYStart()==0){
 			turnToOnPoint(0);
@@ -53,7 +53,7 @@ public class Localizer extends MobileRobot {
 			turnToOnPoint(90);
 		}
 		
-		performRotationCorrectionLocalization();
+		//performRotationCorrectionLocalization();
 		
 		initializePrevTarget(odo.getX(),odo.getY());
 		

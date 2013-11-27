@@ -1,6 +1,7 @@
 package robot;
 
 import lejos.nxt.ColorSensor;
+import lejos.nxt.Sound;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
 
@@ -350,16 +351,13 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private boolean negativeDiffL = false;
 	private boolean negativeDiffR = false;
 	private final int LINE_DIFF = 20;
-	private final int SLOW_LINE_DIFF = 5;
+	private final int SLOW_LINE_DIFF = 12;
 
 	private boolean lineDetected(ColorSensor cs, int lineDiff) {
 
 		boolean left = (cs == leftCS);
 
 		int value = cs.getRawLightValue();
-
-		// LCD.clear();
-		// LCD.drawInt((int)value, 0, 7);
 
 		int diff = (left) ? (value - prevValueL) : (value - prevValueR);
 
@@ -610,18 +608,18 @@ public class OdometryCorrection extends SensorMotorUser implements
 		
 		while ((!rightCSDone) || (!leftCSDone)) {
 
-			if ((!rightCSDone) && lineDetectedSlow(rightCS)) {
+			if ((!rightCSDone) && lineDetected(rightCS)) {
 				rightCSDone = true;
 				rightMotor.setSpeed(0);
 			}
 
-			if ((!leftCSDone) && lineDetectedSlow(leftCS)) {
+			if ((!leftCSDone) && lineDetected(leftCS)) {
 				leftCSDone = true;
 				leftMotor.setSpeed(0);
 			}
 
 			if (rightCSDone && leftCSDone) {
-				
+				Sound.beep();
 				if(odo.getTheta() - initialTheta > LARGE_ANGLE_RANGE_TOLERANCE){
                     break;
 				}

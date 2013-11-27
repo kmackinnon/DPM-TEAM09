@@ -134,8 +134,8 @@ public class Competitor {
 
 	private static void testWithoutBluetooth() {
 
-		int[] testGreen = { 4, 4, 5, 6 };
-		int[] testRed = { 0, 1, 4, 3 };
+		int[] testGreen = { 6, 3, 8, 4 };
+		int[] testRed = { 0, 5, 2, 9 };
 
 		// set role. For now, assume the robot will be a builder.
 		SensorMotorUser.becomeBuilder(true);
@@ -145,81 +145,65 @@ public class Competitor {
 		Map.setForbiddenZone(testRed);
 
 		// corners
-		Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
-				Map.NUM_OF_INTERSECTIONS - 1, 0 });
+		Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
 
 		Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
 				Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
 				Map.NUM_OF_INTERSECTIONS - 1 });
 
-		Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1, 0,
-				Map.NUM_OF_INTERSECTIONS - 1 });
+		Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+				Map.NUM_OF_INTERSECTIONS - 1, 0 });
 
-		SensorMotorUser.setStartCorner(new int[] { 0, 0 });
+		SensorMotorUser.setStartCorner(new int[] { 0,
+				Map.NUM_OF_INTERSECTIONS - 1 });
 
 	}
-	
-	
-	private static void setCornersForbidden(){
 
-		Map.setForbiddenZone(new int[] { 0, 0,
-				0, 0 });
-		
-		Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
-				Map.NUM_OF_INTERSECTIONS - 1, 0 });
+	private static void setCornersForbidden() {
 
-		Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
-				Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
-				Map.NUM_OF_INTERSECTIONS - 1 });
+		if (corner == StartCorner.BOTTOM_LEFT) {
+			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+					Map.NUM_OF_INTERSECTIONS - 1, 0 });
 
-		Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1, 0,
-				Map.NUM_OF_INTERSECTIONS - 1 });
-		
-		
-		
-//		if (corner == StartCorner.BOTTOM_LEFT) {
-//			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
-//					Map.NUM_OF_INTERSECTIONS - 1, 0 });
-//
-//			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
-//					Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
-//					Map.NUM_OF_INTERSECTIONS - 1 });
-//
-//			Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1,
-//					0, Map.NUM_OF_INTERSECTIONS - 1 });
-//		}
-//
-//		else if (corner == StartCorner.BOTTOM_RIGHT) {
-//			Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
-//
-//			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
-//					Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
-//					Map.NUM_OF_INTERSECTIONS - 1 });
-//
-//			Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1,
-//					0, Map.NUM_OF_INTERSECTIONS - 1 });
-//		}
-//
-//		else if (corner == StartCorner.TOP_RIGHT) {
-//			Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
-//
-//			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
-//					Map.NUM_OF_INTERSECTIONS - 1, 0 });
-//
-//			Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1,
-//					0, Map.NUM_OF_INTERSECTIONS - 1 });
-//		}
-//		
-//		else if (corner == StartCorner.TOP_LEFT) {
-//			Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
-//
-//			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
-//					Map.NUM_OF_INTERSECTIONS - 1, 0 });
-//
-//			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
-//					Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
-//					Map.NUM_OF_INTERSECTIONS - 1 });
-//		}
+			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
+					Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
+					Map.NUM_OF_INTERSECTIONS - 1 });
+
+			Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1,
+					0, Map.NUM_OF_INTERSECTIONS - 1 });
+		}
+
+		else if (corner == StartCorner.BOTTOM_RIGHT) {
+			Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
+
+			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
+					Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
+					Map.NUM_OF_INTERSECTIONS - 1 });
+
+			Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1,
+					0, Map.NUM_OF_INTERSECTIONS - 1 });
+		}
+
+		else if (corner == StartCorner.TOP_RIGHT) {
+			Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
+
+			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+					Map.NUM_OF_INTERSECTIONS - 1, 0 });
+
+			Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1,
+					0, Map.NUM_OF_INTERSECTIONS - 1 });
+		}
+
+		else if (corner == StartCorner.TOP_LEFT) {
+			Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
+
+			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+					Map.NUM_OF_INTERSECTIONS - 1, 0 });
+
+			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
+					Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
+					Map.NUM_OF_INTERSECTIONS - 1 });
+		}
 	}
 
 }

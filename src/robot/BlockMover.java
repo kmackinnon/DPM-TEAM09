@@ -69,11 +69,11 @@ public class BlockMover extends MobileRobot {
 	}
 
 	public void grabBlock() {
-		travelMagnitude(-19);
+		travelMagnitude(-21);
 
 		dropClaw();
 
-		travelMagnitude(21);
+		travelMagnitude(23);
 
 		liftClaw();
 

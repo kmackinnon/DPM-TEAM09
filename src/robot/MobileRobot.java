@@ -50,7 +50,7 @@ public class MobileRobot extends SensorMotorUser {
 
 				if (destination.getX() == INT_SPECIAL_FLAG
 						&& destination.getY() == INT_SPECIAL_FLAG) {
-					listOfWayPoints = AStar.algorithmForTargetZone(source);
+					listOfWayPoints = Dijkstra.algorithmForTargetZone(source);
 				}
 
 				else {

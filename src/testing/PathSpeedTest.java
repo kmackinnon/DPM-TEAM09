@@ -1,12 +1,11 @@
 package testing;
 
 import lejos.nxt.Button;
-import lejos.nxt.LCD;
+import lejos.nxt.comm.RConsole;
 import robot.AStar;
 import robot.Dijkstra;
 import robot.Intersection;
 import robot.Map;
-import robot.MobileRobot;
 
 //Use to compare speed of AStar vs Dijkstra
 public class PathSpeedTest {
@@ -20,44 +19,49 @@ public class PathSpeedTest {
 		while (option == 0)
 			option = Button.waitForAnyPress();
 		
+		RConsole.open();
+		
 		Map.initializeMap();
+		Map.setTargetZone(new int[] {7,6,8,8});
+		Map.setForbiddenZone(new int[] { 0, 1, 4, 3 });
 		
-		MobileRobot robot = new MobileRobot();
+		//MobileRobot robot = new MobileRobot();
 		
-//		startTime = System.currentTimeMillis();
-//		Dijkstra.algorithm(new Intersection(0,0), new Intersection(2,0));
-//		LCD.drawInt((int) (System.currentTimeMillis() - startTime), 0, 2);
-//		
-//		startTime = System.currentTimeMillis();
-//		Dijkstra.algorithm(new Intersection(2,0), new Intersection(2,2));
-//		LCD.drawInt((int) (System.currentTimeMillis() - startTime), 0, 3);
-//		
-//		startTime = System.currentTimeMillis();
-//		Dijkstra.algorithm(new Intersection(2,2), new Intersection(0,2));
-//		LCD.drawInt((int) (System.currentTimeMillis() - startTime), 0, 4);
-//		
-//		startTime = System.currentTimeMillis();
-//		Dijkstra.algorithm(new Intersection(0,2), new Intersection(0,0));
-//		LCD.drawInt((int) (System.currentTimeMillis() - startTime), 0, 5);
+		startTime = System.currentTimeMillis();
+		Dijkstra.algorithmForTargetZone(new Intersection(0,0));
+		RConsole.println((int) (System.currentTimeMillis() - startTime) + "");
+		
+		startTime = System.currentTimeMillis();
+		Dijkstra.algorithmForTargetZone(new Intersection(10,0));
+		RConsole.println((int) (System.currentTimeMillis() - startTime) + "");
+		
+		startTime = System.currentTimeMillis();
+		Dijkstra.algorithmForTargetZone(new Intersection(10,10));
+		RConsole.println((int) (System.currentTimeMillis() - startTime) + "");
+		
+		startTime = System.currentTimeMillis();
+		Dijkstra.algorithmForTargetZone(new Intersection(0,10));
+		RConsole.println((int) (System.currentTimeMillis() - startTime) + "");
 		
 		
 		startTime = System.currentTimeMillis();
-		AStar.algorithm(new Intersection(0,0), new Intersection(2,0));
-		LCD.drawInt((int) (System.currentTimeMillis() - startTime), 0, 2);
+		AStar.algorithmForTargetZone(new Intersection(0,0));
+		RConsole.println((int) (System.currentTimeMillis() - startTime) + "");
 		
 		startTime = System.currentTimeMillis();
-		AStar.algorithm(new Intersection(2,0), new Intersection(2,2));
-		LCD.drawInt((int) (System.currentTimeMillis() - startTime), 0, 3);
+		AStar.algorithmForTargetZone(new Intersection(10,0));
+		RConsole.println((int) (System.currentTimeMillis() - startTime) + "");
 		
 		startTime = System.currentTimeMillis();
-		AStar.algorithm(new Intersection(2,2), new Intersection(0,2));
-		LCD.drawInt((int) (System.currentTimeMillis() - startTime), 0, 4);
+		AStar.algorithmForTargetZone(new Intersection(10,10));
+		RConsole.println((int) (System.currentTimeMillis() - startTime) + "");
 		
 		startTime = System.currentTimeMillis();
-		AStar.algorithm(new Intersection(0,2), new Intersection(0,0));
-		LCD.drawInt((int) (System.currentTimeMillis() - startTime), 0, 5);
+		AStar.algorithmForTargetZone(new Intersection(0,10));
+		RConsole.println((int) (System.currentTimeMillis() - startTime) + "");
 
 		Button.waitForAnyPress();
+		RConsole.close();
 		System.exit(0);
 		
 	}

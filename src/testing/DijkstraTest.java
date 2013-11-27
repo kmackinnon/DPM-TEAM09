@@ -1,10 +1,9 @@
 package testing;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import lejos.nxt.comm.RConsole;
-import robot.Dijkstra;
+import robot.AStar;
 import robot.Intersection;
 import robot.Map;
 
@@ -47,7 +46,7 @@ public class DijkstraTest {
 		// ArrayList<Intersection> listOfWayPoints = Dijkstra.algorithm(
 		// startingPoint, destination);
 
-		ArrayList<Intersection> listOfWayPoints = Dijkstra
+		ArrayList<Intersection> listOfWayPoints = AStar
 				.algorithmForTargetZone(startingPoint);
 
 		Map.removeEdge(new Intersection(5,3), new Intersection(6,4));
@@ -75,7 +74,7 @@ public class DijkstraTest {
 			
 			
 			if(i< listOfWayPoints.size()-1 && !listOfWayPoints.get(i).getAdjacencyList().contains(listOfWayPoints.get(i+1))){
-				ArrayList<Intersection> secondPartOfNewRoute = Dijkstra.algorithmForTargetZone(listOfWayPoints.get(i));
+				ArrayList<Intersection> secondPartOfNewRoute = AStar.algorithmForTargetZone(listOfWayPoints.get(i));
 				
 				for(int j=listOfWayPoints.size()-1; j>=i+1.;j--){
 					listOfWayPoints.remove(j);

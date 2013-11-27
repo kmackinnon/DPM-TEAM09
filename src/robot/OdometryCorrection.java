@@ -2,6 +2,7 @@ package robot;
 
 import lejos.nxt.ColorSensor;
 import lejos.nxt.Sound;
+import lejos.nxt.comm.RConsole;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
 
@@ -361,16 +362,20 @@ public class OdometryCorrection extends SensorMotorUser implements
 		boolean left = (cs == leftCS);
 
 		int value = cs.getRawLightValue();
+		RConsole.println("" + value);
 
 		int diff = (left) ? (value - prevValueL) : (value - prevValueR);
 
-		if(lineDetectIgnoreCounter >= 500){
+		
+		if(lineDetectIgnoreCounter >= 100){
 			// RConsole.println("Diff: " + diff);
-			if (diff < -lineDiff) {
-				if (left) {
-					negativeDiffL = true;
-				} else {
-					negativeDiffR = true;
+			if(value < 545){
+				if (diff < -lineDiff) {
+					if (left) {
+						negativeDiffL = true;
+					} else {
+						negativeDiffR = true;
+					}
 				}
 			}
 		}
@@ -381,15 +386,15 @@ public class OdometryCorrection extends SensorMotorUser implements
 			prevValueR = value;
 		}
 
-		if(lineDetectIgnoreCounter >= 500){
+		if(lineDetectIgnoreCounter >= 100){
 			if (diff > lineDiff) {
 				if (negativeDiffL && left) {
-					// RConsole.println("Ldetected");
+					 //RConsole.print(" Ldetected");
 					 Sound.beep();
 					negativeDiffL = false;
 					return true;
 				} else if (negativeDiffR && !left) {
-					// RConsole.println("Rdetected");
+					 //RConsole.print(" Rdetected");
 					 Sound.beep();
 					negativeDiffR = false;
 					return true;

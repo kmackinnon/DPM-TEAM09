@@ -6,13 +6,27 @@ import lejos.nxt.comm.RConsole;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
 
+/**
+ * OdometryCorrection makes sure the odometer accurately reflects the position
+ * and orientation of the robot. It uses line detections to accomplish this.
+ * Diagonal correction was written and has not been deleted. However, we decided
+ * not to use it since it did not seem to help.
+ * 
+ * @author Kevin Musgrave, Simon Lee, Sidney Ng, Keith MacKinnon
+ */
+
 public class OdometryCorrection extends SensorMotorUser implements
 		TimerListener {
 
+	/**
+	 * The robot ignores line detections that happen within this distance of the
+	 * previous line detections
+	 */
 	private final double MIN_DISTANCE_BETWEEN_DETECTIONS = 25;
+
 	private final double MAX_DISTANCE_BETWEEN_DIAGONAL_DETECTIONS = 14;
 	private final double DIAGONAL_IN_RADIANS = Math.toRadians(45);
-	
+
 	private final int LARGE_ANGLE_RANGE_TOLERANCE = 40;
 
 	private Timer correctionTimer;
@@ -21,11 +35,19 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	private int lineCounter = 0;
 	private int lineDetectIgnoreCounter = 0;
-	
+
 	private boolean doCorrection = false;
 
 	// straight line detection variables
+
+	/**
+	 * true if the left sensor has detected a line
+	 */
 	private boolean leftSensorDetected;
+
+	/**
+	 * true if the right sensor has detected a line
+	 */
 	private boolean rightSensorDetected;
 
 	private double rightTachoAtDetection;
@@ -34,6 +56,10 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private double prevRightTachoAtDetection;
 	private double prevLeftTachoAtDetection;
 
+	/**
+	 * the distance travelled by the side of the robot which detects a line
+	 * after the other side
+	 */
 	private double distanceTravelledByLaggingWheel;
 	private double angleOff;
 
@@ -56,10 +82,32 @@ public class OdometryCorrection extends SensorMotorUser implements
 	// end of diagonal detection variables
 
 	// rotate correction variables
+
+	/**
+	 * the right color sensor has detected a line during rotational correction,
+	 * and the right wheel has stopped moving
+	 */
 	private boolean rightCSDone;
+
+	/**
+	 * the left color sensor has detected a line during rotational correction,
+	 * and the left wheel has stopped moving
+	 */
 	private boolean leftCSDone;
+
+	/**
+	 * the x value of the odometer when rotational correction begins.
+	 */
 	private double initialX;
+
+	/**
+	 * the y value of the odometer when rotational correction begins.
+	 */
 	private double initialY;
+
+	/**
+	 * the theta value of the odometer when rotational correction begins.
+	 */
 	private double initialTheta;
 
 	public OdometryCorrection(Odometer odo) {
@@ -69,15 +117,25 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	}
 
-	public void turnOnLightSensors(){
+	/**
+	 * turns on the two color sensors
+	 */
+	public void turnOnLightSensors() {
 		leftCS.setFloodlight(true);
 		rightCS.setFloodlight(true);
 	}
-	
+
+	/**
+	 * stars the timer so that the timedOut method is called every period
+	 */
 	public void startCorrectionTimer() {
 		correctionTimer.start();
 	}
 
+	/**
+	 * turns on straight line odometry correction
+	 * 
+	 */
 	public void turnOnCorrection() {
 
 		leftSensorDetected = false;
@@ -104,32 +162,32 @@ public class OdometryCorrection extends SensorMotorUser implements
 	public void timedOut() {
 
 		// long start = System.currentTimeMillis();
-		
+
 		if (doCorrection) {
-			
+
 			Direction currentDirection = odo.getDirection();
-			
+
 			if (currentDirection == Direction.NORTH
 					|| currentDirection == Direction.EAST
 					|| currentDirection == Direction.SOUTH
 					|| currentDirection == Direction.WEST) {
-				
+
 				straightLineCorrection();
-				
+
 			}
-			
-//			Direction currentDirection = odo.getDirection();
-//
-//			if (currentDirection == Direction.NORTHEAST
-//					|| currentDirection == Direction.SOUTHEAST
-//					|| currentDirection == Direction.NORTHWEST
-//					|| currentDirection == Direction.SOUTHWEST) {
-//				diagonalCorrection();
-//			}
-//
-//			else {
-//				
-//			}
+
+			// Direction currentDirection = odo.getDirection();
+			//
+			// if (currentDirection == Direction.NORTHEAST
+			// || currentDirection == Direction.SOUTHEAST
+			// || currentDirection == Direction.NORTHWEST
+			// || currentDirection == Direction.SOUTHWEST) {
+			// diagonalCorrection();
+			// }
+			//
+			// else {
+			//
+			// }
 
 		}
 
@@ -140,6 +198,10 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	}
 
+	/**
+	 * performs odometry correction when the robot is traveling on grid lines
+	 * (i.e. not diagonally).
+	 */
 	private void straightLineCorrection() {
 
 		// neither sensor has detected a line
@@ -175,7 +237,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 		if (leftSensorDetected && rightSensorDetected) {
 
 			lineCounter++;
-			
+
 			if (distanceTravelledByLaggingWheel != 0) {
 
 				correctXY();
@@ -196,6 +258,9 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	}
 
+	/**
+	 * We did not use diagonal odometry correction
+	 */
 	private void diagonalCorrection() {
 
 		if (lineDetected(leftCS)) {
@@ -261,6 +326,12 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	}
 
+	/**
+	 * We did not use diagonal odometry correction
+	 * 
+	 * @param measuredDistance
+	 * @param cs
+	 */
 	private void xyDiagonalCorrection(double measuredDistance, ColorSensor cs) {
 
 		boolean left = (cs == leftCS);
@@ -352,13 +423,30 @@ public class OdometryCorrection extends SensorMotorUser implements
 	private int prevValueR = 0;
 	private boolean negativeDiffL = false;
 	private boolean negativeDiffR = false;
+	/**
+	 * The difference in the color sensor values that signals a line detection
+	 * when the robot moves at regular speed.
+	 */
 	private final int LINE_DIFF = 20;
+	/**
+	 * The difference in the color sensor values that signals a line detection
+	 * when the robot moves slowly.
+	 */
 	private final int SLOW_LINE_DIFF = 5;
 
+	/**
+	 * 
+	 * @param cs
+	 *            the left or right color sensor
+	 * @param lineDiff
+	 *            the difference we require to determine if a line has been
+	 *            detected
+	 * @return true if the input color sensor has detected a line
+	 */
 	private boolean lineDetected(ColorSensor cs, int lineDiff) {
 
 		lineDetectIgnoreCounter++;
-		
+
 		boolean left = (cs == leftCS);
 
 		int value = cs.getRawLightValue();
@@ -366,10 +454,9 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		int diff = (left) ? (value - prevValueL) : (value - prevValueR);
 
-		
-		if(lineDetectIgnoreCounter >= 100){
+		if (lineDetectIgnoreCounter >= 100) {
 			// RConsole.println("Diff: " + diff);
-			if(value < 545){
+			if (value < 545) {
 				if (diff < -lineDiff) {
 					if (left) {
 						negativeDiffL = true;
@@ -386,16 +473,16 @@ public class OdometryCorrection extends SensorMotorUser implements
 			prevValueR = value;
 		}
 
-		if(lineDetectIgnoreCounter >= 100){
+		if (lineDetectIgnoreCounter >= 100) {
 			if (diff > lineDiff) {
 				if (negativeDiffL && left) {
-					 //RConsole.print(" Ldetected");
-					 Sound.beep();
+					// RConsole.print(" Ldetected");
+					Sound.beep();
 					negativeDiffL = false;
 					return true;
 				} else if (negativeDiffR && !left) {
-					 //RConsole.print(" Rdetected");
-					 Sound.beep();
+					// RConsole.print(" Rdetected");
+					Sound.beep();
 					negativeDiffR = false;
 					return true;
 				}
@@ -404,16 +491,24 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 		return false;
 	}
-	
-	
-	private boolean lineDetected(ColorSensor cs){
+
+	private boolean lineDetected(ColorSensor cs) {
 		return lineDetected(cs, LINE_DIFF);
 	}
-	
-	private boolean lineDetectedSlow(ColorSensor cs){
+
+	/**
+	 * determines if a line has been detected when the robot is moving slowly
+	 * 
+	 * @param cs
+	 * @return
+	 */
+	private boolean lineDetectedSlow(ColorSensor cs) {
 		return lineDetected(cs, SLOW_LINE_DIFF);
 	}
 
+	/**
+	 * helper function for straight line odometry correction
+	 */
 	private void correctXY() {
 
 		Direction currentDirection = odo.getDirection();
@@ -453,6 +548,9 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	}
 
+	/**
+	 * helper function for straight line odometry correction
+	 */
 	private void correctAngle() {
 
 		double currentAngleOff = 0;
@@ -473,7 +571,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 			currentAngleOff = currentTheta - 270;
 		}
 
-		else if(currentDirection == Direction.NORTH){
+		else if (currentDirection == Direction.NORTH) {
 			if (currentTheta < 20) {
 				currentAngleOff = currentTheta;
 			}
@@ -492,6 +590,9 @@ public class OdometryCorrection extends SensorMotorUser implements
 	}
 
 	// This is for the first light sensor that detects the line.
+	/**
+	 * helper function for straight line odometry correction
+	 */
 	private void firstDetection(ColorSensor cs) {
 
 		xAtFirstDetection = odo.getX();
@@ -516,6 +617,9 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	// This is when the light sensor detects the line after the other light
 	// sensor.
+	/**
+	 * helper function for straight line odometry correction
+	 */
 	private void secondDetection(ColorSensor cs) {
 
 		if (cs == rightCS) {
@@ -563,6 +667,13 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	}
 
+	/**
+	 * 
+	 * @param cs
+	 *            the left or right color sensor
+	 * @return true if the robot is approximately one tile from the previous
+	 *         line detection
+	 */
 	private boolean isOneTileFromPreviousDetection(ColorSensor cs) {
 
 		if (cs == leftCS) {
@@ -577,6 +688,12 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	}
 
+	/**
+	 * This was only used for diagonal odometry correction
+	 * 
+	 * @param cs
+	 * @return
+	 */
 	private boolean isLessThanHalfTileFromPreviousDetection(ColorSensor cs) {
 
 		if (cs == leftCS) {
@@ -605,6 +722,12 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	}
 
+	/**
+	 * helper for diagonal odometry correction (which we did not end up using)
+	 * 
+	 * @param measuredDistance
+	 * @return
+	 */
 	private double actualDistanceFromIntersection(double measuredDistance) {
 
 		return measuredDistance - ((SENSOR_WIDTH / 2) * Math.cos(45))
@@ -612,14 +735,20 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 	}
 
+	/**
+	 * This is used periodically to do major correction on the odometer. The
+	 * robot slowly moves forward until both sides detect the line. When one
+	 * side of the robot detects the line, that side's motor stops while the
+	 * other motor keeps moving until the other sensor detects the line as well.
+	 */
 	public void rotateCorrection() {
-		
+
 		lineDetectIgnoreCounter = 0;
 
 		initialX = odo.getX();
 		initialY = odo.getY();
 		initialTheta = odo.getTheta();
-		
+
 		while ((!rightCSDone) || (!leftCSDone)) {
 
 			if ((!rightCSDone) && lineDetectedSlow(rightCS)) {
@@ -634,8 +763,8 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 			if (rightCSDone && leftCSDone) {
 				Sound.beep();
-				if(odo.getTheta() - initialTheta > LARGE_ANGLE_RANGE_TOLERANCE){
-                    break;
+				if (odo.getTheta() - initialTheta > LARGE_ANGLE_RANGE_TOLERANCE) {
+					break;
 				}
 
 				odo.setTheta(90 * Math.round(odo.getTheta() / 90));
@@ -664,14 +793,14 @@ public class OdometryCorrection extends SensorMotorUser implements
 
 			}
 		}
-		
+
 		rightCSDone = false;
 		leftCSDone = false;
 
 	}
-	
-	public int getLineCount(){
+
+	public int getLineCount() {
 		return lineCounter;
 	}
-	
+
 }

@@ -3,12 +3,17 @@ package robot;
 import java.util.ArrayList;
 
 /**
- * Dijkstra contains Dijkstra's algorithm. The code is heavily based on this
- * webpage: http://en.literateprograms.org/Dijkstra's_algorithm_(Java).
+ * Dijkstra contains Dijkstra's algorithm. We started off by using Dijkstra
+ * only, but we switched to A* when we found out that it works faster in most
+ * cases. We still use Dijkstra for finding the shortest path to the target zone
+ * since it works faster than A* in this one case. The code is heavily based on
+ * this webpage: http://en.literateprograms.org/Dijkstra's_algorithm_(Java).
  * 
  * Java has its own Priority Queue. However, it is not included in LeJOS, so I
  * wrote a PriorityQueue class. I found this powerpoint useful while making the
  * class: http://www.cs.princeton.edu/~rs/AlgsDS07/06PriorityQueues.pdf
+ * 
+ * @author Kevin Musgrave
  */
 
 public class Dijkstra {
@@ -16,6 +21,7 @@ public class Dijkstra {
 	static int counter = 0;
 
 	/**
+	 * Gets the shortest path between two intersections.
 	 * 
 	 * @param source
 	 *            the intersection we want to find the shortest path FROM
@@ -31,6 +37,15 @@ public class Dijkstra {
 
 	}
 
+	/**
+	 * Gets the shortest path to the target zone. This is the only method that
+	 * we actually ended up using.
+	 * 
+	 * @param source
+	 *            the intersection we want to find the shortest path FROM
+	 * @return an arraylist of waypoints that comprise the shortest path to the
+	 *         target zone
+	 */
 	public static ArrayList<Intersection> algorithmForTargetZone(
 			Intersection source) {
 
@@ -53,6 +68,14 @@ public class Dijkstra {
 
 	}
 
+	/**
+	 * This is where all the Dijkstra computation happens.
+	 * 
+	 * @param input
+	 *            the starting intersection
+	 * @param input2
+	 *            the destination intersection
+	 */
 	private static void computePaths(Intersection input) {
 
 		Intersection source = Map.getIntersection(input);
@@ -104,6 +127,15 @@ public class Dijkstra {
 
 	}
 
+	/**
+	 * After the paths are computed, this method forms an arraylist using the
+	 * reference in each intersection that points to the preceding intersection
+	 * that lies on the shortest path.
+	 * 
+	 * @param destination
+	 *            the intersection we want to find the shortest path to
+	 * @return an arraylist of waypoints that make up the shortest path.
+	 */
 	private static ArrayList<Intersection> getShortestPathTo(
 			Intersection destination) {
 
@@ -130,6 +162,17 @@ public class Dijkstra {
 
 	}
 
+	/**
+	 * Calculates the weight of an edge (path) connecting two intersections.
+	 * Straight edges have a weight of 1, while diagonal edges have weight of
+	 * 1.414
+	 * 
+	 * @param a
+	 *            the first intersection
+	 * @param b
+	 *            the second intersection
+	 * @return the weight of the edge connection intersections "a" and "b"
+	 */
 	private static double getEdgeWeight(Intersection a, Intersection b) {
 
 		if (a.getX() == b.getX() || a.getY() == b.getY()) {
@@ -142,15 +185,36 @@ public class Dijkstra {
 
 	}
 
+	/**
+	 * Lejos does not have a PriorityQueue, so this class was made so that A*
+	 * and Dijkstra could work. I decided to make this a nested class because
+	 * there is no need for any other classes to see it.
+	 * 
+	 * 
+	 * @author Kevin
+	 * 
+	 */
 	private static class PriorityQueue {
 
+		/**
+		 * The representation of the priority queue
+		 */
 		private ArrayList<Intersection> queue;
 
+		/**
+		 * The constructor adds a null element to the beginning so that the swim
+		 * and sink functions are easier to code.
+		 */
 		public PriorityQueue() {
 			queue = new ArrayList<Intersection>();
 			queue.add(null);
 		}
 
+		/**
+		 * Removes the highest priority element from the queue.
+		 * 
+		 * @return the highest priority element
+		 */
 		public Intersection poll() {
 			Intersection highestPriority = queue.get(1);
 
@@ -164,6 +228,12 @@ public class Dijkstra {
 
 		}
 
+		/**
+		 * Adds an intersection to the queue.
+		 * 
+		 * @param intersection
+		 *            the intersection to add to the queue
+		 */
 		private void add(Intersection intersection) {
 
 			queue.add(intersection);
@@ -172,6 +242,13 @@ public class Dijkstra {
 
 		}
 
+		/**
+		 * Rearranges an element in the queue so that the elements are ordered
+		 * as they should be in a priority queue
+		 * 
+		 * @param k
+		 *            the element to be rearranged
+		 */
 		private void swimUp(int k) {
 
 			while (k > 1 && firstLowerThanSecond(k / 2, k)) {
@@ -181,6 +258,16 @@ public class Dijkstra {
 			}
 		}
 
+		/**
+		 * Determines if an element has higher priority than another element.
+		 * 
+		 * @param first
+		 *            the first element
+		 * @param second
+		 *            the second element
+		 * @return true if "first" has lower priority than "second", false
+		 *         otherwise
+		 */
 		private boolean firstLowerThanSecond(int first, int second) {
 
 			if (queue.get(second).getMinDistance() < queue.get(first)
@@ -194,6 +281,14 @@ public class Dijkstra {
 
 		}
 
+		/**
+		 * exchanges two elements in the priority queue
+		 * 
+		 * @param parent
+		 *            this element changes place with "child"
+		 * @param child
+		 *            this element changes place with "parent"
+		 */
 		private void exchange(int parent, int child) {
 
 			Intersection parentIntersection = queue.get(parent);
@@ -203,6 +298,13 @@ public class Dijkstra {
 
 		}
 
+		/**
+		 * Rearranges an element in the queue so that the elements are ordered
+		 * as they should be in a priority queue
+		 * 
+		 * @param k
+		 *            the element to be rearranged
+		 */
 		private void sinkDown(int k) {
 
 			int N = queue.size() - 1;
@@ -225,14 +327,30 @@ public class Dijkstra {
 
 		}
 
+		/**
+		 * 
+		 * @return true if the priority queue is empty
+		 */
 		private boolean isEmpty() {
 			return queue.isEmpty();
 		}
 
+		/**
+		 * 
+		 * @param intersection
+		 *            the intersection that we want the index of
+		 * @return the index of the intersection in the queue
+		 */
 		private int indexOf(Intersection intersection) {
 			return queue.indexOf(intersection);
 		}
 
+		/**
+		 * 
+		 * @param intersection
+		 *            the intersection we are looking for
+		 * @return true if the queue contains the intersection
+		 */
 		private boolean contains(Intersection intersection) {
 			return queue.contains(intersection);
 		}

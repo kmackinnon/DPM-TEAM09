@@ -2,7 +2,7 @@ package robot;
 
 /**Odometer keeps track of the position of the robot and its orientation
  * 
- * @author Simon Lee, Sidney Ng
+ * @author Simon Lee, Sidney Ng, Kevin Musgrave
  * 
  */
 
@@ -189,6 +189,10 @@ public class Odometer extends SensorMotorUser implements TimerListener {
 				/ WIDTH;
 	}
 	
+	/**
+	 * 
+	 * @return the Direction that the robot is facing (i.e NORTH for 0 degrees, SOUTH for 180 degrees etc)
+	 */
 	public Direction getDirection(){
 		
 		if(theta < LARGE_ANGLE_RANGE_TOLERANCE || theta > (360 - LARGE_ANGLE_RANGE_TOLERANCE)){

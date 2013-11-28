@@ -14,15 +14,30 @@ import bluetooth.Transmission;
  * receives the initial Bluetooth signal which determines competition
  * characteristics.
  * 
- * @author Keith MacKinnon
+ * @author Keith MacKinnon, Kevin Musgrave
  * 
  */
 
 public class Competitor {
 
+	/**
+	 * The starting corner specified by the bluetooth signal
+	 */
 	private static StartCorner corner;
+
+	/**
+	 * Garbage collector or builder
+	 */
 	private static PlayerRole role;
+
+	/**
+	 * Location of the green zone.
+	 */
 	private static int[] greenZone;
+
+	/**
+	 * Location of the red zone.
+	 */
 	private static int[] redZone;
 
 	public static void main(String[] args) throws InterruptedException {
@@ -64,7 +79,7 @@ public class Competitor {
 		localizer.localize();
 		Sound.beep();
 
-		//explorer.liftClaw();
+		// explorer.liftClaw();
 
 		MobileRobot.corr.startCorrectionTimer();
 		MobileRobot.blockDetector.startBlockDetectorTimer();
@@ -132,6 +147,9 @@ public class Competitor {
 
 	}
 
+	/**
+	 * For testing the robot without using the bluetooth input.
+	 */
 	private static void testWithoutBluetooth() {
 
 		int[] testGreen = { 6, 3, 8, 4 };
@@ -159,6 +177,10 @@ public class Competitor {
 
 	}
 
+	/**
+	 * Sets the four starting corners as forbidden, so that the robot does not
+	 * enter them.
+	 */
 	private static void setCornersForbidden() {
 
 		if (corner == StartCorner.BOTTOM_LEFT) {

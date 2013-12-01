@@ -492,7 +492,7 @@ public class OdometryCorrection extends SensorMotorUser implements
 		return false;
 	}
 
-	private boolean lineDetected(ColorSensor cs) {
+	protected boolean lineDetected(ColorSensor cs) {
 		return lineDetected(cs, LINE_DIFF);
 	}
 

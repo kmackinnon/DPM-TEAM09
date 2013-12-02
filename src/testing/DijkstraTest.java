@@ -1,12 +1,19 @@
 package testing;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import lejos.nxt.comm.RConsole;
-import robot.Dijkstra;
+import robot.AStar;
 import robot.Intersection;
 import robot.Map;
+
+/**
+ * Tests the validity of the paths found by Dijkstra. We also used this test to
+ * confirm that AStar works.
+ * 
+ * @author Sidney Ng, Kevin Musgrave
+ * 
+ */
 
 public class DijkstraTest {
 
@@ -19,10 +26,6 @@ public class DijkstraTest {
 
 		Map.setForbiddenZone(forbiddenZone);
 		Map.setTargetZone(targetZone);
-		
-
-		
-		
 
 		// ArrayList<Intersection> testTargetZone = Map.getTargetZone();
 		//
@@ -47,48 +50,48 @@ public class DijkstraTest {
 		// ArrayList<Intersection> listOfWayPoints = Dijkstra.algorithm(
 		// startingPoint, destination);
 
-		ArrayList<Intersection> listOfWayPoints = Dijkstra
+		ArrayList<Intersection> listOfWayPoints = AStar
 				.algorithmForTargetZone(startingPoint);
 
-		Map.removeEdge(new Intersection(5,3), new Intersection(6,4));
-		Map.removeEdge(new Intersection(6,3), new Intersection(6,4));
-		Map.removeEdge(new Intersection(7,3), new Intersection(6,4));
-		
-		Map.removeEdge(new Intersection(6,3), new Intersection(7,4));
-		Map.removeEdge(new Intersection(7,3), new Intersection(7,4));
-		Map.removeEdge(new Intersection(8,3), new Intersection(7,4));
-		
-		Map.removeEdge(new Intersection(7,3), new Intersection(8,4));
-		Map.removeEdge(new Intersection(8,3), new Intersection(8,4));
-		Map.removeEdge(new Intersection(9,3), new Intersection(8,4));
-		
-		Map.removeEdge(new Intersection(8,3), new Intersection(9,4));
-		Map.removeEdge(new Intersection(9,3), new Intersection(9,4));
-		Map.removeEdge(new Intersection(10,3), new Intersection(9,4));
-		
-		Map.removeEdge(new Intersection(9,3), new Intersection(10,4));
-		
+		Map.removeEdge(new Intersection(5, 3), new Intersection(6, 4));
+		Map.removeEdge(new Intersection(6, 3), new Intersection(6, 4));
+		Map.removeEdge(new Intersection(7, 3), new Intersection(6, 4));
+
+		Map.removeEdge(new Intersection(6, 3), new Intersection(7, 4));
+		Map.removeEdge(new Intersection(7, 3), new Intersection(7, 4));
+		Map.removeEdge(new Intersection(8, 3), new Intersection(7, 4));
+
+		Map.removeEdge(new Intersection(7, 3), new Intersection(8, 4));
+		Map.removeEdge(new Intersection(8, 3), new Intersection(8, 4));
+		Map.removeEdge(new Intersection(9, 3), new Intersection(8, 4));
+
+		Map.removeEdge(new Intersection(8, 3), new Intersection(9, 4));
+		Map.removeEdge(new Intersection(9, 3), new Intersection(9, 4));
+		Map.removeEdge(new Intersection(10, 3), new Intersection(9, 4));
+
+		Map.removeEdge(new Intersection(9, 3), new Intersection(10, 4));
+
 		for (int i = 0; i < listOfWayPoints.size(); i++) {
 			int x = listOfWayPoints.get(i).getX();
 			int y = listOfWayPoints.get(i).getY();
 			RConsole.println(x + " " + y);
-			
-			
-			if(i< listOfWayPoints.size()-1 && !listOfWayPoints.get(i).getAdjacencyList().contains(listOfWayPoints.get(i+1))){
-				ArrayList<Intersection> secondPartOfNewRoute = Dijkstra.algorithmForTargetZone(listOfWayPoints.get(i));
-				
-				for(int j=listOfWayPoints.size()-1; j>=i+1.;j--){
+
+			if (i < listOfWayPoints.size() - 1
+					&& !listOfWayPoints.get(i).getAdjacencyList()
+							.contains(listOfWayPoints.get(i + 1))) {
+				ArrayList<Intersection> secondPartOfNewRoute = AStar
+						.algorithmForTargetZone(listOfWayPoints.get(i));
+
+				for (int j = listOfWayPoints.size() - 1; j >= i + 1.; j--) {
 					listOfWayPoints.remove(j);
 				}
 
-				for(int j=0; j < secondPartOfNewRoute.size();j++){
+				for (int j = 0; j < secondPartOfNewRoute.size(); j++) {
 					listOfWayPoints.add(secondPartOfNewRoute.get(j));
 				}
 			}
-			
+
 		}
-		
-		
 
 		/*
 		 * +--+--+--+--+ +--+--+--+--+ +--+--+--+--+ +--+--+--+--+ +--+--+--+--+

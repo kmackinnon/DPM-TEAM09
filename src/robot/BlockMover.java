@@ -1,15 +1,24 @@
 package robot;
 
-
 /**
  * BlockMover moves the styrofoam block to either the red or green zone. It
- * grabs the styrofoam block, travels to one of the zones, and stacks the block
- * if necessary.
+ * grabs the styrofoam block, travels to one of the zones, and releases the
+ * block.
+ * 
+ * @author Kevin Musgrave, Sidney Ng
  */
 
 public class BlockMover extends MobileRobot {
 
+	/**
+	 * The angle used for scanning when finding the best approach for grabbing
+	 * the block.
+	 */
 	private final int SCAN_ANGLE = 45;
+
+	/**
+	 * The maximum number of attempts for grabbing the block
+	 */
 	private final int GIVE_UP_LIMIT = 2;
 
 	public BlockMover() {
@@ -17,14 +26,15 @@ public class BlockMover extends MobileRobot {
 	}
 
 	/**
-	 * Contains all the steps necessary for moving a block to a zone: grabbing,
-	 * traveling to destination and releasing or stacking the block
+	 * Contains all the steps necessary for moving a block to a zone: scanning
+	 * for best approach, grabbing, confirming block grab, traveling to
+	 * destination and releasing the block
 	 */
 	public void moveBlockToZone() {
-		
+
 		corr.turnOffCorrection();
 		blockDetector.turnOffBlockDetection();
-		
+
 		// find best orientation for grabbing the block
 		if (!findBestAngleForBlockGrab()) {
 			return;
@@ -36,17 +46,17 @@ public class BlockMover extends MobileRobot {
 			if (i == GIVE_UP_LIMIT) {
 				return;
 			}
-			
+
 			grabBlock();
-			
-			if(confirmBlockGrab()){
+
+			if (confirmBlockGrab()) {
 				break;
 			}
 		}
 
 		// go to the last intersection the robot was at before seeing and
 		// grabbing the block.
-		
+
 		travelCoordinate(getPrevX(), getPrevY(), true);
 
 		corr.turnOnCorrection();
@@ -58,7 +68,7 @@ public class BlockMover extends MobileRobot {
 		blockDetector.turnOffBlockDetection();
 
 		getReadyForBlockRelease();
-		
+
 		releaseBlock();
 
 		liftClaw();
@@ -68,39 +78,55 @@ public class BlockMover extends MobileRobot {
 		return;
 	}
 
+	/**
+	 * Moves backward, lowers the claw, moves forward, and then grabs the block
+	 * and raises the claw.
+	 */
 	public void grabBlock() {
-		travelMagnitude(-19); // -16, 18
+		travelMagnitude(-21);
 
 		dropClaw();
 
-		travelMagnitude(21); // 13, 15, 16
+		travelMagnitude(23);
 
 		liftClaw();
 
 	}
 
+	/**
+	 * Checks to see if there is still an object in front of the robot. If there
+	 * is then the block has not been picked up.
+	 * 
+	 * @return true if the block has been picked up, false otherwise.
+	 */
 	private boolean confirmBlockGrab() {
-		
+
 		int counter = 0;
-		
-		for(int i = 0; i<DEFAULT_NUM_OF_SAMPLES; i++){
-			if(!blockDetector.isObjectDetected()){
-				
+
+		for (int i = 0; i < DEFAULT_NUM_OF_SAMPLES; i++) {
+			if (!blockDetector.isObjectDetected()) {
+
 				counter++;
-				
+
 			}
 		}
-		
-		if(counter>=DEFAULT_CONFIRMATION_MINIMUM){
+
+		if (counter >= DEFAULT_CONFIRMATION_MINIMUM) {
 			return true;
 		}
-		
-		else{
+
+		else {
 			return false;
 		}
 
 	}
 
+	/**
+	 * Turns to the best angle for grabbing the block.
+	 * 
+	 * @return True if the robot successfully finds and turns to the best angle,
+	 *         false if there is no best angle.
+	 */
 	private boolean findBestAngleForBlockGrab() {
 		scanArea(SCAN_ANGLE);
 
@@ -115,18 +141,27 @@ public class BlockMover extends MobileRobot {
 		return true;
 	}
 
+	/**
+	 * Lowers the claw, releases the block, moves backward, and raises the claw.
+	 */
 	private void releaseBlock() {
 
 		dropClaw();
-		
-		//back away before lifting claw again
+
+		// back away before lifting claw again
 		travelMagnitude(-12);
-		
+
 		liftClaw();
 
 	}
 
-
+	/**
+	 * When at the target zone, the robot must face "inward" to release the
+	 * block (i.e. the robot might be at a target zone intersection, but it
+	 * could be facing away from the actual target zone.) This method gets the
+	 * robot oriented in the correct direction so that the block is placed
+	 * inside the target zone.
+	 */
 	private void getReadyForBlockRelease() {
 		Intersection current = Map.getIntersection(odo.getX(), odo.getY());
 
@@ -186,6 +221,11 @@ public class BlockMover extends MobileRobot {
 		}
 	}
 
+	/**
+	 * When the robot finds a styrofoam block, the robot should not try to pick
+	 * it up if it already is carrying one. This method is used to make this
+	 * decision. It overrides the method in MobileRobot
+	 */
 	public boolean pickUpStyrofoamBlock() {
 		return false;
 	}

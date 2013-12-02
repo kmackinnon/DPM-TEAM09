@@ -14,15 +14,30 @@ import bluetooth.Transmission;
  * receives the initial Bluetooth signal which determines competition
  * characteristics.
  * 
- * @author Keith MacKinnon
+ * @author Keith MacKinnon, Kevin Musgrave
  * 
  */
 
 public class Competitor {
 
+	/**
+	 * The starting corner specified by the bluetooth signal
+	 */
 	private static StartCorner corner;
+
+	/**
+	 * Garbage collector or builder
+	 */
 	private static PlayerRole role;
+
+	/**
+	 * Location of the green zone.
+	 */
 	private static int[] greenZone;
+
+	/**
+	 * Location of the red zone.
+	 */
 	private static int[] redZone;
 
 	public static void main(String[] args) throws InterruptedException {
@@ -63,8 +78,8 @@ public class Competitor {
 
 		localizer.localize();
 		Sound.beep();
-		
-		explorer.liftClaw();
+
+		// explorer.liftClaw();
 
 		MobileRobot.corr.startCorrectionTimer();
 		MobileRobot.blockDetector.startBlockDetectorTimer();
@@ -128,12 +143,17 @@ public class Competitor {
 
 		SensorMotorUser.setStartCorner(corner.getCooridinates());
 
+		setCornersForbidden();
+
 	}
 
+	/**
+	 * For testing the robot without using the bluetooth input.
+	 */
 	private static void testWithoutBluetooth() {
 
-		int[] testGreen = { 2, 3, 3, 4 };
-		int[] testRed = { 0, 5, 1, 6 };
+		int[] testGreen = { 6, 3, 8, 4 };
+		int[] testRed = { 0, 5, 2, 9 };
 
 		// set role. For now, assume the robot will be a builder.
 		SensorMotorUser.becomeBuilder(true);
@@ -143,18 +163,69 @@ public class Competitor {
 		Map.setForbiddenZone(testRed);
 
 		// corners
-		Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
-				Map.NUM_OF_INTERSECTIONS - 1, 0 });
+		Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
 
 		Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
 				Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
 				Map.NUM_OF_INTERSECTIONS - 1 });
 
-		Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1, 0,
+		Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+				Map.NUM_OF_INTERSECTIONS - 1, 0 });
+
+		SensorMotorUser.setStartCorner(new int[] { 0,
 				Map.NUM_OF_INTERSECTIONS - 1 });
 
-		SensorMotorUser.setStartCorner(new int[] { 0, 0 });
+	}
 
+	/**
+	 * Sets the four starting corners as forbidden, so that the robot does not
+	 * enter them.
+	 */
+	private static void setCornersForbidden() {
+
+		if (corner == StartCorner.BOTTOM_LEFT) {
+			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+					Map.NUM_OF_INTERSECTIONS - 1, 0 });
+
+			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
+					Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
+					Map.NUM_OF_INTERSECTIONS - 1 });
+
+			Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1,
+					0, Map.NUM_OF_INTERSECTIONS - 1 });
+		}
+
+		else if (corner == StartCorner.BOTTOM_RIGHT) {
+			Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
+
+			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
+					Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
+					Map.NUM_OF_INTERSECTIONS - 1 });
+
+			Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1,
+					0, Map.NUM_OF_INTERSECTIONS - 1 });
+		}
+
+		else if (corner == StartCorner.TOP_RIGHT) {
+			Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
+
+			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+					Map.NUM_OF_INTERSECTIONS - 1, 0 });
+
+			Map.setForbiddenZone(new int[] { 0, Map.NUM_OF_INTERSECTIONS - 1,
+					0, Map.NUM_OF_INTERSECTIONS - 1 });
+		}
+
+		else if (corner == StartCorner.TOP_LEFT) {
+			Map.setForbiddenZone(new int[] { 0, 0, 0, 0 });
+
+			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1, 0,
+					Map.NUM_OF_INTERSECTIONS - 1, 0 });
+
+			Map.setForbiddenZone(new int[] { Map.NUM_OF_INTERSECTIONS - 1,
+					Map.NUM_OF_INTERSECTIONS - 1, Map.NUM_OF_INTERSECTIONS - 1,
+					Map.NUM_OF_INTERSECTIONS - 1 });
+		}
 	}
 
 }

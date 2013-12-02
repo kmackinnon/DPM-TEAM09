@@ -4,7 +4,8 @@ import java.util.ArrayList;
 
 /**
  * Map contains a representation of the game area. This includes the locations
- * of obstacles, the red and green zones, and the 4 corners
+ * of any forbidden zones and the target zone.
+ * @author Kevin Musgrave
  */
 
 public class Map {
@@ -12,8 +13,12 @@ public class Map {
 	public final static double TILE_SIZE = 30.48;
 
 	/** There are 11 intersections in both the x and y directions. */
-	public final static int NUM_OF_INTERSECTIONS = 7;
+	public final static int NUM_OF_INTERSECTIONS = 11;
 
+	/**
+	 * This list contains all the intersections in the game area. An
+	 * intersection is null if it is forbidden.
+	 */
 	private static ArrayList<Intersection> intersectionList = new ArrayList<Intersection>();
 
 	/**
@@ -40,14 +45,9 @@ public class Map {
 	 * the boundary of the redZone as "forbidden". (The green zone would be
 	 * forbidden for a garbage collector)
 	 * 
-	 * @param topRightCorner
-	 *            the xy coordinates of the top right corner of the forbidden
-	 *            zone.
-	 * 
-	 * @param bottomLeftCorner
-	 *            the xy coordinates of the bottom left corner of the forbidden
-	 *            zone
-	 * 
+	 * @param zone
+	 *            the bottom left and top right tile coordinates of the
+	 *            forbidden zone.
 	 */
 	public static void setForbiddenZone(int[] zone) {
 
@@ -67,13 +67,9 @@ public class Map {
 	 * the boundary of the greenZone as "target". (The red zone would be the
 	 * target for a garbage collector)
 	 * 
-	 * @param topRightCorner
-	 *            the xy coordinates of the top right corner of the target zone.
-	 * 
-	 * @param bottomLeftCorner
-	 *            the xy coordinates of the bottom left corner of the target
-	 *            zone
-	 * 
+	 * @param zone
+	 *            the bottom left and top right tile coordinates of the target
+	 *            zone.
 	 */
 	public static void setTargetZone(int[] zone) {
 
@@ -88,6 +84,16 @@ public class Map {
 		setZone(topRightCorner, bottomLeftCorner, true);
 	}
 
+	/**
+	 * Helper function for setForbiddenZone and setTargetZone
+	 * 
+	 * @param topRightCorner
+	 *            xy tile coordinates of the top right corner
+	 * @param bottomLeftCorner
+	 *            xy tile coordinates of the bottom left corner
+	 * @param keepNode
+	 *            true if we do not want to set the intersection to null
+	 */
 	private static void setZone(int[] topRightCorner, int[] bottomLeftCorner,
 			boolean keepNode) {
 
@@ -111,6 +117,15 @@ public class Map {
 
 	}
 
+	/**
+	 * Removes the path between two intersections. This happens when an obstacle
+	 * is found along a path.
+	 * 
+	 * @param a
+	 *            the first intersection
+	 * @param b
+	 *            the second intersection
+	 */
 	public static void removeEdge(Intersection a, Intersection b) {
 
 		int x1 = a.getX();
@@ -130,6 +145,11 @@ public class Map {
 
 	}
 
+	/**
+	 * 
+	 * @return a list of intersections that are inside and on the boundary of
+	 *         the target zone.
+	 */
 	public static ArrayList<Intersection> getTargetZone() {
 
 		ArrayList<Intersection> targetZone = new ArrayList<Intersection>();
@@ -146,28 +166,58 @@ public class Map {
 
 	}
 
-	
-	public static double nearestIntersectionCoordinate(double input){
-		
+	/**
+	 * 
+	 * @param input
+	 *            an x or y coordinate in centimeters
+	 * @return the x or y coordinate in centimeters of the closest intersection
+	 */
+	public static double nearestIntersectionCoordinate(double input) {
+
 		return (int) (Math.round(input / Map.TILE_SIZE)) * Map.TILE_SIZE;
 	}
-	
-	public static Intersection getIntersection(double x, double y){
-		
+
+	/**
+	 * 
+	 * @param x
+	 *            the x coordinate in cm
+	 * @param y
+	 *            the y coordinate in cm
+	 * @return the intersection at the specified xy centimeter coordinates
+	 */
+	public static Intersection getIntersection(double x, double y) {
+
 		int xGrid = (int) Math.round(x / Map.TILE_SIZE);
 		int yGrid = (int) Math.round(y / Map.TILE_SIZE);
-		
-		return get(index(xGrid,yGrid));
-			
+
+		return get(index(xGrid, yGrid));
+
 	}
-	
-	
-	/** Returns the intersection based on x and y tile coordinates */
+
+	/**
+	 * 
+	 * @param x
+	 *            the x tile coordinate
+	 * @param y
+	 *            the y tile coordinate
+	 * @return the intersection at the specified xy tile coordinates
+	 */
 	public static Intersection getIntersection(int x, int y) {
 		return get(index(x, y));
 	}
 
-	/** Returns the intersection based on "intersection" object */
+	/**
+	 * 
+	 * @param intersection
+	 *            the intersection that we would like to obtain. This seems
+	 *            redundant, but we always need to be dealing with an
+	 *            intersection object that exists in the intersectionList. In
+	 *            other classes we may deal with intersections that do not exist
+	 *            in the list, but that have the same xy coordinates as one of
+	 *            the objects in the list
+	 * @return the intersection that has the same xy coordinates as the input
+	 *         intersection
+	 */
 	public static Intersection getIntersection(Intersection intersection) {
 
 		int index = index(intersection.getX(), intersection.getY());
@@ -175,6 +225,9 @@ public class Map {
 		return get(index);
 	}
 
+	/**
+	 * resets some intersection variables related to AStar and Dijkstra.
+	 */
 	public static void resetAllPreviousAndDistance() {
 
 		for (Intersection intersection : intersectionList) {
@@ -187,7 +240,10 @@ public class Map {
 		}
 
 	}
-	
+
+	/**
+	 * resets some intersection variables related to AStar.
+	 */
 	public static void resetClosedOpenStatus() {
 
 		for (Intersection intersection : intersectionList) {
@@ -199,6 +255,14 @@ public class Map {
 
 	}
 
+	/**
+	 * 
+	 * @param x
+	 *            the x tile coordinate
+	 * @param y
+	 *            the y tile coordinate
+	 * @return the index of the intersection in the intersection list
+	 */
 	public static int index(int x, int y) {
 
 		return (y * NUM_OF_INTERSECTIONS + x);
@@ -211,20 +275,36 @@ public class Map {
 
 	}
 
-	// Does not remove duplicate edges. We tried removing duplicates during
-	// initialization, but it took ~15 seconds.
+	/**
+	 * Adds a directed edge between two intersections. Must be used twice to
+	 * indicate a two way path.
+	 * 
+	 * @param source
+	 *            the intersection with the adjacency list
+	 * @param adjacent
+	 *            the intersection to add to the adjacency list
+	 */
 	private static void addEdge(Intersection source, Intersection adjacent) {
 
 		source.addToAdjacencyList(adjacent);
 
 	}
 
+	/**
+	 * sets the intersection at the index to null
+	 * @param index the index of the intersection in the intersection list
+	 */
 	private static void removeIntersection(int index) {
 
 		intersectionList.set(index, null);
 
 	}
 
+	/**
+	 * Adds all the straight and diagonal paths to the map.
+	 * @param x the x tile coordinate
+	 * @param y the y tile coordinate
+	 */
 	private static void addEdgesToInitialMap(int x, int y) {
 
 		Intersection temp = get(index(x, y));

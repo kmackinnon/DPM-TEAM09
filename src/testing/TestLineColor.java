@@ -4,8 +4,9 @@ import lejos.nxt.Button;
 import lejos.nxt.Sound;
 import lejos.nxt.comm.RConsole;
 import robot.MobileRobot;
-import robot.SensorMotorUser;
+import robot.Odometer;
 import robot.OdometryCorrection;
+import robot.SensorMotorUser;
 
 /**
  * 
@@ -26,15 +27,15 @@ import robot.OdometryCorrection;
  */
 public class TestLineColor extends OdometryCorrection {
 	
-	
-	public TestLineColor() {
-		super();
+	public TestLineColor(Odometer odo) {
+		super(odo);
 	}
 
 	public static void main(String[] args) {
 		
 		MobileRobot robot = new MobileRobot();
-		TestLineColor tester = new TestLineColor();
+		robot = new MobileRobot();
+		TestLineColor tester = new TestLineColor(MobileRobot.odo);
 
 		//Color color;
 

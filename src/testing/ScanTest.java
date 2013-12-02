@@ -7,6 +7,14 @@ import robot.BlockMover;
 import robot.Map;
 import robot.MobileRobot;
 
+/**
+ * Tests the scan method to see if the robot finds the best angle to grab the
+ * styrofoam block.
+ * 
+ * @author Kevin Musgrave
+ * 
+ */
+
 public class ScanTest {
 
 	public static void main(String[] args) {
@@ -18,11 +26,11 @@ public class ScanTest {
 
 		Map.initializeMap();
 
-		Map.setTargetZone(new int[] {4,3,6,5});
-		
+		Map.setTargetZone(new int[] { 4, 3, 6, 5 });
+
 		BlockMover blockMover = new BlockMover();
-		
-		blockMover.initializePrevTarget(0,0);
+
+		blockMover.initializePrevTarget(0, 0);
 
 		blockMover.liftClaw(); // lift the claw at the beginning
 
@@ -32,7 +40,7 @@ public class ScanTest {
 
 		boolean isSearching = true;
 		while (isSearching) {
-			
+
 			// stop moving if there is something in front
 			if (MobileRobot.blockDetector.isObjectInFront()) {
 				blockMover.stopMoving();
@@ -41,20 +49,20 @@ public class ScanTest {
 				// if that object is styrofoam, perform grabBlock() method
 				if (MobileRobot.blockDetector.isObjectStyrofoam()) {
 					MobileRobot.blockDetector.turnOffBlockDetection();
-					
+
 					blockMover.moveBlockToZone();
 				} else {
 					LCD.drawString("Not styro", 0, 0);
 				}
-				
+
 			}
 
 		}
-		
+
 		blockMover.dropClaw();
-		
+
 		Button.waitForAnyPress();
-		
+
 		System.exit(0);
 
 	}

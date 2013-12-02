@@ -2,6 +2,7 @@ package robot;
 
 import lejos.nxt.ColorSensor.Color;
 import lejos.nxt.Sound;
+import lejos.nxt.comm.RConsole;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
 
@@ -10,55 +11,137 @@ import lejos.util.TimerListener;
  * that are close by. The light sensor identifies the block as wooden or
  * styrofoam.
  * 
+ * @author Sidney Ng, Simon Lee, Kevin Musgrave, Keith MacKinnon
  */
 public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	private Timer blockDetectorTimer;
 	private Object lock;
 
+	/**
+	 * When the median of 5 samples of the ultrasonic sensor is less than this
+	 * value, then an object has been detected
+	 */
 	private final int DIST_TO_STOP = 11;
-	private final int LIGHT_DIFF = 5;
-	private final double RED_BLUE_RATIO = 1.8;
+
+	/**
+	 * When the median of 10 samples of the differential of the front light
+	 * sensor exceeds this value, then an object has been detected.
+	 */
+	private final int LIGHT_DIFF = 25;
+
+	/**
+	 * The red/blue color ratio is used together with the wood ratio to
+	 * determine if a block is styrofoam or wooden. For styrofoam, the obtained
+	 * red/blue ratio must be less than this value.
+	 */
+	private final double UPPER_RED_BLUE_RATIO = 1.6;
+
+	/**
+	 * This ratio is used together with the red/blue ratio to determine if a
+	 * block is styrofoam or wooden. For styrofoam, the obtained wood ratio must
+	 * be less than this value
+	 */
 	private final double WOOD_RATIO = 1.9;
 
+	/**
+	 * True if an object is detected
+	 */
 	private boolean isObjectDetected = false;
+
+	/**
+	 * True if at every timeout block detection should be performed
+	 */
 	private boolean doBlockDetection = false;
+
+	/**
+	 * True if at every timeout a minimum distance scan should be performed.
+	 */
 	private boolean doMinDistanceScan = false;
 
+	/**
+	 * the minimum distance found during the scan
+	 */
 	private int scanMinDistance;
+
+	/**
+	 * the angle at which the minimum distance occurred.
+	 */
 	private double minDistanceAngle;
 
+	/**
+	 * Used for ignoring the initial values read by the front color sensor
+	 */
+	private int frontCSIgnoreCounter;
+
 	// variables for object detection
+
+	/**
+	 * a moving window of ultrasonic distances
+	 */
 	private int[] window = { 255, 255, 255, 255, 255 };
+
+	/**
+	 * a moving window of color sensor differentials
+	 */
+	private int[] colorDiffWindow = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+	/**
+	 * the previous value obtained by the color sensor
+	 */
 	private int prevValue = 0;
-	private boolean prevLatch = false;
+
+	/**
+	 * true when the median differential exceeds the LIGHT_DIFF threshold
+	 */
+	private boolean prevLatch = false, latch = false;
 	private int median, value, diff;
-	private boolean latch;
 
 	public BlockDetector() {
 		lock = new Object();
 		blockDetectorTimer = new Timer(DEFAULT_TIMER_PERIOD, this);
 	}
 
+	/**
+	 * Turns on the timer
+	 */
 	public void startBlockDetectorTimer() {
 		blockDetectorTimer.start();
 	}
 
+	/**
+	 * Turns on block detection so that at every timeout, block detection is
+	 * performed
+	 */
 	public void turnOnBlockDetection() {
 		isObjectDetected = false;
 		doBlockDetection = true;
+		latch = false;
+		prevLatch = false;
+		frontCSIgnoreCounter = 0;
 	}
 
+	/**
+	 * Turns off block detection
+	 */
 	public void turnOffBlockDetection() {
+		isObjectDetected = false;
 		doBlockDetection = false;
 	}
 
+	/**
+	 * Turns on minimum distance scanning mode. This is used when the robot
+	 * finds a styrofoam block and wants to find the best angle for grabbing it
+	 */
 	public void turnOnMinDistanceScanMode() {
 		scanMinDistance = US_SENSOR_255;
 
 		doMinDistanceScan = true;
 	}
 
+	/**
+	 * Turns off minimum distance scanning mode.
+	 */
 	public void turnOffMinDistanceScanMode() {
 		doMinDistanceScan = false;
 	}
@@ -88,6 +171,11 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	}
 
+	/**
+	 * @return the angle at which the minimum distance was detected. If the
+	 *         minimum distance was 255, then this returns DOUBLE_SPECIAL_FLAG,
+	 *         which is found in SensorMotorUser
+	 */
 	public double getMinDistanceAngle() {
 
 		if (scanMinDistance == US_SENSOR_255) {
@@ -98,11 +186,21 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	}
 
+	/**
+	 * @return the minimum distance found during the scan
+	 */
 	public double getMinDistance() {
 		return scanMinDistance;
 	}
 
 	// returns the isObjectDetected boolean
+
+	/**
+	 * This is called by other classes when they want to know if an object is
+	 * detected.
+	 * 
+	 * @return true if an object is detected
+	 */
 	public boolean isObjectInFront() {
 		boolean result;
 
@@ -115,54 +213,72 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	/**
 	 * Returns a boolean indicating whether or not a block is detected by the
-	 * ultrasonic or color sensor.
+	 * ultrasonic or color sensor. This method is called at every timeout.
 	 * 
 	 * @return true if a block is detected, false otherwise.
 	 */
 	public boolean isObjectDetected() {
 		// SensorMotorUser.frontCS.setFloodlight(true);
 
+		frontCSIgnoreCounter++;
+
 		// stopping by ultrasonic sensor
 		shiftArrayByOne(window, getUSDistance());
 		median = getMedian(window);
 		// RConsole.println("Distance: " + median);
-		if (median <= DIST_TO_STOP) {
-			return true;
+		if (frontCSIgnoreCounter >= 10) {
+
+			if (median <= DIST_TO_STOP) {
+				return true;
+			}
 		}
 
 		// stopping by color sensor differential
 		latch = false;
 		value = frontCS.getRawLightValue();
 		diff = value - prevValue;
-		// RConsole.println("diff: " + diff);
-		if (diff > LIGHT_DIFF) {
-			latch = true;
-		}
-		if (latch && prevLatch) {
-			prevLatch = false;
-			return true;
-		}
+		shiftArrayByOne(colorDiffWindow, diff);
+		double colorDiffMedian = getMedian(colorDiffWindow);
 		prevValue = value;
+		// RConsole.println("value: " + value);
+
+		if (frontCSIgnoreCounter >= 10) {
+			if (value > 400) {
+				if (colorDiffMedian > LIGHT_DIFF) {
+					latch = true;
+				}
+				if (latch && prevLatch) {
+					prevLatch = false;
+					return true;
+				}
+			}
+
+		}
+
 		prevLatch = latch;
 
 		return false;
 	}
-	
-	public boolean isObjectStyrofoam(){
-		if(isStyrofoamColor() && !isWoodColor()){
+
+	/**
+	 * @return true if the object is styrofoam
+	 */
+	public boolean isObjectStyrofoam() {
+		if (isStyrofoamColor() && !isWoodColor()) {
 			Sound.beep();
 			return true;
 		}
-		
-		else{
+
+		else {
 			return false;
 		}
 	}
 
 	/**
-	 * Returns a boolean indicating whether or not the block is styrofoam.
+	 * Returns a boolean indicating if the object passes the red/blue ratio
+	 * test.
 	 * 
-	 * @return true if styrofoam, false otherwise.
+	 * @return true if it passes, false otherwise.
 	 */
 	private boolean isStyrofoamColor() {
 		// RConsole.println(red + " " + green + " " + blue);
@@ -203,7 +319,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 			ratio = redValue / blueValue;
 
-			if (ratio < RED_BLUE_RATIO) {
+			if (ratio < UPPER_RED_BLUE_RATIO && blueValue > 15) {
 				counter++;
 			}
 		}
@@ -218,6 +334,10 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	}
 
+	/**
+	 * Records the minimum distance and minimum angle during minimum distance
+	 * scanning.
+	 */
 	private void minDistanceScanRoutine() {
 
 		shiftArrayByOne(window, getUSDistance());
@@ -231,6 +351,12 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 
 	}
 
+	/**
+	 * Returns a boolean indicating if the object passes the wood ratio
+	 * test.
+	 * 
+	 * @return true if it passes, false otherwise.
+	 */
 	private boolean isWoodColor() {
 
 		Color color;
@@ -239,8 +365,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		double greenValue;
 		double ratio;
 		int counter = 0;
-		
-		
+
 		for (int i = 0; i < DEFAULT_NUM_OF_SAMPLES; i++) {
 			color = frontCS.getColor();
 			redValue = color.getRed();
@@ -255,7 +380,7 @@ public class BlockDetector extends SensorMotorUser implements TimerListener {
 		}
 
 		if (counter >= DEFAULT_CONFIRMATION_MINIMUM) {
-			//Sound.beep();
+			// Sound.beep();
 			return true;
 		}
 

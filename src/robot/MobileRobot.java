@@ -16,19 +16,40 @@ public class MobileRobot extends SensorMotorUser {
 	public static OdometryCorrection corr = new OdometryCorrection(odo);
 	public static BlockDetector blockDetector = new BlockDetector();
 
+	/**
+	 * The x coordinate of the previous target. Used mainly to determine if the
+	 * robot should move backwards (after finding an obstacle for example).
+	 */
 	private static double xPrevTarget;
+
+	/**
+	 * The y coordinate of the previous target. Used mainly to determine if the
+	 * robot should move backwards (after finding an obstacle for example).
+	 */
 	private static double yPrevTarget;
+
+	/**
+	 * counts how many moves the robot has made.
+	 */
 	private static int travelCounter = 0;
-	private static boolean isPathSafe = false;
-	//private static boolean nextPointIsATurn = false;
-	
+	// private static boolean isPathSafe = false;
+
 	private final int ANGLE_ERROR_THRESHOLD = 1; // measured in degrees
 	private final int POSITION_ERROR_THRESHOLD = 1;
+
+	/**
+	 * if the change in angle is greater than this, the robot should turn on
+	 * point instead of while moving.
+	 */
 	private final int TURN_ON_POINT_ANGLE_THRESHOLD = 20;
+
 	private final int POINT_IS_BEHIND_ANGLE_THRESHOLD = 45;
-	private final double PATH_SCAN_ANGLE = 15;
-	private final int PATH_IS_SAFE_THRESHOLD = 20;
-	//private final int FAR_AWAY_PATH_IS_SAFE_THRESHOLD = 45;
+	// private final double PATH_SCAN_ANGLE = 15;
+	// private final int PATH_IS_SAFE_THRESHOLD = 20;
+
+	/**
+	 * localize after this many moves
+	 */
 	private final int LOCALIZE_PERIODICALLY = 6;
 
 	/**
@@ -39,66 +60,88 @@ public class MobileRobot extends SensorMotorUser {
 	public MobileRobot() {
 	}
 
+	/**
+	 * Gets the robot to travel to a destination using the shortest path. If the
+	 * robot finds an obstacle, it will find a new shortest path. It will
+	 * continue doing this until it determines that the destination is
+	 * unreachable, at which point it simply quits.
+	 * 
+	 * @param destination
+	 *            the destination the robot should travel to.
+	 */
 	public void travelTo(Intersection destination) {
-		boolean isSuccess = false;
-		Intersection source;
-		ArrayList<Intersection> listOfWayPoints;
 
-		while (!isSuccess) {
+		try {
+			boolean isSuccess = false;
+			Intersection source;
+			ArrayList<Intersection> listOfWayPoints;
 
-			source = Map.getIntersection(odo.getX(), odo.getY());
+			while (!isSuccess) {
 
-			if (destination.getX() == INT_SPECIAL_FLAG
-					&& destination.getY() == INT_SPECIAL_FLAG) {
-				listOfWayPoints = AStar.algorithmForTargetZone(source);
-			}
+				source = Map.getIntersection(odo.getX(), odo.getY());
 
-			else {
-
-				if (destination.getAdjacencyList().isEmpty()) {
-					return;
-				}
-
-				listOfWayPoints = AStar.algorithm(source, destination);
-			}
-
-			isSuccess = travelToWaypoints(listOfWayPoints);
-
-			if (!isSuccess) {
-				
-				if(!isPathSafe){
-					removePath(listOfWayPoints);
-				}
-
-				else if (!blockDetector.isObjectStyrofoam()) {
-					moveBackToPreviousIntersection();
-					removePath(listOfWayPoints);
+				if (destination.getX() == INT_SPECIAL_FLAG
+						&& destination.getY() == INT_SPECIAL_FLAG) {
+					listOfWayPoints = Dijkstra.algorithmForTargetZone(source);
 				}
 
 				else {
 
-					if (pickUpStyrofoamBlock()) {
+					if (destination.getAdjacencyList().isEmpty()) {
 						return;
 					}
-					
-					else{
+
+					listOfWayPoints = AStar.algorithm(source, destination);
+				}
+
+				isSuccess = travelToWaypoints(listOfWayPoints);
+
+				if (!isSuccess) {
+
+					if (!blockDetector.isObjectStyrofoam()) {
 						moveBackToPreviousIntersection();
 						removePath(listOfWayPoints);
 					}
 
-				}
+					else {
 
+						if (pickUpStyrofoamBlock()) {
+							return;
+						}
+
+						else {
+							moveBackToPreviousIntersection();
+							removePath(listOfWayPoints);
+						}
+
+					}
+
+				}
 			}
+		} catch (IndexOutOfBoundsException e) {
+			specialMoveAround();
+			return;
 		}
 
 	}
 
+	/**
+	 * gets the robot to travel to the target zone using the shortest path.
+	 */
 	public void travelToTargetZone() {
 
 		travelTo(new Intersection(INT_SPECIAL_FLAG, INT_SPECIAL_FLAG));
 
 	}
 
+	/**
+	 * travels to an intersection directly, without looking for shortest path.
+	 * 
+	 * @param x
+	 *            the x tile coordinate
+	 * @param y
+	 *            the y tile coordinate
+	 */
 	public void travelTileCoordinate(int x, int y) {
 
 		double xInCm = x * Map.TILE_SIZE;
@@ -108,6 +151,18 @@ public class MobileRobot extends SensorMotorUser {
 
 	}
 
+	/**
+	 * Gets the robot to travel straight to a coordinate
+	 * 
+	 * @param xTarget
+	 *            the x coordinate in centimeters
+	 * @param yTarget
+	 *            the y coordinate in centimeters
+	 * @param stopAtTarget
+	 *            true if the robot should stop at the target
+	 * @return true if the robot successfully arrived at the target, false
+	 *         otherwise
+	 */
 	public boolean travelCoordinate(double xTarget, double yTarget,
 			boolean stopAtTarget) {
 
@@ -124,13 +179,14 @@ public class MobileRobot extends SensorMotorUser {
 		// target position is greater than the position error threshold
 		while (!isAtPoint(xTarget, yTarget)) {
 
-			if (blockDetector.isObjectInFront()&&!isAtPoint(xPrevTarget,yPrevTarget)) {
+			if (blockDetector.isObjectInFront()
+					&& !isAtPoint(xPrevTarget, yPrevTarget)) {
 				return false;
 			}
 
-			deltaTheta = findAngle(xTarget,yTarget);
+			deltaTheta = findAngle(xTarget, yTarget);
 
-			howToMoveDecider(xTarget,yTarget,deltaTheta);
+			howToMoveDecider(xTarget, yTarget, deltaTheta);
 		}
 
 		if (stopAtTarget) {
@@ -144,6 +200,18 @@ public class MobileRobot extends SensorMotorUser {
 
 	}
 
+	/**
+	 * Gets the robot to travel straight to coordinate, but moving backwards. If
+	 * its not practical to move backwards, then turn around to face the target,
+	 * and move forward
+	 * 
+	 * @param xTarget
+	 *            the x coordinate in centimeters
+	 * @param yTarget
+	 *            the y coordinate in centimeters
+	 * @param stopAtTarget
+	 *            true if the robot should stop at the target
+	 */
 	public void travelCoordinateBackwards(double xTarget, double yTarget,
 			boolean stopAtTarget) {
 
@@ -152,48 +220,67 @@ public class MobileRobot extends SensorMotorUser {
 
 		while (!isAtPoint(xTarget, yTarget)) {
 
-			deltaTheta = findAngle(xTarget,yTarget);
-			
+			deltaTheta = findAngle(xTarget, yTarget);
+
 			backwardDeltaTheta = getMinAngle(deltaTheta - 180);
 
 			// is the point behind the robot
 			if (Math.abs(backwardDeltaTheta) < POINT_IS_BEHIND_ANGLE_THRESHOLD) {
 
-				if(backwardDeltaTheta > ANGLE_ERROR_THRESHOLD){
-				
+				if (backwardDeltaTheta > ANGLE_ERROR_THRESHOLD) {
+
 					if (Math.abs(backwardDeltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD) {
-						
+
 						onPointTurnBy(backwardDeltaTheta);
 					}
-					
-					else{
+
+					else {
 						whileMovingBackwardTurnBy(backwardDeltaTheta);
 					}
 				}
-				
-				else{
+
+				else {
 					moveBackward();
 				}
 			}
 
-			else{
-				howToMoveDecider(xTarget,yTarget,deltaTheta);
+			else {
+				howToMoveDecider(xTarget, yTarget, deltaTheta);
 			}
 		}
 
 	}
 
+	/**
+	 * Moves the specified distance
+	 * 
+	 * @param magnitudeInCm
+	 *            the distance the robot should move. Negative means backwards.
+	 */
 	public void travelMagnitude(double magnitudeInCm) {
 
 		travelMagnitude(magnitudeInCm, FORWARD_SPEED);
 	}
-	
+
+	/**
+	 * Moves the specified distance slowly.
+	 * 
+	 * @param magnitudeInCm
+	 *            the distance the robot should move. Negative means backwards.
+	 */
 	public void travelMagnitudeSlow(double magnitudeInCm) {
 
 		travelMagnitude(magnitudeInCm, SLOW_FORWARD_SPEED);
 	}
-	
-	
+
+	/**
+	 * Moves the specified distance at the specified speed.
+	 * 
+	 * @param magnitudeInCm
+	 *            the distance the robot should move. Negative means backwards.
+	 * @param speed
+	 *            the speed at which the robot should move
+	 */
 	public void travelMagnitude(double magnitudeInCm, int speed) {
 
 		int leftAmount = convertDistance(LEFT_RADIUS, magnitudeInCm);
@@ -220,6 +307,12 @@ public class MobileRobot extends SensorMotorUser {
 		return yPrevTarget;
 	}
 
+	/**
+	 * turn to the specified angle while moving forward.
+	 * 
+	 * @param targetTheta
+	 *            the angle to turn to
+	 */
 	public void turnToWhileMoving(double targetTheta) {
 		double angleToRotateBy = targetTheta - odo.getTheta();
 
@@ -231,6 +324,12 @@ public class MobileRobot extends SensorMotorUser {
 
 	}
 
+	/**
+	 * turn to the specified angle while staying in one position
+	 * 
+	 * @param targetTheta
+	 *            the angle to turn to
+	 */
 	public void turnToOnPoint(double targetTheta) {
 
 		double angleToRotateBy = targetTheta - odo.getTheta();
@@ -250,7 +349,7 @@ public class MobileRobot extends SensorMotorUser {
 		rightMotor.forward();
 
 	}
-	
+
 	public void moveForwardSlow() {
 
 		leftMotor.setSpeed(SLOW_FORWARD_SPEED);
@@ -320,8 +419,7 @@ public class MobileRobot extends SensorMotorUser {
 		rightMotor.forward();
 
 	}
-	
-	
+
 	public void turnLeftWhileMovingBackward() {
 
 		leftMotor.setSpeed(FORWARD_SPEED);
@@ -349,118 +447,123 @@ public class MobileRobot extends SensorMotorUser {
 
 	}
 
+	/**
+	 * closes the claw and lifts it
+	 */
 	public void liftClaw() {
 		clawMotor.setSpeed(LIFTING_SPEED);
 		clawMotor.rotateTo(LIFTING_DEGREE);
 	}
 
+	/**
+	 * lowers the claw and opens it
+	 */
 	public void dropClaw() {
 		clawMotor.setSpeed(LIFTING_SPEED);
 		clawMotor.rotateTo(DROPPING_DEGREE);
 	}
 
 	// override this
+	/**
+	 * Explorer and BlockMover override this method
+	 * 
+	 * @return true if the robot should pick up the styrofoam block, false if
+	 *         the robot should move around the styrofoam block.
+	 */
 	public boolean pickUpStyrofoamBlock() {
 
 		return true;
 	}
-	
-	public void scanArea(double scanAngle){
-		
-		blockDetector.turnOnMinDistanceScanMode();
-		
-		onPointTurnBy(-scanAngle);
-		onPointTurnBy(2*scanAngle);
-		onPointTurnBy(-scanAngle);
-		
-		blockDetector.turnOffMinDistanceScanMode();
-		
-	}
-	
-	public boolean isPathAheadSafe(){
 
-		scanArea(PATH_SCAN_ANGLE);
-		
-		if(blockDetector.getMinDistance()<PATH_IS_SAFE_THRESHOLD){
-			isPathSafe = false;
-			return false;
-		}
-		
-		else{
-			isPathSafe = true;
-			return true;
-		}
-		
+	/**
+	 * Turns left, right, and then back to the original orientation. Turns by
+	 * the specified angle.
+	 * 
+	 * @param scanAngle
+	 *            half of the total range to scan
+	 */
+	public void scanArea(double scanAngle) {
+
+		blockDetector.turnOnMinDistanceScanMode();
+
+		onPointTurnBy(-scanAngle);
+		onPointTurnBy(2 * scanAngle);
+		onPointTurnBy(-scanAngle);
+
+		blockDetector.turnOffMinDistanceScanMode();
+
 	}
-	
-	public void performRotationCorrection(){
-		
+
+	/**
+	 * this is used to localize periodically
+	 */
+	public void performRotationCorrection() {
+
 		double closestRightAngle = 90 * Math.round(odo.getTheta() / 90);
-		
+
 		turnToOnPoint(closestRightAngle);
-		
-		boolean previousDirectionIsBlocked = false;
-		
-		for(int i = 0; i<4; i++){
+
+		for (int i = 0; i < 4; i++) {
 			onPointTurnBy(-90);
-			
-			if(!blockDetector.isObjectInFront() && !previousDirectionIsBlocked){
+			if (!blockDetector.isObjectInFront()) {
 				break;
 			}
-			
-			if(blockDetector.isObjectInFront()){
-				previousDirectionIsBlocked = true;
-			}
-			
-			else if(!blockDetector.isObjectInFront()){
-				previousDirectionIsBlocked = false;
-			}
+		}
 
-		}
-		
-		if(previousDirectionIsBlocked){
-			return;
-		}
-		
 		onPointTurnBy(90);
-		
+
 		corr.turnOffCorrection();
 		moveForwardSlow();
 		corr.rotateCorrection();
-		
+
 		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
-		
+
 		onPointTurnBy(90);
-		
+
 		corr.turnOffCorrection();
 		moveForwardSlow();
 		corr.rotateCorrection();
-		
+
 		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
-		
+
 	}
-	
+
+	public void performRotationCorrectionLocalization() {
+
+		corr.turnOffCorrection();
+		moveForwardSlow();
+		corr.rotateCorrection();
+
+		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
+
+		onPointTurnBy(90);
+
+		corr.turnOffCorrection();
+		moveForwardSlow();
+		corr.rotateCorrection();
+
+		travelMagnitudeSlow(-SENSOR_TO_WHEEL_DISTANCE);
+
+	}
+
+	/**
+	 * Travels to all the waypoints in the input list.
+	 * 
+	 * @param listOfWayPoints
+	 *            the waypoints the robot should travel to
+	 * @return true if the robot successfully finished travelling to all
+	 *         waypoints
+	 */
 	private boolean travelToWaypoints(ArrayList<Intersection> listOfWayPoints) {
-		
+
 		Intersection intersection;
 		boolean isSuccess = false;
-		double deltaTheta;
 
 		for (int i = 0; i < listOfWayPoints.size(); i++) {
 
 			intersection = listOfWayPoints.get(i);
 
-			if(i == 0){
-				deltaTheta = findAngle(intersection.getXInCm(),intersection.getYInCm());
-				onPointTurnBy(deltaTheta);
-				
-				if(!isPathAheadSafe()){
-					return false;
-				}
-			}
-			
 			if (i == listOfWayPoints.size() - 1) {
-				
 				isSuccess = travelCoordinate(intersection.getXInCm(),
 						intersection.getYInCm(), true);
 			}
@@ -469,10 +572,10 @@ public class MobileRobot extends SensorMotorUser {
 				isSuccess = travelCoordinate(intersection.getXInCm(),
 						intersection.getYInCm(), false);
 			}
-			
-			if(isSuccess){
+
+			if (isSuccess) {
 				travelCounter++;
-				if(travelCounter % LOCALIZE_PERIODICALLY == 0){
+				if (travelCounter % LOCALIZE_PERIODICALLY == 0) {
 					performRotationCorrection();
 				}
 			}
@@ -498,7 +601,7 @@ public class MobileRobot extends SensorMotorUser {
 		}
 
 	}
-	
+
 	private void whileMovingBackwardTurnBy(double minimumAngle) {
 
 		if (minimumAngle > 0) {
@@ -525,6 +628,12 @@ public class MobileRobot extends SensorMotorUser {
 		corr.turnOnCorrection();
 	}
 
+	/**
+	 * 
+	 * @param input
+	 *            the input angle
+	 * @return the smallest equivalent angle
+	 */
 	private double getMinAngle(double input) {
 
 		double output = input;
@@ -539,6 +648,14 @@ public class MobileRobot extends SensorMotorUser {
 
 	}
 
+	/**
+	 * 
+	 * @param xTarget
+	 *            x coordinate in centimeters
+	 * @param yTarget
+	 *            y coordinate in centimeters
+	 * @return true if the robot is at the specified coordinates
+	 */
 	private boolean isAtPoint(double xTarget, double yTarget) {
 
 		if (Math.abs(xTarget - odo.getX()) < POSITION_ERROR_THRESHOLD
@@ -552,14 +669,22 @@ public class MobileRobot extends SensorMotorUser {
 
 	}
 
-	
-	private void howToMoveDecider(double xTarget, double yTarget, double deltaTheta){
-		
+	/**
+	 * decides whether the robot needs to turn or just move forward. If the
+	 * robot needs to turn, this method will determine if it needs to turn while
+	 * moving or while on point.
+	 * 
+	 * @param xTarget
+	 * @param yTarget
+	 * @param deltaTheta
+	 */
+	private void howToMoveDecider(double xTarget, double yTarget,
+			double deltaTheta) {
+
 		if (Math.abs(deltaTheta) > ANGLE_ERROR_THRESHOLD) {
-			if (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD){
+			if (Math.abs(deltaTheta) > TURN_ON_POINT_ANGLE_THRESHOLD) {
 				onPointTurnBy(deltaTheta);
-			}
-			else {
+			} else {
 				whileMovingTurnBy(deltaTheta);
 			}
 
@@ -567,54 +692,105 @@ public class MobileRobot extends SensorMotorUser {
 
 			moveForward(); // the heading is good
 		}
-		
-	}
-	
-	
-	private void removePath(ArrayList<Intersection> listOfWayPoints){
-		
-		Intersection prevIntersection = Map.getIntersection(
-				xPrevTarget, yPrevTarget);
 
-		int indexOfNextIntersection = listOfWayPoints
-				.indexOf(prevIntersection) + 1;
+	}
+
+	/**
+	 * Removes the path between the intersection the robot is at and the next
+	 * intersetion in the list of way points.
+	 * 
+	 * @param listOfWayPoints
+	 */
+	private void removePath(ArrayList<Intersection> listOfWayPoints) {
+
+		Intersection prevIntersection = Map.getIntersection(xPrevTarget,
+				yPrevTarget);
+
+		int indexOfNextIntersection = listOfWayPoints.indexOf(prevIntersection) + 1;
 
 		Intersection nextIntersection = listOfWayPoints
 				.get(indexOfNextIntersection);
 
 		Map.removeEdge(prevIntersection, nextIntersection);
-		
+
 	}
-	
-	
-	private double findAngle(double xTarget, double yTarget){
+
+	private double findAngle(double xTarget, double yTarget) {
 		double xDiff;
 		double yDiff;
 		double targetTheta;
 		double deltaTheta;
-		
+
 		xDiff = xTarget - odo.getX();
 		yDiff = yTarget - odo.getY();
 		targetTheta = odo.fixDegAngle(90 - Math.toDegrees(Math.atan2(yDiff,
 				xDiff)));
-		
+
 		deltaTheta = targetTheta - odo.getTheta();
 
 		deltaTheta = getMinAngle(deltaTheta);
-		
+
 		return deltaTheta;
-		
+
 	}
-	
 
 	// returns the number of degrees the wheels must turn over a distance
 	private int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
+	// returns the distance from tacho count
+	private int convertTachoCount(double radius, int tachoCount) {
+		return (int) ((2 * Math.PI * radius) / (360.0 * tachoCount));
+	}
+
 	// returns the number of degrees to turn a certain angle
 	private int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	}
+
+	/**
+	 * this is used in the case of the exception that may occur if the robot
+	 * thinks it has no paths out of its current intersection.
+	 */
+	private void specialMoveAround() {
+
+		int initialLineCount = corr.getLineCount();
+		double initialX = odo.getX();
+		double initialY = odo.getY();
+
+		int initialLeftTacho = leftMotor.getTachoCount();
+		int initialRightTacho = rightMotor.getTachoCount();
+
+		blockDetector.turnOffBlockDetection();
+
+		travelMagnitude(Map.TILE_SIZE * 2);
+
+		int changeInLineCount = corr.getLineCount() - initialLineCount;
+		int currentLineCount = corr.getLineCount();
+
+		int leftTachoDifference = leftMotor.getTachoCount() - initialLeftTacho;
+		int rightTachoDifference = rightMotor.getTachoCount()
+				- initialRightTacho;
+
+		while ((currentLineCount < (initialLineCount + 2 * changeInLineCount))
+				&& (convertTachoCount(LEFT_RADIUS, leftTachoDifference) < Map.TILE_SIZE * 2)
+				&& (convertTachoCount(RIGHT_RADIUS, rightTachoDifference) < Map.TILE_SIZE * 2)) {
+
+			moveBackward();
+			currentLineCount = corr.getLineCount();
+
+		}
+
+		stopMoving();
+
+		odo.setY(initialY);
+		odo.setX(initialX);
+
+		// performRotationCorrection();
+
+		blockDetector.turnOnBlockDetection();
+
 	}
 
 }

@@ -19,12 +19,14 @@ public class OdometerTest {
 		Map.initializeMap();
 		
 		MobileRobot robot = new MobileRobot();
+
+		
+		RConsole.open();
+		
 		int option = 0;
 		
 		while (option == 0)
 			option = Button.waitForAnyPress();
-		
-//		RConsole.open();
 		
 		switch(option) {
 		case Button.ID_LEFT:
@@ -45,7 +47,7 @@ public class OdometerTest {
 			break;
 		}
 		Button.waitForAnyPress();
-//		RConsole.close();
+		RConsole.close();
 		System.exit(0);
 	}
 	

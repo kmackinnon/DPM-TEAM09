@@ -3,11 +3,11 @@ package robot;
 import java.util.ArrayList;
 
 /**
- * AStar contains the A* search algorithm. This is used to find the shortest
- * path between intersections. It is used in all cases except for going to the
- * target zone, since in this case our Dijkstra class works faster. The A* code
- * is heavily based on this webpage:
- * http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html.
+ * Dijkstra contains Dijkstra's algorithm. We started off by using Dijkstra
+ * only, but we switched to A* when we found out that it works faster in most
+ * cases. We still use Dijkstra for finding the shortest path to the target zone
+ * since it works faster than A* in this one case. The code is heavily based on
+ * this webpage: http://en.literateprograms.org/Dijkstra's_algorithm_(Java).
  * 
  * Java has its own Priority Queue. However, it is not included in LeJOS, so I
  * wrote a PriorityQueue class. I found this powerpoint useful while making the
@@ -16,7 +16,9 @@ import java.util.ArrayList;
  * @author Kevin Musgrave
  */
 
-public class AStar {
+public class Dijkstra {
+
+	static int counter = 0;
 
 	/**
 	 * Gets the shortest path between two intersections.
@@ -30,17 +32,14 @@ public class AStar {
 	public static ArrayList<Intersection> algorithm(Intersection source,
 			Intersection destination) {
 
-		computePaths(source, destination);
-
-		Map.resetClosedOpenStatus();
-
+		computePaths(source);
 		return getShortestPathTo(destination);
 
 	}
 
 	/**
-	 * Gets the shortest path to the target zone. This method was not used
-	 * because the equivalent method in Dijkstra was found to be faster.
+	 * Gets the shortest path to the target zone. This is the only method that
+	 * we actually ended up using.
 	 * 
 	 * @param source
 	 *            the intersection we want to find the shortest path FROM
@@ -50,52 +49,50 @@ public class AStar {
 	public static ArrayList<Intersection> algorithmForTargetZone(
 			Intersection source) {
 
-		Intersection closestOne = Map.getTargetZone().get(0);
-		double minimumDistance = closestOne.getMinDistance();
+		computePaths(source);
 
-		for (Intersection destination : Map.getTargetZone()) {
+		Intersection destination = Map.getTargetZone().get(0);
 
-			computePaths(source, destination);
+		double minimumDistance = destination.getMinDistance();
 
-			if (destination.getMinDistance() < minimumDistance) {
-				closestOne = destination;
-				minimumDistance = closestOne.getMinDistance();
+		for (Intersection intersection : Map.getTargetZone()) {
+
+			if (intersection.getMinDistance() < minimumDistance) {
+				destination = intersection;
+				minimumDistance = intersection.getMinDistance();
 			}
-
-			Map.resetClosedOpenStatus();
 
 		}
 
-		return getShortestPathTo(closestOne);
+		return getShortestPathTo(destination);
 
 	}
 
 	/**
-	 * This is where all the A* computation happens.
+	 * This is where all the Dijkstra computation happens.
 	 * 
 	 * @param input
 	 *            the starting intersection
 	 * @param input2
 	 *            the destination intersection
 	 */
-	private static void computePaths(Intersection input, Intersection input2) {
+	private static void computePaths(Intersection input) {
 
 		Intersection source = Map.getIntersection(input);
-		Intersection destination = Map.getIntersection(input2);
 
 		source.setMinDistance(0);
 
 		PriorityQueue intersectionQueue = new PriorityQueue();
 
 		intersectionQueue.add(source);
-		source.setIsOpen(true);
 
-		while ((intersectionQueue.queue.size() != 1)
-				&& (intersectionQueue.get(1) != destination)) {
+		while (!intersectionQueue.isEmpty()) {
+
+			if (intersectionQueue.queue.size() == 1) {
+				break;
+			}
 
 			Intersection current = intersectionQueue.poll();
-
-			current.setIsClosed(true);
 
 			for (Intersection adjacent : current.getAdjacencyList()) {
 
@@ -108,27 +105,19 @@ public class AStar {
 					double distanceThroughCurrent = current.getMinDistance()
 							+ weight;
 
-					if (adjacent.getIsOpen()
-							&& (distanceThroughCurrent < adjacent
-									.getMinDistance())) {
-
-						intersectionQueue.remove(adjacent);
-						adjacent.setIsOpen(false);
-					}
-
-					if (adjacent.getIsClosed()
-							&& (distanceThroughCurrent < adjacent
-									.getMinDistance())) {
-						adjacent.setIsClosed(false);
-					}
-
-					if ((!adjacent.getIsOpen()) && (!adjacent.getIsClosed())) {
+					if (distanceThroughCurrent < adjacent.getMinDistance()) {
 						adjacent.setMinDistance(distanceThroughCurrent);
-						adjacent.setHeuristicDistance(heuristic(adjacent,
-								destination));
 						adjacent.setPrevious(current);
-						intersectionQueue.add(adjacent);
-						adjacent.setIsOpen(true);
+
+						if (intersectionQueue.contains(adjacent)) {
+							intersectionQueue.swimUp(intersectionQueue
+									.indexOf(adjacent));
+						}
+
+						else {
+							intersectionQueue.add(adjacent);
+						}
+
 					}
 
 				}
@@ -193,26 +182,6 @@ public class AStar {
 		else {
 			return 1.414;
 		}
-
-	}
-
-	/**
-	 * Calculates the estimated distance used for figuring out the next best
-	 * node to look at. The formula is from this webpage:
-	 * http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
-	 * 
-	 * @param a
-	 *            the first intersection
-	 * @param b
-	 *            the second intersection
-	 * @return an estimate of the distance from "a" to "b"
-	 */
-	private static double heuristic(Intersection a, Intersection b) {
-
-		double dx = Math.abs(a.getX() - b.getX());
-		double dy = Math.abs(a.getY() - b.getY());
-
-		return (dx + dy) + ((1.414 - 2) * Math.min(dx, dy));
 
 	}
 
@@ -301,9 +270,8 @@ public class AStar {
 		 */
 		private boolean firstLowerThanSecond(int first, int second) {
 
-			if ((queue.get(second).getMinDistance() + queue.get(second)
-					.getHeuristicDistance()) < (queue.get(first)
-					.getMinDistance() + queue.get(first).getHeuristicDistance())) {
+			if (queue.get(second).getMinDistance() < queue.get(first)
+					.getMinDistance()) {
 				return true;
 			}
 
@@ -360,47 +328,31 @@ public class AStar {
 		}
 
 		/**
-		 * Removes an element from the priority queue
 		 * 
-		 * @param a
-		 *            the element to be removed
+		 * @return true if the priority queue is empty
 		 */
-		public void remove(Intersection a) {
-
-			int i = queue.indexOf(a);
-			int size = size();
-
-			if (i == size - 1) {
-				queue.remove(i);
-			}
-
-			else {
-				exchange(i, size - 1);
-				queue.remove(size - 1);
-				swimUp(i);
-				sinkDown(i);
-			}
-
+		private boolean isEmpty() {
+			return queue.isEmpty();
 		}
 
 		/**
-		 * Size of the priority queue
 		 * 
-		 * @return number of elements in the priority queue
+		 * @param intersection
+		 *            the intersection that we want the index of
+		 * @return the index of the intersection in the queue
 		 */
-		private int size() {
-			return queue.size();
+		private int indexOf(Intersection intersection) {
+			return queue.indexOf(intersection);
 		}
 
 		/**
-		 * gets the ith element in the priority queue
 		 * 
-		 * @param i
-		 *            the desired index
-		 * @return the ith element
+		 * @param intersection
+		 *            the intersection we are looking for
+		 * @return true if the queue contains the intersection
 		 */
-		private Intersection get(int i) {
-			return queue.get(i);
+		private boolean contains(Intersection intersection) {
+			return queue.contains(intersection);
 		}
 
 	}

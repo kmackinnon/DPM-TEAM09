@@ -1,5 +1,6 @@
 package testing;
 
+import robot.MobileRobot;
 import lejos.nxt.Button;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
@@ -21,29 +22,37 @@ public class ClawTest {
 			option = Button.waitForAnyPress();
 		}
 
-		NXTRegulatedMotor clawMotor = Motor.C;
+//		NXTRegulatedMotor clawMotor = Motor.C;
+//
+//		clawMotor.setSpeed(50);
+//
+//		clawMotor.rotate(-100); // opens claw
+//		clawMotor.resetTachoCount(); // reset tachometer when fully open
+//
+//		try {
+//			Thread.sleep(1000); // sleep for one second
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//		clawMotor.rotateTo(350); // lift the block
+//
+//		try {
+//			Thread.sleep(1000); // sleep for one second
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//		clawMotor.rotateTo(0); // set the block back down
 
-		clawMotor.setSpeed(50);
-
-		clawMotor.rotate(-100); // opens claw
-		clawMotor.resetTachoCount(); // reset tachometer when fully open
-
+		MobileRobot robot = new MobileRobot();
+		robot.liftClaw();
 		try {
 			Thread.sleep(1000); // sleep for one second
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		clawMotor.rotateTo(350); // lift the block
-
-		try {
-			Thread.sleep(1000); // sleep for one second
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		clawMotor.rotateTo(0); // set the block back down
-
+		robot.dropClaw();
 		System.exit(0);
 	}
 

@@ -21,7 +21,7 @@ import lejos.nxt.UltrasonicSensor;
 public class ColorRangeTest extends Thread {
 
 	public static void main(String[] args) {
-
+		
 		UltrasonicSensor us = new UltrasonicSensor(SensorPort.S4);
 		ColorSensor cs = new ColorSensor(SensorPort.S2);
 		cs.setFloodlight(true);
@@ -29,7 +29,7 @@ public class ColorRangeTest extends Thread {
 		NXTRegulatedMotor clawMotor = Motor.C;
 
 		clawMotor.setSpeed(60);
-		clawMotor.rotateTo(300);
+		clawMotor.rotateTo(330);
 
 		RConsole.open(); // opens a USB connection with no timeout
 
@@ -44,12 +44,10 @@ public class ColorRangeTest extends Thread {
 			int distance = us.getDistance();
 			color = cs.getColor();
 			int redValue = color.getRed();
-			int greenValue = color.getGreen();
 			int blueValue = color.getBlue();
 
 			RConsole.println(Integer.toString(distance) + " "
 					+ Integer.toString(redValue) + " "
-					+ Integer.toString(greenValue) + " "
 					+ Integer.toString(blueValue));
 
 			buttonChoice = Button.readButtons();
